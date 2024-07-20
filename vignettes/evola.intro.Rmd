@@ -1,0 +1,60 @@
+---
+title: "Genetic algorithm using the evola package"
+author: "Giovanny Covarrubias-Pazaran"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Genetic algorithm using the evola package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The evola package is nice wrapper of the AlphaSimR package that enables the use of the evolutionary algorithm to solve complex questions in a simple manner.
+
+The vignettes aim to provide several examples in how to use the evola package under different optimization scenarios. We will spend the rest of the space providing examples for: 
+
+1) Optimizing a multi-trait scenario
+2) Obtaining optimal crosses in plant breeding
+3) Obtaining optimal individuals in plant breeding
+4) Optimizing a sparse testing allocation in plant breeding
+
+### 1) Optimizing a multi-trait scenario
+
+TBD.
+
+```{r}
+library(evola)
+# TBD
+```
+
+### 2) Obtaining optimal crosses in plant breeding
+
+TBD
+
+```{r, fig.show='hold'}
+# TBD
+```
+
+### 3) Obtaining optimal individuals in plant breeding
+
+TBD
+
+```{r}
+#TBD
+```
+
+### 4) Optimizing a sparse testing allocation in plant breeding
+
+TBD
+
+```{r}
+# TBD
+```
+
+## Literature
+
+Giovanny Covarrubias-Pazaran (2024).  evola: a simple evolutionary algorithm for complex problems. To be submitted to Bioinformatics.
+
+Gaynor, R. Chris, Gregor Gorjanc, and John M. Hickey. 2021. AlphaSimR: an R package for breeding program simulations. G3 Gene|Genomes|Genetics 11(2):jkaa017. https://doi.org/10.1093/g3journal/jkaa017.
+
+Chen GK, Marjoram P, Wall JD (2009). Fast and Flexible Simulation of DNA Sequence Data. Genome Research, 19, 136-142. http://genome.cshlp.org/content/19/1/136.
