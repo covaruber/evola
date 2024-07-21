@@ -41,6 +41,7 @@ Mf <- (Mf_technow*2) - 1
 
 \dontrun{
 
+
 ## first get all possible hybrids
 res1 <- sommer::build.HMM(Md, Mf, 
                           return.combos.only = TRUE)
@@ -60,26 +61,38 @@ DT$occ <- 1; DT$occ[1]=0
 # run the genetic algorithm
 res<-evolafit(formula = c(GY, occ)~hy,
               dt= DT, 
-              constraintsUB = c(Inf,100), # constraints: if sum is greater than this ignore
-              constraintsLB= c(-Inf,-Inf), # constraints: if sum is smaller than this ignore
-              traitWeight = c(1,0), # weight the traits for the selection
-              nCrosses = 50, nProgeny = 30, # population parameters
-              A=A, lambda=c(0.4,0), nQTLperInd = 100, # coancestry parameters
-              propSelBetween = 0.9, propSelWithin =0.9, nGenerations = 20) # selection parameters
+              # constraints: if sum is greater than this ignore
+              constraintsUB = c(Inf,100), 
+              # constraints: if sum is smaller than this ignore
+              constraintsLB= c(-Inf,-Inf),
+              # weight the traits for the selection
+              traitWeight = c(1,0), 
+              # population parameters
+              nCrosses = 50, nProgeny = 30, 
+              # coancestry parameters
+              A=A, lambda=c(0.4,0), nQTLperInd = 100, 
+              # selection parameters
+              propSelBetween = 0.9, propSelWithin =0.9, 
+              nGenerations = 20) 
 
 best = which(res$pheno[,1]==max(res$pheno[,1]))[1];best
 xa = (res$M %*% DT$GY)[best,]; xa 
 xAx = res$M[best,] %*% A %*% res$M[best,]; xAx 
 sum(res$M[best,]) # total # of inds selected
 
-plot(NULL, xlim =c(1,nrow(res$score)), ylim = c(0, max(res$score) ), ylab = "Value", xlab = "Generation")
-legend("bottomright", c("Best x'a", "Average x'a", "Average x'Ax", "Mean nQTL"), pch = 20, col = c(1, 2, 3, 4),bty = "n")
+plot(NULL, xlim =c(1,nrow(res$score)), 
+     ylim = c(0, max(res$score) ), 
+     ylab = "Value", xlab = "Generation")
+legend("bottomright", 
+       c("Best x'a", "Average x'a", "Average x'Ax", "Mean nQTL"), 
+       pch = 20, col = c(1, 2, 3, 4),bty = "n")
 lines(res$score[,2])
 lines(res$score[,1], col = "red")
 lines(res$score[,3], col = "green")
 lines(res$score[,4], col = "blue")
-plot(DT$GY, col=as.factor(res$M[best,]), pch=(res$M[best,]*19)+1)
- 
+plot(DT$GY, col=as.factor(res$M[best,]), 
+     pch=(res$M[best,]*19)+1)
+
 
 }
 

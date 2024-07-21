@@ -62,12 +62,13 @@ GT <- GT_wheat
 DT <- data.frame(pheno=as.vector(DT),
                  env=as.factor(paste0("e", sort(rep(1:4,nrow(DT))))),
                  id=rep(rownames(DT),4))
-
 rownames(GT) <-  rownames(DT_wheat)
-K <- A.mat(GT) # additive relationship matrix
-K[1:4,1:4]
-##
 head(DT)
+
+\dontrun{
+K <- sommer::A.mat(GT) # additive relationship matrix
+K[1:4,1:4]
+}
 
 }
 \keyword{datasets}

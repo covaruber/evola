@@ -1,7 +1,7 @@
 Package: evola
 Version: 1.0.1
 Date: 2024-07-21
-Title: Evolutionary Algorithm
+Title: Evolutionary Algorithm in R
 Authors@R: c(
     person("Giovanny","Covarrubias-Pazaran", email="cova_ruber@live.com.mx", role=c("aut","cre"),
 	comment=c(ORCID="0000-0002-7194-3837"))

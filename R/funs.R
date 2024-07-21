@@ -10,10 +10,10 @@ evolafit <- function(formula, dt,
   traits <- elements[[1]]
   classifiers <- elements[[2]]
   
-  if(length(constraintsUB) != length(traits)){stop("Constraints need to have the same length than traits.", call. = FALSE)}
-  if(length(constraintsLB) != length(traits)){stop("Constraints need to have the same length than traits.", call. = FALSE)}
-  if(length(traitWeight) != length(traits)){stop("Weights need to have the same length than traits.", call. = FALSE)}
-  if(length(lambda) != length(traits)){stop("Lambda need to have the same length than traits.", call. = FALSE)}
+  if(length(constraintsUB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
+  if(length(constraintsLB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
+  if(length(traitWeight) != length(traits)){stop(paste0("Weights need to have the same length than traits (",length(traits),")"), call. = FALSE)}
+  if(length(lambda) != length(traits)){stop(paste0("Lambda need to have the same length than traits (",length(traits),")"), call. = FALSE)}
   if(is.null(A)){A <- diag(nrow(dt))}
   
   # 1) initialize the population with customized haplotypes to ensure a single QTL per individual
@@ -110,3 +110,23 @@ evolafit <- function(formula, dt,
   return(list(M=M, score=Performance, pheno=pop@pheno))
 }
 
+##################################################################################################
+#Startup function
+#this function is executed once the library is loaded
+.onAttach = function(library, pkg)
+{
+  Rv = R.Version()
+  if(!exists("getRversion", baseenv()) || (getRversion() < "3.5.0"))
+    stop("This package requires R 3.5.0 or later")
+  if(interactive()) {
+    packageStartupMessage(blue(paste("[]==================================================================[]")),appendLF=TRUE)
+    packageStartupMessage(blue(paste("[] Evolutionary Algorithm in R (evola) 1.0.1 (2024-07)              []",sep="")),appendLF=TRUE)
+    packageStartupMessage(paste0(blue("[] Author: Giovanny Covarrubias-Pazaran",paste0(bgGreen(white(" ")), bgWhite(magenta("*")), bgRed(white(" "))),"                        []")),appendLF=TRUE)
+    packageStartupMessage(blue("[] Dedicated to the University of Chapingo and UW-Madison           []"),appendLF=TRUE)
+    # packageStartupMessage(blue("[] Type 'vignette('evola.intro')' for a short tutorial             []"),appendLF=TRUE)
+    packageStartupMessage(blue(paste("[]==================================================================[]")),appendLF=TRUE)
+    packageStartupMessage(blue("evola is updated on CRAN every 4-months due to CRAN policies"),appendLF=TRUE)
+    packageStartupMessage(blue("Source code is available at https://github.com/covaruber/evola"),appendLF=TRUE)
+  }
+  invisible()
+}

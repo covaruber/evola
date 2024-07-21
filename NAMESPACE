@@ -1,6 +1,9 @@
 
 import("AlphaSimR")
 import("crayon")
+import("methods")
+
+importFrom("stats", "as.formula")
 
 export( "evolafit")
 

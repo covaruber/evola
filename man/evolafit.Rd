@@ -96,7 +96,9 @@ set.seed(1)
 
 # Data
 Gems <- data.frame(
-  Color = c("Red", "Blue", "Purple", "Orange", "Green", "Pink", "White", "Black", "Yellow"),
+  Color = c("Red", "Blue", "Purple", "Orange",
+            "Green", "Pink", "White", "Black", 
+            "Yellow"),
   Weight = round(runif(9,0.5,5),2),
   Value = round(abs(rnorm(9,0,5))+0.5,2),
   Times=c(0,rep(1,8))
@@ -119,27 +121,32 @@ head(Gems)
 # Aim: Get highest combined value.
 # Restriction: Max weight of the gem combined = 10. 
 res0<-evolafit(cbind(Weight,Times,Value)~Color, dt= Gems,
-           constraintsUB = c(10,5,Inf), # constraints: if greater than this ignore
-           constraintsLB= c(-Inf,-Inf,-Inf), # constraints: if smaller than this ignore
-           traitWeight = c(0,0,1), # weight the traits for the selection
-           nCrosses = 50, nProgeny = 40, recombGens = 1, # population parameters
-           A=NULL, lambda=c(0,0,0), nQTLperInd = 4, # coancestry parameters
-           propSelBetween = .9, propSelWithin =0.9, nGenerations = 30# selection parameters
+               # constraints: if greater than this ignore
+               constraintsUB = c(10,5,Inf), 
+               # constraints: if smaller than this ignore
+               constraintsLB= c(-Inf,-Inf,-Inf), 
+               # weight the traits for the selection
+               traitWeight = c(0,0,1), 
+               # population parameters
+               nCrosses = 50, nProgeny = 40, recombGens = 1, 
+               # coancestry parameters
+               A=NULL, lambda=c(0,0,0), nQTLperInd = 4, 
+               # selection parameters
+               propSelBetween = .9, propSelWithin =0.9, 
+               nGenerations = 30
 ) 
 
  }
  
  \dontrun{
 
+
 best = which(res0$pheno[,3]==max(res0$pheno[,3]))[1];best
-xa = res0$M %*% Gems$Value; xa # 43-46 with lambda=0, and 32-35 with lambda=0.5
+xa = res0$M[best,] %*% as.matrix(Gems[,c("Weight","Value")]); xa
 
 res0$M[best,]
 apply(res0$M,1,sum)
 res0$score[nrow(res0$score),]
-
-xa = res0$M[best,] %*% Gems$Value; xa # 43-46 with lambda=0, and 32-35 with lambda=0.5
-
 
 # $`Genes`
 # Red   Blue Purple Orange  Green   Pink  White  Black Yellow 
@@ -149,12 +156,16 @@ xa = res0$M[best,] %*% Gems$Value; xa # 43-46 with lambda=0, and 32-35 with lamb
 # Weight  Value 
 # 8.74  32.10 
 
-  plot(NULL, xlim =c(1,nrow(res0$score)), ylim = c(0, max(res0$score) ), ylab = "Value", xlab = "Generation")
-  legend("bottomright", c("Best x'a", "Average x'a", "Average x'Ax", "Mean nQTL"), pch = 20, col = c(1, 2, 3, 4),bty = "n")
-  lines(res0$score[,2])
-  lines(res0$score[,1], col = "red")
-  lines(res0$score[,3], col = "green")
-  lines(res0$score[,4], col = "blue")
+plot(NULL, xlim =c(1,nrow(res0$score)), 
+     ylim = c(0, max(res0$score) ), ylab = "Value", 
+     xlab = "Generation")
+legend("bottomright", 
+       c("Best x'a", "Average x'a", "Average x'Ax", "Mean nQTL"), 
+       pch = 20, col = c(1, 2, 3, 4),bty = "n")
+lines(res0$score[,2])
+lines(res0$score[,1], col = "red")
+lines(res0$score[,3], col = "green")
+lines(res0$score[,4], col = "blue")
   
 }
 
