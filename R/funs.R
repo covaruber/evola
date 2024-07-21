@@ -1,4 +1,4 @@
-evola <- function(formula, dt, 
+evolafit <- function(formula, dt, 
                  constraintsUB, constraintsLB, traitWeight,
                  nCrosses=50, nProgeny=40,nGenerations=30, recombGens=1,
                  nQTLperInd=1, A=NULL, lambda=1,
@@ -110,18 +110,3 @@ evola <- function(formula, dt,
   return(list(M=M, score=Performance, pheno=pop@pheno))
 }
 
-# if(plotting){
-#   plot(NULL, xlim =c(1,nGenerations), ylim = c(0, max((pop@pheno %*% traitWeight)[,1]) ), ylab = "Value", xlab = "Generation")
-#   legend("bottomright", c("Best x'a", "Average x'a", "Average x'Ax", "Mean nQTL"), pch = 20, col = c(1, 2, 3, 4),bty = "n")
-# }
-# if(plotting){
-#   # update plot 
-#   if(j %in% seq(1,nGenerations,1)) {
-#     Sys.sleep(0.1)
-#     lines(Performance[,2])
-#     lines(Performance[,1], col = "red")
-#     lines(Performance[,3], col = "green")
-#     lines(Performance[,4], col = "blue")
-#   }
-#   Sys.sleep(0)
-# } # end of plotting

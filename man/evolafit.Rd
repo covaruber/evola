@@ -1,5 +1,5 @@
-\name{evola}
-\alias{evola}
+\name{evolafit}
+\alias{evolafit}
 
 \title{
 Fits a genetic algorithm for a set of traits and constraints.
@@ -9,7 +9,7 @@ Using the AlphaSimR machinery it recreates the evolutionary forces applied to a 
 }
 \usage{
 
-evola(formula, dt, 
+evolafit(formula, dt, 
      constraintsUB, constraintsLB, traitWeight,
      nCrosses=50, nProgeny=40,nGenerations=30, recombGens=1,
      nQTLperInd=1, A=NULL, lambda=1,
@@ -118,7 +118,7 @@ head(Gems)
 # Task: Gem selection. 
 # Aim: Get highest combined value.
 # Restriction: Max weight of the gem combined = 10. 
-res0<-evola(cbind(Weight,Times,Value)~Color, dt= Gems,
+res0<-evolafit(cbind(Weight,Times,Value)~Color, dt= Gems,
            constraintsUB = c(10,5,Inf), # constraints: if greater than this ignore
            constraintsLB= c(-Inf,-Inf,-Inf), # constraints: if smaller than this ignore
            traitWeight = c(0,0,1), # weight the traits for the selection
@@ -149,7 +149,14 @@ xa = res0$M[best,] %*% Gems$Value; xa # 43-46 with lambda=0, and 32-35 with lamb
 # Weight  Value 
 # 8.74  32.10 
 
+  plot(NULL, xlim =c(1,nrow(res0$score)), ylim = c(0, max(res0$score) ), ylab = "Value", xlab = "Generation")
+  legend("bottomright", c("Best x'a", "Average x'a", "Average x'Ax", "Mean nQTL"), pch = 20, col = c(1, 2, 3, 4),bty = "n")
+  lines(res0$score[,2])
+  lines(res0$score[,1], col = "red")
+  lines(res0$score[,3], col = "green")
+  lines(res0$score[,4], col = "blue")
+  
 }
 
 }
-\seealso{\code{\link{evola}} -- the information of the package }
+\seealso{\code{\link{evolafit}} -- the information of the package }

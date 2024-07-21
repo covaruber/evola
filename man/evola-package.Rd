@@ -14,7 +14,7 @@ Giovanny Covarrubias-Pazaran
 
 The evola package is nice wrapper of the AlphaSimR package that enables the use of the evolutionary algorithm to solve complex questions in a simple manner.
 
-The \code{\link{evola}} function is the core function of the package which allows the user to specify the problem and constraints to find a close-to-optimal solution using the evolutionary forces.
+The \code{\link{evolafit}} function is the core function of the package which allows the user to specify the problem and constraints to find a close-to-optimal solution using the evolutionary forces.
 
 }
 

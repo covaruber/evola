@@ -8,7 +8,7 @@ Authors@R: c(
 	)
 Maintainer: Giovanny Covarrubias-Pazaran <cova_ruber@live.com.mx>
 Description: Runs a genetic algorithm using the 'AlphaSimR' machinery.
-Depends: R(>= 3.0.0), AlphaSimR (>= 1.0), methods, crayon
+Depends: R(>= 3.0.0), AlphaSimR (>= 1.4.2), methods, crayon
 LazyLoad: yes
 LazyData: yes
 License: GPL (>= 2)
