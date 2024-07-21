@@ -35,16 +35,39 @@ data(DT_cpdata)
 DT <- DT_cpdata
 GT <- GT_cpdata
 MP <- MP_cpdata
-## create the variance-covariance matrix
-A <- A.mat(GT) # additive relationship matrix
-A <- A + diag(1e-4, ncol(A), ncol(A))
 ## look at the data and fit the model
 head(DT)
+DT$Yield <- scale(imputev(DT$Yield))
+DT$occ <- 1; DT$occ[1]=0
 
-\donttest{
+\dontrun{
 
-## ff
+## create the variance-covariance matrix
+A <- sommer::A.mat(GT) # additive relationship matrix
+A <- A + diag(1e-4, ncol(A), ncol(A))
+# get best 20 individuals weighting variance by 0.5
+res<-evolafit(cbind(Yield, occ)~id, dt= DT, 
+          constraintsUB = c(Inf,20), # constraints: if sum is greater than this ignore
+          constraintsLB= c(-Inf,-Inf), # constraints: if sum is smaller than this ignore
+          traitWeight = c(1,0), # weight the traits for the selection
+          nCrosses = 50, nProgeny = 40, # population parameters
+          A=A, lambda=c(0.5,0), nQTLperInd = 20, # coancestry parameters
+          propSelBetween = 0.9, propSelWithin =0.9, nGenerations = 30) # selection parameters
 
+best = which(res$pheno[,1]==max(res$pheno[,1]))[1];best
+xa = (res$M %*% DT$Yield)[best,]; xa 
+xAx = res$M[best,] %*% A %*% res$M[best,]; xAx 
+sum(res$M[best,]) # total # of inds selected
+
+plot(NULL, xlim =c(1,nrow(res$score)), ylim = c(0, max(res$score) ), ylab = "Value", xlab = "Generation")
+legend("bottomright", c("Best x'a", "Average x'a", "Average x'Ax", "Mean nQTL"), pch = 20, col = c(1, 2, 3, 4),bty = "n")
+lines(res$score[,2])
+lines(res$score[,1], col = "red")
+lines(res$score[,3], col = "green")
+lines(res$score[,4], col = "blue")
+
+plot(DT$Yield, col=as.factor(res$M[best,]), pch=(res$M[best,]*19)+1)
+ 
 }
 
 }

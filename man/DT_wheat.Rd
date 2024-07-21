@@ -69,12 +69,5 @@ K[1:4,1:4]
 ##
 head(DT)
 
-\donttest{
-
-#### 
-
-
-}
-
 }
 \keyword{datasets}

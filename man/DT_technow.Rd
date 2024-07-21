@@ -38,18 +38,48 @@ data(DT_technow)
 DT <- DT_technow
 Md <- (Md_technow*2) - 1
 Mf <- (Mf_technow*2) - 1
-Ad <- A.mat(Md)
-Af <- A.mat(Mf)
-Ad <- Ad + diag(1e-4, ncol(Ad), ncol(Ad))
-Af <- Af + diag(1e-4, ncol(Af), ncol(Af))
-## simple model
-ans2 <- lmebreed(GY ~ (1|dent) + (1|flint),
-                 data=DT)
-vc <- VarCorr(ans2); print(vc,comp=c("Variance"))
 
-\donttest{
+\dontrun{
 
-### with 
+## first get all possible hybrids
+res1 <- sommer::build.HMM(Md, Mf, 
+                          return.combos.only = TRUE)
+head(res1$data.used)
+## build the marker matrix for the first 50 hybrids
+pred <- which(res1$data.used$hybrid %in% DT$hy)
+res2 <- sommer::build.HMM(Md, Mf,
+                          custom.hyb = res1$data.used[pred,]
+)
+res2$HMM.add[1:5,1:5]
+res2$HMM.dom[1:5,1:5]
+## now you can use the A.mat()
+M <- res2$HMM.add
+A <- sommer::A.mat(M)
+DT$GY <- imputev(DT$GY)
+DT$occ <- 1; DT$occ[1]=0
+# run the genetic algorithm
+res<-evolafit(formula = c(GY, occ)~hy,
+              dt= DT, 
+              constraintsUB = c(Inf,100), # constraints: if sum is greater than this ignore
+              constraintsLB= c(-Inf,-Inf), # constraints: if sum is smaller than this ignore
+              traitWeight = c(1,0), # weight the traits for the selection
+              nCrosses = 50, nProgeny = 30, # population parameters
+              A=A, lambda=c(0.4,0), nQTLperInd = 100, # coancestry parameters
+              propSelBetween = 0.9, propSelWithin =0.9, nGenerations = 20) # selection parameters
+
+best = which(res$pheno[,1]==max(res$pheno[,1]))[1];best
+xa = (res$M %*% DT$GY)[best,]; xa 
+xAx = res$M[best,] %*% A %*% res$M[best,]; xAx 
+sum(res$M[best,]) # total # of inds selected
+
+plot(NULL, xlim =c(1,nrow(res$score)), ylim = c(0, max(res$score) ), ylab = "Value", xlab = "Generation")
+legend("bottomright", c("Best x'a", "Average x'a", "Average x'Ax", "Mean nQTL"), pch = 20, col = c(1, 2, 3, 4),bty = "n")
+lines(res$score[,2])
+lines(res$score[,1], col = "red")
+lines(res$score[,3], col = "green")
+lines(res$score[,4], col = "blue")
+plot(DT$GY, col=as.factor(res$M[best,]), pch=(res$M[best,]*19)+1)
+ 
 
 }
 
