@@ -3,3 +3,9 @@
       * [r1] Initial release: brining  a simple genetic algorithm for complex problems.
 
 
+## TO DO
++ Add the mutation and crossover rate to the parameters of the function (mutRateGenome and ??).
++ Not only allow the posibility of mutation in the genome, but also in the addtive effects (mutRateTrait)
++ Is there any benefit in allowing ploidy?
++ add the metrics: rate of coancestry (from formula) and rate of inbreeding (from the diagonal of the GRM of selected inds and all inds) to the output
++ improve the regression approach

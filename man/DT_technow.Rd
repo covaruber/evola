@@ -41,7 +41,8 @@ Mf <- (Mf_technow*2) - 1
 
 \dontrun{
 
-
+## sommer library is needed for this example
+library(sommer)
 ## first get all possible hybrids
 res1 <- sommer::build.HMM(Md, Mf, 
                           return.combos.only = TRUE)
@@ -76,8 +77,8 @@ res<-evolafit(formula = c(GY, occ)~hy,
               nGenerations = 20) 
 
 best = which(res$pheno[,1]==max(res$pheno[,1]))[1];best
-xa = (res$M %*% DT$GY)[best,]; xa 
-xAx = res$M[best,] %*% A %*% res$M[best,]; xAx 
+xa = (res$M \%*\% DT$GY)[best,]; xa 
+xAx = res$M[best,] \%*\% A \%*\% res$M[best,]; xAx 
 sum(res$M[best,]) # total # of inds selected
 
 plot(NULL, xlim =c(1,nrow(res$score)), 

@@ -26,10 +26,10 @@ Formula of the form y~x where 'y' refers to the traits or features involved in s
 A dataset containing the features and classifiers.
 }
   \item{constraintsUB}{
-A numeric vector specifying the upper bound constraints in the traits/features (y). The length is equal to the number of traits/features.
+A numeric vector specifying the upper bound constraints in the traits/features (y). The length is equal to the number of traits/features. 
 }
   \item{constraintsLB}{
-A numeric vector specifying the lower bound constraints in the traits/features (y). The length is equal to the number of traits/features.
+A numeric vector specifying the lower bound constraints in the traits/features (y). The length is equal to the number of traits/features. 
 }
   \item{traitWeight}{
 A numeric vector specifying the weights that each trait has in the final selection index. The length is equal to the number of traits/features.
@@ -120,29 +120,24 @@ head(Gems)
 # Task: Gem selection. 
 # Aim: Get highest combined value.
 # Restriction: Max weight of the gem combined = 10. 
-res0<-evolafit(cbind(Weight,Times,Value)~Color, dt= Gems,
+res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                # constraints: if greater than this ignore
-               constraintsUB = c(10,5,Inf), 
+               constraintsUB = c(10,Inf), 
                # constraints: if smaller than this ignore
-               constraintsLB= c(-Inf,-Inf,-Inf), 
+               constraintsLB= c(-Inf,-Inf), 
                # weight the traits for the selection
-               traitWeight = c(0,0,1), 
+               traitWeight = c(0,1), 
                # population parameters
                nCrosses = 50, nProgeny = 40, recombGens = 1, 
                # coancestry parameters
-               A=NULL, lambda=c(0,0,0), nQTLperInd = 4, 
+               A=NULL, lambda=c(0,0), nQTLperInd = 4, 
                # selection parameters
                propSelBetween = .9, propSelWithin =0.9, 
                nGenerations = 30
 ) 
 
- }
- 
- \dontrun{
-
-
-best = which(res0$pheno[,3]==max(res0$pheno[,3]))[1];best
-xa = res0$M[best,] %*% as.matrix(Gems[,c("Weight","Value")]); xa
+best = which(res0$pheno[,2]==max(res0$pheno[,2]))[1];best
+xa = res0$M[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); xa
 
 res0$M[best,]
 apply(res0$M,1,sum)
@@ -155,6 +150,10 @@ res0$score[nrow(res0$score),]
 # $Result
 # Weight  Value 
 # 8.74  32.10 
+
+ }
+ 
+ \dontrun{
 
 plot(NULL, xlim =c(1,nrow(res0$score)), 
      ylim = c(0, max(res0$score) ), ylab = "Value", 

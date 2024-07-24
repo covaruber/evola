@@ -37,7 +37,8 @@ GT <- GT_cpdata
 MP <- MP_cpdata
 
 \dontrun{
-
+## library sommer is needed for the relationship matrix
+library(sommer)
 ## look at the data and fit the model
 DT$Yield <- scale(sommer::imputev(DT$Yield))
 DT$occ <- 1; DT$occ[1]=0
@@ -62,8 +63,8 @@ res<-evolafit(cbind(Yield, occ)~id, dt= DT,
               nGenerations = 30) 
 
 best = which(res$pheno[,1]==max(res$pheno[,1]))[1];best
-xa = (res$M %*% DT$Yield)[best,]; xa 
-xAx = res$M[best,] %*% A %*% res$M[best,]; xAx 
+xa = (res$M \%*\% DT$Yield)[best,]; xa 
+xAx = res$M[best,] \%*\% A \%*\% res$M[best,]; xAx 
 sum(res$M[best,]) # total # of inds selected
 
 plot(NULL, xlim =c(1,nrow(res$score)), ylim = c(0, max(res$score)), 
