@@ -13,7 +13,8 @@ evolafit(formula, dt,
      constraintsUB, constraintsLB, traitWeight,
      nCrosses=50, nProgeny=40,nGenerations=30, recombGens=1,
      nQTLperInd=1, A=NULL, lambda=1,
-     propSelBetween=1,propSelWithin=0.5)
+     propSelBetween=1,propSelWithin=0.5,
+     fitnessf=NULL)
 
 }
 
@@ -61,6 +62,9 @@ A numeric value between 0 and 1 indicating the proportion of families/crosses th
   \item{propSelWithin}{
 A numeric value between 0 and 1 indicating the proportion of individuals within families/crosses that should be selected.
 }
+  \item{fitnessf}{
+An alternative named list defining the fitness function for a given trait. If NULL the default function will be xa - lam * x'Ax where x is the contribution vector to the solution, a are the original values assigned to the trait, and A is the covariance between solutions.
+}
 
 }
 \details{
@@ -101,7 +105,7 @@ Gems <- data.frame(
             "Yellow"),
   Weight = round(runif(9,0.5,5),2),
   Value = round(abs(rnorm(9,0,5))+0.5,2),
-  Times=c(0,rep(1,8))
+  Times=c(rep(1,8),0)
 )
 head(Gems)
 #     Color Weight Value
