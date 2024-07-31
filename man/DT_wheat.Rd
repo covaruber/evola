@@ -65,10 +65,5 @@ DT <- data.frame(pheno=as.vector(DT),
 rownames(GT) <-  rownames(DT_wheat)
 head(DT)
 
-\dontrun{
-K <- sommer::A.mat(GT) # additive relationship matrix
-K[1:4,1:4]
-}
-
 }
 \keyword{datasets}

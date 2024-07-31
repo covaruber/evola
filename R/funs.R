@@ -127,6 +127,21 @@ evolafit <- function(formula, dt,
   return(list(M=M, score=Performance, pheno=pop@pheno, pop=pop))
 }
 
+
+pmonitor <- function(object,...){
+  x <- object$score#[,"Best.xa"]
+  mmin <- min(c(0, x[,"Average.xa"]))
+  mmax <- max(x[,"Best.xa"])
+  plot(x[1,], type="o", ylim=c(mmin,mmax), xlab="Generation", ylab="Value")
+  if(ncol(x) > 1){
+    for(i in 2:ncol(x)){
+      par(new=TRUE)
+      plot(x[i,], col=i, ylim=c(mmin,mmax), ylab="",xlab="", type="o",...)
+    }
+  }
+  legend("topright",legend = colnames(x), col=1:(ncol(x)), bty="n", lty=1)
+}
+
 ##################################################################################################
 #Startup function
 #this function is executed once the library is loaded

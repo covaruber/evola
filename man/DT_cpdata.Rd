@@ -1,7 +1,6 @@
 \name{DT_cpdata}
 \alias{DT_cpdata}
-\alias{GT_cpdata}
-\alias{MP_cpdata}
+\alias{A}
 \docType{data}
 \title{
 Genotypic and Phenotypic data for a CP population
@@ -33,19 +32,8 @@ Chen GK, Marjoram P, Wall JD (2009). Fast and Flexible Simulation of DNA Sequenc
 
 data(DT_cpdata)
 DT <- DT_cpdata
-GT <- GT_cpdata
-MP <- MP_cpdata
 
-\dontrun{
-## library sommer is needed for the relationship matrix
-library(sommer)
-## look at the data and fit the model
-DT$Yield <- scale(sommer::imputev(DT$Yield))
-DT$occ <- 1; DT$occ[1]=0
-head(DT)
-## create the variance-covariance matrix
-A <- sommer::A.mat(GT) # additive relationship matrix
-A <- A + diag(1e-4, ncol(A), ncol(A))
+\donttest{
 # get best 20 individuals weighting variance by 0.5
 res<-evolafit(cbind(Yield, occ)~id, dt= DT, 
               # constraints: if sum is greater than this ignore 
@@ -55,27 +43,19 @@ res<-evolafit(cbind(Yield, occ)~id, dt= DT,
               # weight the traits for the selection
               traitWeight = c(1,0), 
               # population parameters
-              nCrosses = 50, nProgeny = 40, 
+              nCrosses = 50, nProgeny = 20, 
               # coancestry parameters
               A=A, lambda=c(0.5,0), nQTLperInd = 20, 
               # selection parameters
               propSelBetween = 0.9, propSelWithin =0.9, 
-              nGenerations = 30) 
+              nGenerations = 20) 
 
 best = which(res$pheno[,1]==max(res$pheno[,1]))[1];best
 xa = (res$M \%*\% DT$Yield)[best,]; xa 
 xAx = res$M[best,] \%*\% A \%*\% res$M[best,]; xAx 
 sum(res$M[best,]) # total # of inds selected
 
-plot(NULL, xlim =c(1,nrow(res$score)), ylim = c(0, max(res$score)), 
-     ylab = "Value", xlab = "Generation")
-legend("bottomright", 
-       c("Best x'a", "Average x'a", "Average x'Ax", "Mean nQTL"), 
-       pch = 20, col = c(1, 2, 3, 4),bty = "n")
-lines(res$score[,2])
-lines(res$score[,1], col = "red")
-lines(res$score[,3], col = "green")
-lines(res$score[,4], col = "blue")
+pmonitor(res)
 
 plot(DT$Yield, col=as.factor(res$M[best,]), 
      pch=(res$M[best,]*19)+1)
