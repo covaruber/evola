@@ -131,12 +131,12 @@ evolafit <- function(formula, dt,
 pmonitor <- function(object,...){
   x <- object$score#[,"Best.xa"]
   mmin <- min(c(0, x[,"Average.xa"]))
-  mmax <- max(x[,"Best.xa"])
-  plot(x[1,], type="o", ylim=c(mmin,mmax), xlab="Generation", ylab="Value")
+  mmax <- max(c( x[,"Best.xa"], x[,"Average.xAx"] ) )
+  plot(x[,1], type="o", ylim=c(mmin,mmax), xlab="Generation", ylab="Value")
   if(ncol(x) > 1){
     for(i in 2:ncol(x)){
       par(new=TRUE)
-      plot(x[i,], col=i, ylim=c(mmin,mmax), ylab="",xlab="", type="o",...)
+      plot(x[,i], col=i, ylim=c(mmin,mmax), ylab="",xlab="", type="o",...)
     }
   }
   legend("topright",legend = colnames(x), col=1:(ncol(x)), bty="n", lty=1)

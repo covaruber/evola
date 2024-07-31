@@ -132,12 +132,12 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                # weight the traits for the selection
                traitWeight = c(0,1), 
                # population parameters
-               nCrosses = 50, nProgeny = 40, recombGens = 1, 
+               nCrosses = 100, nProgeny = 10, recombGens = 1, 
                # coancestry parameters
                A=NULL, lambda=c(0,0), nQTLperInd = 4, 
                # selection parameters
                propSelBetween = .9, propSelWithin =0.9, 
-               nGenerations = 30
+               nGenerations = 50
 ) 
 
 best = which(res0$pheno[,2]==max(res0$pheno[,2]))[1];best

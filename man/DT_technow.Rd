@@ -47,7 +47,7 @@ M <- M_technow
                 # weight the traits for the selection
                 traitWeight = c(1,0), 
                 # population parameters
-                nCrosses = 50, nProgeny = 20, 
+                nCrosses = 100, nProgeny = 10, 
                 # coancestry parameters
                 A=A, lambda=c(0.4,0), nQTLperInd = 100, 
                 # selection parameters

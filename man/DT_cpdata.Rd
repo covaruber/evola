@@ -43,7 +43,7 @@ res<-evolafit(cbind(Yield, occ)~id, dt= DT,
               # weight the traits for the selection
               traitWeight = c(1,0), 
               # population parameters
-              nCrosses = 50, nProgeny = 20, 
+              nCrosses = 100, nProgeny = 10, 
               # coancestry parameters
               A=A, lambda=c(0.5,0), nQTLperInd = 20, 
               # selection parameters
