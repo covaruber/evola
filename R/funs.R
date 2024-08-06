@@ -52,9 +52,10 @@ evolafit <- function(formula, dt,
   variances = diag(varG(pop))
   pop = setPheno(pop,h2=rep(.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0) ) # ignore h2 since we will replace it in line 56
   # ***) creating the frame for the plot
-  Performance <- matrix(NA, nrow=nGenerations,ncol=4) # to store results
-  colnames(Performance) <- c("Average.xa","Best.xa","Average.xAx","nQTL.mu")
-  rownames(Performance) <- paste("Generation",seq(nrow(Performance)))
+  indivPerformance <- list() # store results by generation
+  averagePerformance <- matrix(NA, nrow=nGenerations,ncol=5) # to store results
+  colnames(averagePerformance) <- c("Average.xa","Best.xa","Average.xAx","nQTL.mu", "deltaC.mu")
+  rownames(averagePerformance) <- paste("Generation",seq(nrow(averagePerformance)))
   # 4) Starting the Generational process
   for (j in 1:nGenerations) { # for each generation we breed # j=1
     message(paste("generation",j))
@@ -73,14 +74,17 @@ evolafit <- function(formula, dt,
       pop <- setPheno(pop=pop, h2=rep(0.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0))  # ignore h2 since we will replace it in line 90
     }
     Q <- pullQtlGeno(pop, simParam = SP, trait = iTrait)  # plot((apply(Q,2,sum)/2)/nrow(Q))  # plot((apply(Q,1,sum)/2)/ncol(Q))
+    xtAx <- diag(Q%*%A%*%t(Q))
+    m <- matrix(1,nrow=1,ncol=ncol(A))
+    mAmt <- as.vector(m%*%A%*%t(m)/(4*(ncol(A)^2)))
+    deltaC <- (xtAx - mAmt)/(1-mAmt)
+    if((max(xtAx)-min(xtAx)) > 0){ # if there is variation
+      xtAx = (xtAx-min(xtAx))/(max(xtAx)-min(xtAx)) # standardized xAx
+    }
     for(iTrait in 1:length(traits)){ # iTrait=5
       xa <- Q %*% SP$traits[[iTrait]]@addEff
-      if((max(xa)-min(xa)) > 0){
+      if((max(xa)-min(xa)) > 0){ # if there is variation
         xa = (xa-min(xa))/(max(xa)-min(xa)) # standardized xa
-      }
-      xtAx <- diag(Q%*%A%*%t(Q))
-      if((max(xtAx)-min(xtAx)) > 0){
-        xtAx = (xtAx-min(xtAx))/(max(xtAx)-min(xtAx)) # standardized xAx
       }
       xtAx.lam = xtAx * lambda[iTrait]
       pop@pheno[,iTrait] <- do.call(fitnessf[[iTrait]], list(dt=dt, xa=xa, xtAx.lam=xtAx.lam, pop=pop, Q=Q, alpha=alpha)) # xa - (lambda[iTrait] * xtAx ) # breeding value + coancestry
@@ -117,14 +121,18 @@ evolafit <- function(formula, dt,
     }
     #store the performance of the jth generation for plots
     xaFinal <- list()
-    for(kk in 1:length(traits)){xaFinal[[kk]] <- Q %*% SP$traits[[1]]@addEff}
+    for(kk in 1:length(traits)){ # save merit of the different solutions
+      xaFinal[[kk]] <- Q %*% SP$traits[[1]]@addEff
+    }
     score <- do.call(cbind, xaFinal) %*% traitWeight
-    Performance[j,] <- c( mean(score), max(score) , mean(diag(Q%*%A%*%t(Q))),  mean(apply(Q/2,1,sum)) )
+    indivPerformance[[j]] <- data.frame(score=score,deltaC=deltaC, xtAx=xtAx, generation=j) # save individual solution performance
+    averagePerformance[j,] <- c( mean(score), max(score) , mean(diag(Q%*%A%*%t(Q))),  mean(apply(Q/2,1,sum)), mean(deltaC) ) # save summaries of performance
   }
   # 7) retrieve output of best combinations
   M <- pullQtlGeno(pop, simParam = SP, trait=1); M <- M/2
   colnames(M) <- apply(data.frame(dt[,classifiers]),1,function(x){paste(x,collapse = "_")})
-  return(list(M=M, score=Performance, pheno=pop@pheno, pop=pop))
+  indivPerformance <- do.call(rbind, indivPerformance)
+  return(list(M=M, score=averagePerformance, pheno=pop@pheno, pop=pop, indivPerformance=indivPerformance))
 }
 
 
@@ -140,6 +148,66 @@ pmonitor <- function(object,...){
     }
   }
   legend("topright",legend = colnames(x), col=1:(ncol(x)), bty="n", lty=1)
+}
+
+pareto <- function(object, scaled=TRUE, ...){
+  transp<-  function (col, alpha = 0.5) {
+    res <- apply(col2rgb(col), 2, function(c) rgb(c[1]/255, c[2]/255, 
+                                                  c[3]/255, alpha))
+    return(res)
+  }
+  dt <- object$indivPerformance 
+  # prepare rate ot coancestry
+  dt$deltaC <- dt$deltaC * -1
+  # prepare performance
+  if(scaled){
+    minScore <- min(dt$score)
+    maxScore <- max(dt$score)
+    dt$score = (dt$score-minScore)/(maxScore-minScore) * 100 # standardized xa
+  }
+  # prepare summaries of rate of coancestry
+  dt2 <- as.data.frame(object$score)
+  dt2$deltaC.mu <- dt2$deltaC.mu  * -1 
+  # prepare summaries of performance
+  if(scaled){
+  dt2$Average.xa <- (dt2$Average.xa-minScore)/(maxScore-minScore) * 100 # standardized xa
+  }
+  colfunc <- colorRampPalette(c("plum1", "plum4"))
+  
+  layout(matrix(1:2,ncol=2), width = c(2,1),height = c(1,1))
+  # left plot
+  if(!scaled){ylabName="Maximum gain (units)"}else{ylabName="Maximum gain (%)"}
+  dt$color <- transp(colfunc(max(dt$generation))[dt$generation], alpha = 0.4)
+  with(dt, plot(score~ deltaC, col=color, main="Pareto frontier", pch=20,
+                xlab="Rate of coancestry (%)", ylab=ylabName, xaxt="n", ... ))
+  axis(1, at=seq(-100,0,10),labels=seq(100,0,-10), col.axis="black")
+  grid()
+  lines(dt2$deltaC.mu, dt2$Average.xa, col = "blue")
+  # right plot
+  legend_image <- as.raster(matrix(colfunc(max(dt$generation)), ncol=1))
+  plot(c(0,2),c(0, max(dt$generation) ),type = 'n', axes = F,xlab = '', ylab = '', main = 'Generation')
+  text(x=1.5, y = seq(min(dt$generation),max(dt$generation),l=5), labels = seq(max(dt$generation),min(dt$generation),l=5) )
+  rasterImage(legend_image, 0, 0, 1, max(dt$generation) )
+  par(mfrow=c(1,1))
+  # library(ggplot2)
+  # # Basic scatter plot
+  # p <- ggplot(dt, aes(x=deltaC, y=score, col=generation)) 
+  # p <- p + geom_point() + xlab("Rate of coancestry (dC)") + ylab("Gain")
+  # for(i in 1:(nrow(dt2)-1)){
+  #   if(i == (nrow(dt2)-1) ){
+  #     p <- p + geom_segment(y = dt2$Average.xa[i], x = dt2$deltaC.mu[i], 
+  #                           yend = dt2$Average.xa[i+1], xend = dt2$deltaC.mu[i+1],
+  #                           arrow = arrow(length = unit(0.5, "cm"))
+  #     )
+  #   }else{
+  #     p <- p + geom_segment(y = dt2$Average.xa[i], x = dt2$deltaC.mu[i], 
+  #                           yend = dt2$Average.xa[i+1], xend = dt2$deltaC.mu[i+1] #,
+  #                           #arrow = arrow(length = unit(0.5, "cm")) 
+  #     )
+  #   }
+  #   
+  # }
+  # p
 }
 
 ##################################################################################################

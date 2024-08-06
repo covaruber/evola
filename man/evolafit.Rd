@@ -132,9 +132,9 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                # weight the traits for the selection
                traitWeight = c(0,1), 
                # population parameters
-               nCrosses = 100, nProgeny = 10, recombGens = 1, 
+               nCrosses = 100, nProgeny = 20, recombGens = 1, 
                # coancestry parameters
-               A=NULL, lambda=c(0,0), nQTLperInd = 4, 
+               A=NULL, lambda=c(0,0), nQTLperInd = 1, 
                # selection parameters
                propSelBetween = .9, propSelWithin =0.9, 
                nGenerations = 50
@@ -159,16 +159,7 @@ res0$score[nrow(res0$score),]
  
  \dontrun{
 
-plot(NULL, xlim =c(1,nrow(res0$score)), 
-     ylim = c(0, max(res0$score) ), ylab = "Value", 
-     xlab = "Generation")
-legend("bottomright", 
-       c("Best x'a", "Average x'a", "Average x'Ax", "Mean nQTL"), 
-       pch = 20, col = c(1, 2, 3, 4),bty = "n")
-lines(res0$score[,2])
-lines(res0$score[,1], col = "red")
-lines(res0$score[,3], col = "green")
-lines(res0$score[,4], col = "blue")
+pmonitor(res0)
   
 }
 

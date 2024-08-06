@@ -17,6 +17,9 @@ The vignettes aim to provide several examples in how to use the evola package un
 2) Obtaining optimal crosses in plant breeding
 3) Obtaining optimal individuals in plant breeding
 4) Optimizing a sparse testing allocation in plant breeding
+5) How to specify gender constraints
+6) How to specify the number of times a parent should be used
+7) How to optimize the number of progeny to produce per cross
 
 ### 1) Optimizing a multi-trait scenario
 
@@ -50,6 +53,33 @@ TBD
 ```{r}
 # TBD
 ```
+
+### 5) How to specify gender constraints
+
+In this case is better if you only create the cross combinations that are possible (e.g., where male and female can couple) and you handed them to the evolutionary algorithm. That means, the rows of the crosses to be in the searching space only include the realistic ones.
+
+### 6) How to specify the number of times a parent should be used
+
+In this case you would need to do 2 things:
+
+A) Create two new column with the mother and father of the cross
+B) Create a new trait that is computed on the fly while runing the analysis where the trait is a representation of how many times the parent is present in the current contribution. For example the trait function can be defined for mother as:
+
+```{r}
+# data$motherN <- as.numeric(as.factor(data$mother))
+# data$fatherN <- as.numeric(as.factor(data$father))
+# fitnessf <- list(motherN= function(motherN,fatherN){
+# v = table(c(motherN,fatherN))
+# res <- ifelse(any(v > 4), 0, 1)
+# return(res)
+# })
+```
+
+Where motherN is a new trait that is just a numerical recoding of the mothers (e.g., as.numeric(as.factor(dt$mother)) ). This new fitness function for the trait motherN can be added to the 'fitnessf' argument together with a constraint (e.g., constraintsLB=1) to ensure that only crosses that meet the number of times showing in a cross are among the selected candidates.
+
+### 7) How to optimize the number of progeny to produce per cross
+
+The advice here is to upload the phased genotypes (haplotypes) to the AlphaSimR machinery and simulate the possible crosses to explore how many individuals are required to sample a given trait (oligogenic or polygenic) with a given probablility.
 
 ## Literature
 

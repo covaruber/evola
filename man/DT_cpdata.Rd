@@ -45,10 +45,10 @@ res<-evolafit(cbind(Yield, occ)~id, dt= DT,
               # population parameters
               nCrosses = 100, nProgeny = 10, 
               # coancestry parameters
-              A=A, lambda=c(0.5,0), nQTLperInd = 20, 
+              A=A, lambda=c(0.5,0), nQTLperInd = 2, 
               # selection parameters
-              propSelBetween = 0.9, propSelWithin =0.9, 
-              nGenerations = 20) 
+              propSelBetween = 0.5, propSelWithin =0.5, 
+              nGenerations = 40) 
 
 best = which(res$pheno[,1]==max(res$pheno[,1]))[1];best
 xa = (res$M \%*\% DT$Yield)[best,]; xa 
