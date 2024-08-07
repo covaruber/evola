@@ -9,4 +9,4 @@
 + Is there any benefit in allowing ploidy?
 + add the metrics: rate of coancestry (from formula) and rate of inbreeding (from the diagonal of the GRM of selected inds and all inds) to the output
 + improve the regression approach
-+ add the calcultion of the rate of coancestry
++ in pareto plot should we scale the y-axis over the number of solutions provided

@@ -18,6 +18,7 @@ evolafit <- function(formula, dt,
     }
   };  fitnessf <- fitnessf[traits]
   classifiers <- elements[[2]]
+  # print(classifiers)
   if(length(constraintsUB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
   if(length(constraintsLB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
   if(length(traitWeight) != length(traits)){stop(paste0("Weights need to have the same length than traits (",length(traits),")"), call. = FALSE)}
@@ -75,9 +76,11 @@ evolafit <- function(formula, dt,
     }
     Q <- pullQtlGeno(pop, simParam = SP, trait = iTrait)  # plot((apply(Q,2,sum)/2)/nrow(Q))  # plot((apply(Q,1,sum)/2)/ncol(Q))
     xtAx <- diag(Q%*%A%*%t(Q))
+    # base coancestry Ct
     m <- matrix(1,nrow=1,ncol=ncol(A))
     mAmt <- as.vector(m%*%A%*%t(m)/(4*(ncol(A)^2)))
-    deltaC <- (xtAx - mAmt)/(1-mAmt)
+    # rate of coancestry xtAx/4p^2 - mtAm/4n^2
+    deltaC <- ( (xtAx/(4*(apply(Q/2,1,sum)^2))) - mAmt)/(1-mAmt)
     if((max(xtAx)-min(xtAx)) > 0){ # if there is variation
       xtAx = (xtAx-min(xtAx))/(max(xtAx)-min(xtAx)) # standardized xAx
     }
@@ -125,7 +128,7 @@ evolafit <- function(formula, dt,
       xaFinal[[kk]] <- Q %*% SP$traits[[1]]@addEff
     }
     score <- do.call(cbind, xaFinal) %*% traitWeight
-    indivPerformance[[j]] <- data.frame(score=score,deltaC=deltaC, xtAx=xtAx, generation=j) # save individual solution performance
+    indivPerformance[[j]] <- data.frame(score=score,deltaC=deltaC, xtAx=xtAx, generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
     averagePerformance[j,] <- c( mean(score), max(score) , mean(diag(Q%*%A%*%t(Q))),  mean(apply(Q/2,1,sum)), mean(deltaC) ) # save summaries of performance
   }
   # 7) retrieve output of best combinations
@@ -150,13 +153,14 @@ pmonitor <- function(object,...){
   legend("topright",legend = colnames(x), col=1:(ncol(x)), bty="n", lty=1)
 }
 
-pareto <- function(object, scaled=TRUE, ...){
+pareto <- function(object, scaled=TRUE, pch=20, xlim=c(-.3,0), ...){
   transp<-  function (col, alpha = 0.5) {
     res <- apply(col2rgb(col), 2, function(c) rgb(c[1]/255, c[2]/255, 
                                                   c[3]/255, alpha))
     return(res)
   }
   dt <- object$indivPerformance 
+  dt2 <- as.data.frame(object$score)
   # prepare rate ot coancestry
   dt$deltaC <- dt$deltaC * -1
   # prepare performance
@@ -164,23 +168,23 @@ pareto <- function(object, scaled=TRUE, ...){
     minScore <- min(dt$score)
     maxScore <- max(dt$score)
     dt$score = (dt$score-minScore)/(maxScore-minScore) * 100 # standardized xa
-  }
+  }else{dt$score <- dt$score/dt$nQTL }
   # prepare summaries of rate of coancestry
-  dt2 <- as.data.frame(object$score)
   dt2$deltaC.mu <- dt2$deltaC.mu  * -1 
+  dt2 <- dt2[which(!is.nan(dt2$deltaC.mu)),]
   # prepare summaries of performance
   if(scaled){
   dt2$Average.xa <- (dt2$Average.xa-minScore)/(maxScore-minScore) * 100 # standardized xa
-  }
+  }else{dt2$Average.xa <- dt2$Average.xa/dt2$nQTL.mu  }
   colfunc <- colorRampPalette(c("plum1", "plum4"))
   
   layout(matrix(1:2,ncol=2), width = c(2,1),height = c(1,1))
   # left plot
   if(!scaled){ylabName="Maximum gain (units)"}else{ylabName="Maximum gain (%)"}
   dt$color <- transp(colfunc(max(dt$generation))[dt$generation], alpha = 0.4)
-  with(dt, plot(score~ deltaC, col=color, main="Pareto frontier", pch=20,
-                xlab="Rate of coancestry (%)", ylab=ylabName, xaxt="n", ... ))
-  axis(1, at=seq(-100,0,10),labels=seq(100,0,-10), col.axis="black")
+  with(dt, plot(score~ deltaC, col=color, main="Pareto frontier", pch=pch,
+                xlab="Rate of coancestry", ylab=ylabName, xaxt="n",  ... ))
+  axis(1, at=seq(-3,0,.05),labels=round(seq(3,0,-.05),2), col.axis="black")
   grid()
   lines(dt2$deltaC.mu, dt2$Average.xa, col = "blue")
   # right plot
