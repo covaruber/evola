@@ -79,6 +79,8 @@ Using the AlphaSimR machinery (runMacs) it recreates the evolutionary forces app
 \item{$M}{the matrix of haplotypes/solutions after selection.}
 \item{$score}{a matrix with scores for different metrics () across generations of evolution.}
 \item{$pheno}{the matrix of phenotypes of individuals/solutions present in the last generation.}
+\item{indivPerformance}{the matrix of x'a, x'Ax, deltaC, nQTLs per solution per generation.}
+\item{pop}{AlphaSimR object used for the evolutionary algorithm.}
 
 }
 
