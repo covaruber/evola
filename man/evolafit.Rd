@@ -160,6 +160,7 @@ res0$score[nrow(res0$score),]
  \dontrun{
 
 pmonitor(res0)
+pareto(res)
   
 }
 

@@ -59,6 +59,8 @@ pmonitor(res)
 
 plot(DT$Yield, col=as.factor(res$M[best,]), 
      pch=(res$M[best,]*19)+1)
+
+pareto(res)
  
 }
 
