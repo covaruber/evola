@@ -76,12 +76,13 @@ evolafit <- function(formula, dt,
     }
     Q <- pullQtlGeno(pop, simParam = SP, trait = iTrait)  # plot((apply(Q,2,sum)/2)/nrow(Q))  # plot((apply(Q,1,sum)/2)/ncol(Q))
     xtAx <- diag(Q%*%A%*%t(Q))
-    # base coancestry Ct
+    # calculate base coancestry Ct
     m <- matrix(1,nrow=1,ncol=ncol(A))
     mAmt <- as.vector(m%*%A%*%t(m)/(4*(ncol(A)^2)))
     # rate of coancestry xtAx/4p^2 - mtAm/4n^2
     deltaC <- ( (xtAx/(4*(apply(Q/2,1,sum)^2))) - mAmt)/(1-mAmt)
-    if((max(xtAx)-min(xtAx)) > 0){ # if there is variation
+    # if there is variation in min and max values in xtAx standardize
+    if((max(xtAx)-min(xtAx)) > 0){ 
       xtAx = (xtAx-min(xtAx))/(max(xtAx)-min(xtAx)) # standardized xAx
     }
     for(iTrait in 1:length(traits)){ # iTrait=5
@@ -122,9 +123,9 @@ evolafit <- function(formula, dt,
         } 
       }
     }
-    #store the performance of the jth generation for plots
+    #store the performance of the jth generation for plot functions
     xaFinal <- list()
-    for(kk in 1:length(traits)){ # save merit of the different solutions
+    for(kk in 1:length(traits)){ # save merit of the different solutions for each trait
       xaFinal[[kk]] <- Q %*% SP$traits[[1]]@addEff
     }
     score <- do.call(cbind, xaFinal) %*% traitWeight
@@ -183,7 +184,7 @@ pareto <- function(object, scaled=TRUE, pch=20, xlim=c(-.3,0), ...){
   if(!scaled){ylabName="Maximum gain (units)"}else{ylabName="Maximum gain (%)"}
   dt$color <- transp(colfunc(max(dt$generation))[dt$generation], alpha = 0.4)
   with(dt, plot(score~ deltaC, col=color, main="Pareto frontier", pch=pch,
-                xlab="Rate of coancestry", ylab=ylabName, xaxt="n",  ... ))
+                xlab="Rate of coancestry", ylab=ylabName, xlim=xlim, xaxt="n",  ... ))
   axis(1, at=seq(-3,0,.05),labels=round(seq(3,0,-.05),2), col.axis="black")
   grid()
   lines(dt2$deltaC.mu, dt2$Average.xa, col = "blue")
