@@ -27,8 +27,11 @@ The vignettes aim to provide several examples in how to use the evola package un
 
 The example presented here is a list of gems (Color) that have different weights in Kg (Weight) and a given value (Value). 
 
-```{r}
+```{r setup, include=FALSE} 
 library(evola)
+```
+
+```{r}
 set.seed(1)
 # Data
 Gems <- data.frame(
@@ -60,7 +63,7 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                A=NULL, lambda=c(0,0), nQTLperInd = 1, 
                # selection parameters
                propSelBetween = .9, propSelWithin =0.9, 
-               nGenerations = 50
+               nGenerations = 50, verbose = FALSE
 ) 
 ```
 
@@ -69,9 +72,9 @@ Noticed that the formula cbind(Weight,Value)~Color specified the traits to be co
 When looking at the results of the evolution we can observe that the best solution for the traits under the contraints can be extracted with the bestSol() function.
 
 ```{r}
-best=bestSol(res0)[1] # best solution for trait 1
-xa = res0$M[best,] %*% as.matrix(Gems[,c("Weight","Value")]); xa
+best=bestSol(res0)[2]; best # best solution for trait 1
 res0$M[best,]
+xa = res0$M[best,] %*% as.matrix(Gems[,c("Weight","Value")]); xa
 ```
 
 The best selection of Gems was the one one found in the M element of the resulting object.
@@ -81,7 +84,45 @@ The best selection of Gems was the one one found in the M element of the resulti
 TBD
 
 ```{r, fig.show='hold'}
-# TBD
+data(DT_cpdata)
+DT <- DT_cpdata
+head(DT)
+```
+
+TBD
+
+```{r, fig.show='hold'}
+# get best 20 individuals weighting variance by 0.5
+res<-evolafit(cbind(Yield, occ)~id, dt= DT, 
+              # constraints: if sum is greater than this ignore 
+              constraintsUB = c(Inf,20), 
+              # constraints: if sum is smaller than this ignore
+              constraintsLB= c(-Inf,-Inf), 
+              # weight the traits for the selection
+              traitWeight = c(1,0), 
+              # population parameters
+              nCrosses = 100, nProgeny = 10, 
+              # coancestry parameters
+              A=A, lambda=c(0.5,0), nQTLperInd = 2, 
+              # selection parameters
+              propSelBetween = 0.5, propSelWithin =0.5, 
+              nGenerations = 40, verbose=FALSE) 
+```
+
+TBD
+
+```{r, fig.show='hold'}
+best = bestSol(res)[1];
+sum(res$M[best,]) # total # of inds selected
+```
+
+TBD
+
+```{r, fig.show='hold'}
+pmonitor(res)
+plot(DT$Yield, col=as.factor(res$M[best,]), 
+     pch=(res$M[best,]*19)+1)
+
 ```
 
 ### 3) Obtaining optimal N crosses from a population for a given feature
@@ -89,15 +130,110 @@ TBD
 TBD
 
 ```{r}
-#TBD
+data(DT_technow)
+DT <- DT_technow
+M <- M_technow
+A <- A.mat(M)
+head(DT)
 ```
+
+
+```{r}
+# run the genetic algorithm
+  res<-evolafit(formula = c(GY, occ)~hy, dt= DT, 
+                # constraints: if sum is greater than this ignore
+                constraintsUB = c(Inf,100), 
+                # constraints: if sum is smaller than this ignore
+                constraintsLB= c(-Inf,-Inf),
+                # weight the traits for the selection
+                traitWeight = c(1,0), 
+                # population parameters
+                nCrosses = 100, nProgeny = 10, 
+                # coancestry parameters
+                A=A, lambda=c(0.3,0), nQTLperInd = 100, 
+                # selection parameters
+                propSelBetween = 0.9, propSelWithin =0.9, 
+                nGenerations = 20, verbose=FALSE) 
+best = bestSol(res)[1]
+sum(res$M[best,]) # total # of inds selected
+```
+
+
+```{r}
+pmonitor(res)
+plot(DT$GY, col=as.factor(res$M[best,]), 
+       pch=(res$M[best,]*19)+1)
+```
+
 
 ### 4) Optimizing a sample of size N to be representative
 
 TBD
 
 ```{r}
-# TBD
+data(DT_wheat)
+DT <- as.data.frame(DT_wheat)
+DT$id <- rownames(DT) # IDs
+DT$occ <- 1; DT$occ[1]=0 # to track occurrences
+DT$dummy <- 1; DT$dummy[1]=0 # dummy trait
+# if genomic
+# GT <- GT_wheat + 1; rownames(GT) <- rownames(DT)
+# A <-  GT%*%t(GT)
+# A <- A/mean(diag(A))
+# if pedigree
+A <- A_wheat
+```
+
+
+```{r}
+##Perform eigenvalue decomposition for clustering
+##And select cluster 5 as target set to predict
+pcNum=25
+svdWheat <- svd(A, nu = pcNum, nv = pcNum)
+PCWheat <- A %*% svdWheat$v
+rownames(PCWheat) <- rownames(A)
+DistWheat <- dist(PCWheat)
+TreeWheat <- cutree(hclust(DistWheat), k = 5 )
+plot(PCWheat[,1], PCWheat[,2], col = TreeWheat, 
+     pch = as.character(TreeWheat), xlab = "pc1", ylab = "pc2")
+vp <- rownames(PCWheat)[TreeWheat == 5]; length(vp)
+tp <- setdiff(rownames(PCWheat),vp)
+```
+
+
+```{r}
+As <- A[tp,tp]
+DT2 <- DT[rownames(As),]
+```
+
+
+```{r}
+res<-evolafit(cbind(dummy, occ)~id, dt= DT2, 
+                # constraints: if sum is greater than this ignore 
+                constraintsUB = c(Inf, 100), 
+                # constraints: if sum is smaller than this ignore
+                constraintsLB= c(-Inf, -Inf), 
+                # weight the traits for the selection
+                traitWeight = c(1,0), 
+                # population parameters
+                nCrosses = 100, nProgeny = 10, 
+                # coancestry parameters
+                A=As,
+                lambda=c(1,0), nQTLperInd = 80, 
+                # selection parameters
+                propSelBetween = 0.5, propSelWithin =0.5, 
+                nGenerations = 30, verbose = FALSE)
+best = bestSol(res)
+sum(res$M[best,]) # total # of inds selected
+```
+
+
+```{r}
+newCol <- TreeWheat
+
+plot(PCWheat[,1], PCWheat[,2], col = TreeWheat, 
+     pch = as.character(TreeWheat), xlab = "pc1", ylab = "pc2")
+
 ```
 
 ### 5) Optimizing a sample of size N to be predict another sample
@@ -105,7 +241,28 @@ TBD
 TBD
 
 ```{r}
-# TBD
+DT2$cov <- apply(A[tp,vp],1,mean)
+```
+
+
+```{r}
+res<-evolafit(cbind(cov, occ)~id, dt= DT2, 
+                # constraints: if sum is greater than this ignore 
+                constraintsUB = c(Inf, 100), 
+                # constraints: if sum is smaller than this ignore
+                constraintsLB= c(-Inf, -Inf), 
+                # weight the traits for the selection
+                traitWeight = c(1,0), 
+                # population parameters
+                nCrosses = 100, nProgeny = 10, 
+                # coancestry parameters
+                A=As,
+                lambda=c(1,0), nQTLperInd = 80, 
+                # selection parameters
+                propSelBetween = 0.5, propSelWithin =0.5, 
+                nGenerations = 30, verbose = FALSE)
+best = bestSol(res)
+sum(res$M[best,]) # total # of inds selected
 ```
 
 ### 6) How to specify constraints

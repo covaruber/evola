@@ -1,6 +1,7 @@
 \name{DT_wheat}
 \alias{DT_wheat}
 \alias{GT_wheat}
+\alias{A_wheat}
 \title{wheat lines dataset}
 \description{
 
