@@ -58,13 +58,59 @@ A platform for meta-analysis of rice crop data. \emph{Plant Physiology} \bold{13
 \examples{
 
 data(DT_wheat)
-DT <- DT_wheat
-GT <- GT_wheat
-DT <- data.frame(pheno=as.vector(DT),
-                 env=as.factor(paste0("e", sort(rep(1:4,nrow(DT))))),
-                 id=rep(rownames(DT),4))
-rownames(GT) <-  rownames(DT_wheat)
-head(DT)
+DT <- as.data.frame(DT_wheat)
+DT$id <- rownames(DT) # IDs
+DT$occ <- 1; DT$occ[1]=0 # to track occurrences
+DT$dummy <- 1; DT$dummy[1]=0 # dummy trait
+
+# if genomic
+# GT <- GT_wheat + 1; rownames(GT) <- rownames(DT)
+# A <-  GT\%*\%t(GT)
+# A <- A/mean(diag(A))
+# if pedigree
+A <- A_wheat
+A[1:4,1:4]
+##Perform eigenvalue decomposition for clustering
+##And select cluster 5 as target set to predict
+pcNum=25
+svdWheat <- svd(A, nu = pcNum, nv = pcNum)
+PCWheat <- A \%*\% svdWheat$v
+rownames(PCWheat) <- rownames(A)
+DistWheat <- dist(PCWheat)
+TreeWheat <- cutree(hclust(DistWheat), k = 5 )
+plot(PCWheat[,1], PCWheat[,2], col = TreeWheat, 
+     pch = as.character(TreeWheat), xlab = "pc1", ylab = "pc2")
+vp <- rownames(PCWheat)[TreeWheat == 3]; length(vp)
+tp <- setdiff(rownames(PCWheat),vp)
+
+As <- A[tp,tp]
+DT2 <- DT[rownames(As),]
+DT2$cov <- apply(A[tp,vp],1,mean)
+
+head(DT2)
+
+\donttest{
+res<-evolafit(cbind(cov, occ)~id, dt= DT2, 
+              # constraints: if sum is greater than this ignore 
+              constraintsUB = c(Inf, 100), 
+              # constraints: if sum is smaller than this ignore
+              constraintsLB= c(-Inf, -Inf), 
+              # weight the traits for the selection
+              traitWeight = c(1,0), 
+              # population parameters
+              nCrosses = 100, nProgeny = 10, 
+              # coancestry parameters
+              A=As,
+              lambda=c(1,0), nQTLperInd = 80, 
+              # selection parameters
+              propSelBetween = 0.5, propSelWithin =0.5, 
+              nGenerations = 30, verbose = TRUE) 
+
+
+best <- bestSol(res)[1]
+sum(res$M[best,]) # total # of inds selected
+pareto(res)
+}
 
 }
 \keyword{datasets}

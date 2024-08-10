@@ -23,6 +23,8 @@ The vignettes aim to provide several examples in how to use the evola package un
 6b) number of times a parent should be used
 7) How to optimize the number of progeny to produce per cross
 
+Because of CRAN requirements I will only run few generations but please when you run your analysis let it run for many generations.
+
 ### 1) Optimizing the selection of one feature with a constraint in other
 
 The example presented here is a list of gems (Color) that have different weights in Kg (Weight) and a given value (Value). 
@@ -63,7 +65,7 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                A=NULL, lambda=c(0,0), nQTLperInd = 1, 
                # selection parameters
                propSelBetween = .9, propSelWithin =0.9, 
-               nGenerations = 50, verbose = FALSE
+               nGenerations = 30, verbose = FALSE
 ) 
 ```
 
@@ -106,7 +108,7 @@ res<-evolafit(cbind(Yield, occ)~id, dt= DT,
               A=A, lambda=c(0.5,0), nQTLperInd = 2, 
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
-              nGenerations = 40, verbose=FALSE) 
+              nGenerations = 20, verbose=FALSE) 
 ```
 
 TBD
@@ -153,7 +155,7 @@ head(DT)
                 A=A, lambda=c(0.3,0), nQTLperInd = 100, 
                 # selection parameters
                 propSelBetween = 0.9, propSelWithin =0.9, 
-                nGenerations = 20, verbose=FALSE) 
+                nGenerations = 10, verbose=FALSE) 
 best = bestSol(res)[1]
 sum(res$M[best,]) # total # of inds selected
 ```
@@ -196,7 +198,7 @@ DistWheat <- dist(PCWheat)
 TreeWheat <- cutree(hclust(DistWheat), k = 5 )
 plot(PCWheat[,1], PCWheat[,2], col = TreeWheat, 
      pch = as.character(TreeWheat), xlab = "pc1", ylab = "pc2")
-vp <- rownames(PCWheat)[TreeWheat == 5]; length(vp)
+vp <- rownames(PCWheat)[TreeWheat == 3]; length(vp)
 tp <- setdiff(rownames(PCWheat),vp)
 ```
 
@@ -222,8 +224,8 @@ res<-evolafit(cbind(dummy, occ)~id, dt= DT2,
                 lambda=c(1,0), nQTLperInd = 80, 
                 # selection parameters
                 propSelBetween = 0.5, propSelWithin =0.5, 
-                nGenerations = 30, verbose = FALSE)
-best = bestSol(res)
+                nGenerations = 15, verbose = FALSE)
+best = bestSol(res)[1]
 sum(res$M[best,]) # total # of inds selected
 ```
 
@@ -244,7 +246,6 @@ TBD
 DT2$cov <- apply(A[tp,vp],1,mean)
 ```
 
-
 ```{r}
 res<-evolafit(cbind(cov, occ)~id, dt= DT2, 
                 # constraints: if sum is greater than this ignore 
@@ -260,10 +261,19 @@ res<-evolafit(cbind(cov, occ)~id, dt= DT2,
                 lambda=c(1,0), nQTLperInd = 80, 
                 # selection parameters
                 propSelBetween = 0.5, propSelWithin =0.5, 
-                nGenerations = 30, verbose = FALSE)
-best = bestSol(res)
+                nGenerations = 15, verbose = FALSE)
+best = bestSol(res)[1]
 sum(res$M[best,]) # total # of inds selected
 ```
+
+```{r}
+cex <- rep(0.5,nrow(PCWheat))
+names(cex) <- rownames(PCWheat)
+cex[names(which(res$M[best,]==1))]=2
+plot(PCWheat[,1], PCWheat[,2], col = TreeWheat, cex=cex,
+     pch = TreeWheat, xlab = "pc1", ylab = "pc2")
+```
+
 
 ### 6) How to specify constraints
 
