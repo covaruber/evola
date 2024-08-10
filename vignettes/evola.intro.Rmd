@@ -13,24 +13,70 @@ The evola package is nice wrapper of the AlphaSimR package that enables the use 
 
 The vignettes aim to provide several examples in how to use the evola package under different optimization scenarios. We will spend the rest of the space providing examples for: 
 
-1) Optimizing a multi-trait scenario
-2) Obtaining optimal crosses in plant breeding
-3) Obtaining optimal individuals in plant breeding
-4) Optimizing a sparse testing allocation in plant breeding
-5) How to specify gender constraints
-6) How to specify the number of times a parent should be used
+1) Optimizing the selection of one feature with a constraint in other
+2) Obtaining optimal N individuals from a population for a given feature
+3) Obtaining optimal N crosses from a population for a given feature
+4) Optimizing a sample of size N to be representative
+5) Optimizing a sample of size N to be predict another sample
+6) How to specify constraints:
+5a) gender
+6b) number of times a parent should be used
 7) How to optimize the number of progeny to produce per cross
 
-### 1) Optimizing a multi-trait scenario
+### 1) Optimizing the selection of one feature with a constraint in other
 
-TBD.
+The example presented here is a list of gems (Color) that have different weights in Kg (Weight) and a given value (Value). 
 
 ```{r}
 library(evola)
-# TBD
+set.seed(1)
+# Data
+Gems <- data.frame(
+  Color = c("Red", "Blue", "Purple", "Orange",
+            "Green", "Pink", "White", "Black", 
+            "Yellow"),
+  Weight = round(runif(9,0.5,5),2),
+  Value = round(abs(rnorm(9,0,5))+0.5,2)
+)
+head(Gems)
 ```
 
-### 2) Obtaining optimal crosses in plant breeding
+The task to optimize here is to be able to pick in your bag all the possible gems that maximize the value with the contraint that your bag would break after 10Kg. In the evolafit function this would be specified as follows:
+
+```{r}
+# Task: Gem selection. 
+# Aim: Get highest combined value.
+# Restriction: Max weight of the gem combined = 10. 
+res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
+               # constraints: if greater than this ignore
+               constraintsUB = c(10,Inf), 
+               # constraints: if smaller than this ignore
+               constraintsLB= c(-Inf,-Inf), 
+               # weight the traits for the selection
+               traitWeight = c(0,1), 
+               # population parameters
+               nCrosses = 100, nProgeny = 20, recombGens = 1, 
+               # coancestry parameters
+               A=NULL, lambda=c(0,0), nQTLperInd = 1, 
+               # selection parameters
+               propSelBetween = .9, propSelWithin =0.9, 
+               nGenerations = 50
+) 
+```
+
+Noticed that the formula cbind(Weight,Value)~Color specified the traits to be considered in the optimization problem are specified in the left side of the formula whereas the right side of the formula specifies the term corresponding to the genes that will form the 'genome' of the solution. Each trait in the formula requires a value for the contraints, weights in the fitness function (i.e., selection index) and lambda (weight for group relationship between the genes in the genome). The rest of the parameters are the parameters controling the evolution of the population of solutions.
+
+When looking at the results of the evolution we can observe that the best solution for the traits under the contraints can be extracted with the bestSol() function.
+
+```{r}
+best=bestSol(res0)[1] # best solution for trait 1
+xa = res0$M[best,] %*% as.matrix(Gems[,c("Weight","Value")]); xa
+res0$M[best,]
+```
+
+The best selection of Gems was the one one found in the M element of the resulting object.
+
+### 2) Obtaining optimal N individuals from a population for a given feature
 
 TBD
 
@@ -38,7 +84,7 @@ TBD
 # TBD
 ```
 
-### 3) Obtaining optimal individuals in plant breeding
+### 3) Obtaining optimal N crosses from a population for a given feature
 
 TBD
 
@@ -46,7 +92,7 @@ TBD
 #TBD
 ```
 
-### 4) Optimizing a sparse testing allocation in plant breeding
+### 4) Optimizing a sample of size N to be representative
 
 TBD
 
@@ -54,11 +100,20 @@ TBD
 # TBD
 ```
 
-### 5) How to specify gender constraints
+### 5) Optimizing a sample of size N to be predict another sample
 
+TBD
+
+```{r}
+# TBD
+```
+
+### 6) How to specify constraints
+
+#### Gender
 In this case is better if you only create the cross combinations that are possible (e.g., where male and female can couple) and you handed them to the evolutionary algorithm. That means, the rows of the crosses to be in the searching space only include the realistic ones.
 
-### 6) How to specify the number of times a parent should be used
+#### Number of times a parent should be used
 
 In this case you would need to do 2 things:
 
@@ -79,7 +134,7 @@ Where motherN is a new trait that is just a numerical recoding of the mothers (e
 
 ### 7) How to optimize the number of progeny to produce per cross
 
-The advice here is to upload the phased genotypes (haplotypes) to the AlphaSimR machinery and simulate the possible crosses to explore how many individuals are required to sample a given trait (oligogenic or polygenic) with a given probablility.
+The advice here is to upload directly the phased genotypes (haplotypes) to the AlphaSimR machinery and simulate the possible crosses to explore how many individuals are required to sample a given trait (oligogenic or polygenic) with a given probablility. No need to use the evola package.
 
 ## Literature
 

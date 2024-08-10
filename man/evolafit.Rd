@@ -14,7 +14,7 @@ evolafit(formula, dt,
      nCrosses=50, nProgeny=40,nGenerations=30, recombGens=1,
      nQTLperInd=1, A=NULL, lambda=1,
      propSelBetween=1,propSelWithin=0.5,
-     fitnessf=NULL)
+     fitnessf=NULL, dateWarning=TRUE)
 
 }
 
@@ -63,13 +63,16 @@ A numeric value between 0 and 1 indicating the proportion of families/crosses th
 A numeric value between 0 and 1 indicating the proportion of individuals within families/crosses that should be selected.
 }
   \item{fitnessf}{
-An alternative named list defining the fitness function for a given trait. If NULL the default function will be xa - lam * x'Ax where x is the contribution vector to the solution, a are the original values assigned to the trait, and A is the covariance between solutions.
+An alternative named list defining the fitness function for a given trait. If NULL the default function will be xa - (lam * x'Ax) where x is the contribution vector to the solution, a are the original values assigned to the trait-merit, and A is the covariance between solutions.
+}
+  \item{dateWarning}{
+A logical value indicating if you should be warned when there is a new version on CRAN.
 }
 
 }
 \details{
 
-Using the AlphaSimR machinery (runMacs) it recreates the evolutionary forces applied to a problem where possible solutions replace individuals and combinations of variables in the problem replace the genes. Then evolutionary forces are applied to find a close-to-optimal solution. The number of solutions are controlled with the nCrosses and nProgeny parameters, whereas the number of initial combinations present for the classifier/genes is controlled by the nQTLperInd parameter. The drift force can be controlled by the recombGens parameter.
+Using the AlphaSimR machinery (runMacs) it recreates the evolutionary forces applied to a problem where possible solutions replace individuals and combinations of variables in the problem replace the genes. Then evolutionary forces are applied to find a close-to-optimal solution. The number of solutions are controlled with the nCrosses and nProgeny parameters, whereas the number of initial combinations present for the classifier/genes is controlled by the nQTLperInd parameter. This of course will increase if has an effect in the fitness. The drift force can be controlled by the recombGens parameter.
 
 }
 \value{

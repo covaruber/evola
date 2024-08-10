@@ -6,6 +6,6 @@ import("methods")
 importFrom("stats", "as.formula")
 importFrom("graphics", "legend", "par")
 
-export( "evolafit", "pmonitor", "pareto")
+export( "evolafit", "pmonitor", "pareto", "varM", "bestSol", "A.mat")
 
 
