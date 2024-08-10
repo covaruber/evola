@@ -57,6 +57,7 @@ A platform for meta-analysis of rice crop data. \emph{Plant Physiology} \bold{13
 }
 \examples{
 
+# example to optimize a training pop for a validation pop
 data(DT_wheat)
 DT <- as.data.frame(DT_wheat)
 DT$id <- rownames(DT) # IDs

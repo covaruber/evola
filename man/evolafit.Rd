@@ -12,7 +12,7 @@ Using the AlphaSimR machinery it recreates the evolutionary forces applied to a 
 evolafit(formula, dt, 
      constraintsUB, constraintsLB, traitWeight,
      nCrosses=50, nProgeny=40,nGenerations=30, recombGens=1,
-     nQTLperInd=1, A=NULL, lambda=1,
+     nQTLperInd=NULL, A=NULL, lambda=NULL,
      propSelBetween=1,propSelWithin=0.5,
      fitnessf=NULL, dateWarning=TRUE)
 
@@ -27,13 +27,13 @@ Formula of the form y~x where 'y' refers to the traits or features involved in s
 A dataset containing the features and classifiers.
 }
   \item{constraintsUB}{
-A numeric vector specifying the upper bound constraints in the traits/features (y). The length is equal to the number of traits/features. 
+A numeric vector specifying the upper bound constraints in the traits/features (y). The length is equal to the number of traits/features. If missing is assume infinite for all traits.
 }
   \item{constraintsLB}{
-A numeric vector specifying the lower bound constraints in the traits/features (y). The length is equal to the number of traits/features. 
+A numeric vector specifying the lower bound constraints in the traits/features (y). The length is equal to the number of traits/features. If missing is assume minus infinite for all traits.
 }
   \item{traitWeight}{
-A numeric vector specifying the weights that each trait has in the final selection index. The length is equal to the number of traits/features.
+A numeric vector specifying the weights that each trait has in the final selection index. The length is equal to the number of traits/features. If missing is assumed equal weight for all traits.
 }
   \item{nCrosses}{
 A numeric value indicating how many crosses should occur in the population of solutions at every generation.
@@ -48,13 +48,13 @@ The number of generations that the evolutionary process should run for.
 The number of recombination generations that should occur before selection is applied. This is in case the user wants to allow for more recombination before selection operates.
 }
   \item{nQTLperInd}{
-The number of levels corresponding to the classifier (x) that should show up as present at the begginning of the simulation. See details section.
+The number of levels corresponding to the classifier (x) that should show up as present at the begginning of the simulation. If not specified it will be equal to the number of rows in the dataset/4. See details section.
 }
   \item{A}{
 A relationship matrix between the levels of the classifier variable (x).
 }
   \item{lambda}{
-A numeric value indicating the weight assigned to the relationship between levels of the classifiers with respect to the selection index.
+A numeric value indicating the weight assigned to the relationship between levels of the classifiers with respect to the selection index. If not specified is assumed to be 0.
 }
   \item{propSelBetween}{
 A numeric value between 0 and 1 indicating the proportion of families/crosses that should be selected.

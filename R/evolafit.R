@@ -1,7 +1,7 @@
 evolafit <- function(formula, dt, 
                  constraintsUB, constraintsLB, traitWeight,
                  nCrosses=50, nProgeny=40,nGenerations=30, recombGens=1,
-                 nQTLperInd=1, A=NULL, lambda=1,
+                 nQTLperInd=NULL, A=NULL, lambda=NULL,
                  propSelBetween=1,propSelWithin=0.5,
                  fitnessf=NULL, verbose=TRUE, dateWarning=TRUE){
   
@@ -18,6 +18,7 @@ evolafit <- function(formula, dt,
   elements <- strsplit(as.character(formula), split = "[+]")#[[1]]
   elements <- lapply(elements[-c(1)], function(x){all.vars(as.formula(paste("~",x)))})
   traits <- elements[[1]]
+  if(!all(traits%in%colnames(dt))){stop("Specified traits are not traits in the dataset. Please correct.", call. = FALSE)}
   # add the fitness function (current options are xa=-1 to ln>=0 )
   if(is.null(fitnessf)){fitnessf <- rep( list( function(xa, xtAx.lam, dt, pop, Q, alpha){xa - xtAx.lam} ), length(traits)) ; names(fitnessf) <- traits }else{
     if(is.list(fitnessf)){
@@ -28,11 +29,16 @@ evolafit <- function(formula, dt,
   };  fitnessf <- fitnessf[traits]
   classifiers <- elements[[2]]
   # print(classifiers)
+  if(missing(constraintsUB)){constraintsUB <- rep(Inf,length(traits))}
   if(length(constraintsUB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
+  if(missing(constraintsLB)){constraintsLB <- rep(-Inf,length(traits))}
   if(length(constraintsLB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
+  if(missing(traitWeight)){traitWeight <- rep(1,length(traits))}
   if(length(traitWeight) != length(traits)){stop(paste0("Weights need to have the same length than traits (",length(traits),")"), call. = FALSE)}
+  if(is.null(lambda)){lambda <- rep(0, length(traits))}
   if(length(lambda) != length(traits)){stop(paste0("Lambda need to have the same length than traits (",length(traits),")"), call. = FALSE)}
   if(is.null(A)){A <- diag(nrow(dt))}
+  if(is.null(nQTLperInd)){nQTLperInd <- nrow(dt)/4}
   
   # 1) initialize the population with customized haplotypes to ensure a single QTL per individual
   haplo = matrix(0, nrow=nrow(dt)*2, ncol = nrow(dt)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )

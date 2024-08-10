@@ -33,10 +33,11 @@ Chen GK, Marjoram P, Wall JD (2009). Fast and Flexible Simulation of DNA Sequenc
 
 data(DT_technow)
 DT <- DT_technow
+DT$occ <- 1; DT$occ[1]=0
 M <- M_technow
 
 \donttest{
-  A <- M\%*\%t(M)
+  A <- A.mat(M)
   # run the genetic algorithm
   res<-evolafit(formula = c(GY, occ)~hy,
                 dt= DT, 
@@ -49,12 +50,12 @@ M <- M_technow
                 # population parameters
                 nCrosses = 100, nProgeny = 10, 
                 # coancestry parameters
-                A=A, lambda=c(0.4,0), nQTLperInd = 10, 
+                A=A, lambda=c(0.4,0), nQTLperInd = 70, 
                 # selection parameters
-                propSelBetween = 0.9, propSelWithin =0.9, 
+                propSelBetween = 0.5, propSelWithin =0.5, 
                 nGenerations = 20) 
   
-  best = which(res$pheno[,1]==max(res$pheno[,1]))[1];best
+  best = bestSol(res)[1]
   xa = (res$M \%*\% DT$GY)[best,]; xa 
   xAx = res$M[best,] \%*\% A \%*\% res$M[best,]; xAx 
   sum(res$M[best,]) # total # of inds selected
