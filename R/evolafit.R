@@ -37,8 +37,8 @@ evolafit <- function(formula, dt,
   if(length(traitWeight) != length(traits)){stop(paste0("Weights need to have the same length than traits (",length(traits),")"), call. = FALSE)}
   if(is.null(lambda)){lambda <- rep(0, length(traits))}
   if(length(lambda) != length(traits)){stop(paste0("Lambda need to have the same length than traits (",length(traits),")"), call. = FALSE)}
-  if(is.null(A)){A <- diag(nrow(dt))}
-  if(is.null(nQTLperInd)){nQTLperInd <- nrow(dt)/4}
+  if(is.null(A)){A <- Matrix::Diagonal(nrow(dt))}
+  if(is.null(nQTLperInd)){nQTLperInd <- nrow(dt)/5}
   
   # 1) initialize the population with customized haplotypes to ensure a single QTL per individual
   haplo = matrix(0, nrow=nrow(dt)*2, ncol = nrow(dt)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )
@@ -90,9 +90,10 @@ evolafit <- function(formula, dt,
       pop <- setPheno(pop=pop, h2=rep(0.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0))  # ignore h2 since we will replace it in line 90
     }
     Q <- pullQtlGeno(pop, simParam = SP, trait = iTrait)  # plot((apply(Q,2,sum)/2)/nrow(Q))  # plot((apply(Q,1,sum)/2)/ncol(Q))
+    Q <- as(Q, Class = "dgCMatrix")
     xtAx <- diag(Q%*%A%*%t(Q))
     # calculate base coancestry Ct
-    m <- matrix(1,nrow=1,ncol=ncol(A))
+    m <- Matrix::Matrix(1,nrow=1,ncol=ncol(A))
     mAmt <- as.vector(m%*%A%*%t(m)/(4*(ncol(A)^2)))
     # rate of coancestry xtAx/4p^2 - mtAm/4n^2
     deltaC <- ( (xtAx/(4*(apply(Q/2,1,sum)^2))) - mAmt)/(1-mAmt)
@@ -100,13 +101,13 @@ evolafit <- function(formula, dt,
     if((max(xtAx)-min(xtAx)) > 0){ 
       xtAx = (xtAx-min(xtAx))/(max(xtAx)-min(xtAx)) # standardized xAx
     }
-    for(iTrait in 1:length(traits)){ # iTrait=5
+    for(iTrait in 1:length(traits)){ # iTrait=1
       xa <- Q %*% SP$traits[[iTrait]]@addEff
       if((max(xa)-min(xa)) > 0){ # if there is variation
         xa = (xa-min(xa))/(max(xa)-min(xa)) # standardized xa
       }
       xtAx.lam = xtAx * lambda[iTrait]
-      pop@pheno[,iTrait] <- do.call(fitnessf[[iTrait]], list(dt=dt, xa=xa, xtAx.lam=xtAx.lam, pop=pop, Q=Q, alpha=alpha)) # xa - (lambda[iTrait] * xtAx ) # breeding value + coancestry
+      pop@pheno[,iTrait] <- as.vector( do.call(fitnessf[[iTrait]], list(dt=dt, xa=xa, xtAx.lam=xtAx.lam, pop=pop, Q=Q, alpha=alpha)) ) # xa - (lambda[iTrait] * xtAx ) # breeding value + coancestry
       # we only apply constraints to traits that will account for the total merit
       if(traitWeight[iTrait] != 0){ # if the trait will be used for selection
         ## pass each trait through all constraints
@@ -144,8 +145,8 @@ evolafit <- function(formula, dt,
       xaFinal[[kk]] <- Q %*% SP$traits[[1]]@addEff
     }
     score <- do.call(cbind, xaFinal) %*% traitWeight
-    indivPerformance[[j]] <- data.frame(score=score,deltaC=deltaC, xtAx=xtAx, generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
-    averagePerformance[j,] <- c( mean(score), max(score) , mean(diag(Q%*%A%*%t(Q))),  mean(apply(Q/2,1,sum)), mean(deltaC) ) # save summaries of performance
+    indivPerformance[[j]] <- data.frame(score=as.vector(score),deltaC=as.vector(deltaC), xtAx=as.vector(xtAx), generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
+    averagePerformance[j,] <- c( mean(score), max(score) , mean(xtAx),  mean(apply(Q/2,1,sum)), mean(deltaC) ) # save summaries of performance
   }
   # 7) retrieve output of best combinations
   M <- pullQtlGeno(pop, simParam = SP, trait=1); M <- M/2

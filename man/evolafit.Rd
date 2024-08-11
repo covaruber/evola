@@ -48,7 +48,7 @@ The number of generations that the evolutionary process should run for.
 The number of recombination generations that should occur before selection is applied. This is in case the user wants to allow for more recombination before selection operates.
 }
   \item{nQTLperInd}{
-The number of levels corresponding to the classifier (x) that should show up as present at the begginning of the simulation. If not specified it will be equal to the number of rows in the dataset/4. See details section.
+The number of levels corresponding to the classifier (x) that should show up as present at the begginning of the simulation. If not specified it will be equal to the number of rows in the dataset/5. See details section.
 }
   \item{A}{
 A relationship matrix between the levels of the classifier variable (x).
@@ -145,11 +145,10 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                nGenerations = 50
 ) 
 
-best = which(res0$pheno[,2]==max(res0$pheno[,2]))[1];best
+best = bestSol(res0)[2]
 xa = res0$M[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); xa
 
 res0$M[best,]
-apply(res0$M,1,sum)
 res0$score[nrow(res0$score),]
 
 # $`Genes`
@@ -165,7 +164,7 @@ res0$score[nrow(res0$score),]
  \dontrun{
 
 pmonitor(res0)
-pareto(res)
+pareto(res0)
   
 }
 
