@@ -1,7 +1,9 @@
 pmonitor <- function(object,...){
   x <- object$score#[,"Best.xa"]
-  mmin <- min(c(0, x[,"Average.xa"]))
-  mmax <- max(c( x[,"Best.xa"], x[,"Average.xAx"] ) )
+  x2 <- x[which(x[,"Average.xa"] < Inf & x[,"Average.xa"] > -Inf),"Average.xa"]
+  x3 <- x[which(x[,"Best.xa"] < Inf & x[,"Best.xa"] > -Inf),"Best.xa"]
+  mmin <- min(c(0, x2))
+  mmax <- max(c( x3, x2 ) )
   plot(x[,1], type="o", ylim=c(mmin,mmax), xlab="Generation", ylab="Value")
   if(ncol(x) > 1){
     for(i in 2:ncol(x)){

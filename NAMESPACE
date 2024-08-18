@@ -1,10 +1,14 @@
 
 import("AlphaSimR")
+import("Matrix")
 import("crayon")
 import("methods")
 
-importFrom("stats", "as.formula")
-importFrom("graphics", "legend", "par")
+importFrom("grDevices", "as.raster", "col2rgb", "colorRampPalette",
+             "rgb")
+importFrom("graphics", "axis", "grid", "layout", "lines", "points",
+             "rasterImage", "text", "legend", "par")
+importFrom("stats", "na.omit", "quantile", "var", "as.formula")
 
 export( "evolafit", "pmonitor", "pareto", "varM", "bestSol", "A.mat")
 

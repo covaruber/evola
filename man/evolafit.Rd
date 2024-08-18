@@ -14,7 +14,7 @@ evolafit(formula, dt,
      nCrosses=50, nProgeny=40,nGenerations=30, recombGens=1,
      nQTLperInd=NULL, A=NULL, lambda=NULL,
      propSelBetween=1,propSelWithin=0.5,
-     fitnessf=NULL, dateWarning=TRUE)
+     fitnessf=NULL, verbose=TRUE, dateWarning=TRUE)
 
 }
 
@@ -64,6 +64,9 @@ A numeric value between 0 and 1 indicating the proportion of individuals within 
 }
   \item{fitnessf}{
 An alternative named list defining the fitness function for a given trait. If NULL the default function will be xa - (lam * x'Ax) where x is the contribution vector to the solution, a are the original values assigned to the trait-merit, and A is the covariance between solutions.
+}
+  \item{verbose}{
+A logical value indicating if we should print logs.
 }
   \item{dateWarning}{
 A logical value indicating if you should be warned when there is a new version on CRAN.

@@ -4,7 +4,7 @@
 \description{\code{plot} for monitoring.
 }
 \usage{
-pareto(object, scaled=TRUE,pch=20, xlim=c(-.3,0), \dots)
+pareto(object, scaled=TRUE,pch=20, xlim, \dots)
 }
 \arguments{
  \item{object}{model object of class \code{"evolafit"}}
