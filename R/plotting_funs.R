@@ -39,7 +39,7 @@ pareto <- function(object, scaled=TRUE, pch=20, xlim, ...){
   }else{dt2$Average.xa <- dt2$Average.xa/dt2$nQTL.mu  }
   colfunc <- colorRampPalette(c("plum1", "plum4"))
   
-  layout(matrix(1:2,ncol=2), width = c(2,1),height = c(1,1))
+  layout(matrix(1:2,ncol=2), widths = c(2,1),heights = c(1,1))
   # left plot
   if(!scaled){ylabName="Maximum gain (units)"}else{ylabName="Maximum gain (%)"}
   dt$color <- transp(colfunc(max(dt$generation))[dt$generation], alpha = 0.4)
