@@ -91,10 +91,17 @@ evolafit <- function(formula, dt,
     }
     Q <- pullQtlGeno(pop, simParam = SP, trait = iTrait)  # plot((apply(Q,2,sum)/2)/nrow(Q))  # plot((apply(Q,1,sum)/2)/ncol(Q))
     Q <- as(Q, Class = "dgCMatrix")
-    xtAx <- diag(Q%*%A%*%t(Q))
+    # print(str(Q))
+    # print(str(A%*%t(Q)))
+    # print(apply(Q,1,sum))
+    # print(t(Q))
+    xtAx <- Matrix::diag(Q%*%Matrix::tcrossprod(A,Q))
+    # print(xtAx)
+    # xtAx <- diag(Q%*%tcrossprod(A,Q))
+    # print(xtAx)
     # calculate base coancestry Ct
     m <- Matrix::Matrix(1,nrow=1,ncol=ncol(A))
-    mAmt <- as.vector(m%*%A%*%t(m)/(4*(ncol(A)^2)))
+    mAmt <- as.vector((m%*%Matrix::tcrossprod(A,m))/(4*(ncol(A)^2)))
     # rate of coancestry xtAx/4p^2 - mtAm/4n^2
     deltaC <- ( (xtAx/(4*(apply(Q/2,1,sum)^2))) - mAmt)/(1-mAmt)
     # if there is variation in min and max values in xtAx standardize
@@ -146,7 +153,7 @@ evolafit <- function(formula, dt,
     }
     score <- do.call(cbind, xaFinal) %*% traitWeight
     indivPerformance[[j]] <- data.frame(score=as.vector(score),deltaC=as.vector(deltaC), xtAx=as.vector(xtAx), generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
-    averagePerformance[j,] <- c( mean(score), max(score) , mean(xtAx),  mean(apply(Q/2,1,sum)), mean(deltaC) ) # save summaries of performance
+    averagePerformance[j,] <- c( mean(score,na.rm=TRUE), max(score,na.rm=TRUE) , mean(xtAx,na.rm=TRUE),  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
   }
   # 7) retrieve output of best combinations
   M <- pullQtlGeno(pop, simParam = SP, trait=1); M <- M/2
