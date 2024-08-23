@@ -10,7 +10,7 @@ evolafit <- function(formula, dt,
   ## if your month is greater than my month you are outdated
   if(dateWarning & verbose){
     if (your.date > my.date) {
-      cat("Version out of date. Please update evola to the newest version using:\ninstall.packages('evola') in a new session\n Use the 'dateWarning' argument to disable the warning message.")
+      warning("Version out of date. Please update evola to the newest version using:\ninstall.packages('evola') in a new session\n Use the 'dateWarning' argument to disable the warning message.", call. = FALSE)
     }
   }
   
