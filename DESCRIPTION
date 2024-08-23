@@ -7,7 +7,7 @@ Authors@R: c(
 	comment=c(ORCID="0000-0002-7194-3837"))
 	)
 Maintainer: Giovanny Covarrubias-Pazaran <cova_ruber@live.com.mx>
-Description: Runs a genetic algorithm using the 'AlphaSimR' machinery from Gaynor et al. (2021) <doi:10.1093/g3journal/jkaa017> and the coalescent simulator 'MaCS' from Chen et al. (2009) <doi:10.1101/gr.083634.108>.
+Description: Runs a genetic algorithm using the 'AlphaSimR' machinery from Gaynor (2021) <doi:10.1093/g3journal/jkaa017> and the coalescent simulator 'MaCS' from Chen (2009) <doi:10.1101/gr.083634.108>.
 Depends: R(>= 3.5.0), AlphaSimR (>= 1.4.2), Matrix (>= 1.0), methods, crayon
 LazyLoad: yes
 LazyData: yes

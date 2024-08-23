@@ -5,6 +5,8 @@ pmonitor <- function(object,...){
   mmin <- min(c(0, x2))
   mmax <- max(c( x3, x2 ) )
   plot(x[,1], type="o", ylim=c(mmin,mmax), xlab="Generation", ylab="Value")
+  oldpar <- par(no.readonly = TRUE) # code line i
+  on.exit(par(oldpar)) # code line i + 1
   if(ncol(x) > 1){
     for(i in 2:ncol(x)){
       par(new=TRUE)
@@ -39,6 +41,9 @@ pareto <- function(object, scaled=TRUE, pch=20, xlim, ...){
   }else{dt2$Average.xa <- dt2$Average.xa/dt2$nQTL.mu  }
   colfunc <- colorRampPalette(c("plum1", "plum4"))
   
+  oldpar <- par(no.readonly = TRUE) # code line i
+  on.exit(par(oldpar)) # code line i + 1
+  
   layout(matrix(1:2,ncol=2), widths = c(2,1),heights = c(1,1))
   # left plot
   if(!scaled){ylabName="Maximum gain (units)"}else{ylabName="Maximum gain (%)"}
@@ -56,5 +61,5 @@ pareto <- function(object, scaled=TRUE, pch=20, xlim, ...){
   plot(c(0,2),c(0, max(dt$generation) ),type = 'n', axes = F,xlab = '', ylab = '', main = 'Generation')
   text(x=1.5, y = seq(min(dt$generation),max(dt$generation),l=5), labels = seq(max(dt$generation),min(dt$generation),l=5) )
   rasterImage(legend_image, 0, 0, 1, max(dt$generation) )
-  par(mfrow=c(1,1))
+  # par(mfrow=c(1,1))
 }

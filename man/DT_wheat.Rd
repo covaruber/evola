@@ -65,9 +65,9 @@ DT$occ <- 1; DT$occ[1]=0 # to track occurrences
 DT$dummy <- 1; DT$dummy[1]=0 # dummy trait
 
 # if genomic
-# GT <- GT_wheat + 1; rownames(GT) <- rownames(DT)
-# A <-  GT\%*\%t(GT)
-# A <- A/mean(diag(A))
+GT <- GT_wheat + 1; rownames(GT) <- rownames(DT)
+G <-  GT\%*\%t(GT)
+G <- G/mean(diag(G))
 # if pedigree
 A <- A_wheat
 A[1:4,1:4]
@@ -101,8 +101,7 @@ res<-evolafit(cbind(cov, occ)~id, dt= DT2,
               # population parameters
               nCrosses = 100, nProgeny = 10, 
               # coancestry parameters
-              A=As,
-              lambda=c(1,0), nQTLperInd = 80, 
+              A=As, lambda=c(1,0), nQTLperInd = 80, 
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
               nGenerations = 30, verbose = TRUE) 

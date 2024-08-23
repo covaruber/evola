@@ -49,6 +49,7 @@ Gems <- data.frame(
 )
 head(Gems)
 
+ \donttest{
 # Task: Gem selection. 
 # Aim: Get highest combined value.
 # Restriction: Max weight of the gem combined = 10. 
@@ -69,6 +70,7 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
 ) 
 
 varM(res0)
+}
 
 }
 \seealso{\code{\link{evolafit}} -- the core function of the package }

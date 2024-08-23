@@ -161,15 +161,10 @@ res0$score[nrow(res0$score),]
 # $Result
 # Weight  Value 
 # 8.74  32.10 
-
- }
- 
- \dontrun{
-
 pmonitor(res0)
 pareto(res0)
-  
-}
+
+ }
 
 }
 \seealso{\code{\link{evolafit}} -- the information of the package }
