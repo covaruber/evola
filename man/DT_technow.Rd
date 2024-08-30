@@ -39,6 +39,7 @@ M <- M_technow
 \donttest{
   A <- A.mat(M)
   # run the genetic algorithm
+  # we assig a weight to x'Ax of (20*pi)/180=0.34
   res<-evolafit(formula = c(GY, occ)~hy,
                 dt= DT, 
                 # constraints: if sum is greater than this ignore
@@ -50,7 +51,7 @@ M <- M_technow
                 # population parameters
                 nCrosses = 100, nProgeny = 10, 
                 # coancestry parameters
-                A=A, lambda=c(0.4,0), nQTLperInd = 70, 
+                A=A, lambda=c( (20*pi)/180 ,0), nQTLperInd = 70, 
                 # selection parameters
                 propSelBetween = 0.5, propSelWithin =0.5, 
                 nGenerations = 20) 

@@ -5,7 +5,7 @@
 Fits a genetic algorithm for a set of traits and constraints.
 }
 \description{
-Using the AlphaSimR machinery it recreates the evolutionary forces applied to a problem where possible solutions replace individuals and combinations of variables in the problem replace the genes. Then evolutionary forces are applied to find a close-to-optimal solution. 
+Using the AlphaSimR machinery it recreates the evolutionary forces applied to a problem where possible solutions replace individuals and combinations of variables in the problem replace the genes or QTLs. Then evolutionary forces (mutation, selection and drift) are applied to find a close-to-optimal solution. 
 }
 \usage{
 
@@ -21,16 +21,16 @@ evolafit(formula, dt,
 \arguments{
 
   \item{formula}{
-Formula of the form y~x where 'y' refers to the traits or features involved in selecting or putting constraints to the solutions, and 'x'refers to the classifiers of the problem to define the chromosome regions.
+Formula of the form y~x where 'y' refers to the traits or features defining the average allelic substitution effects of the QTLs, and 'x'refers to the variable defining the genes or QTLs to be combined in the possible solutions.
 }
   \item{dt}{
-A dataset containing the features and classifiers.
+A dataset containing the features/traits and classifiers/genes/QTLs.
 }
   \item{constraintsUB}{
-A numeric vector specifying the upper bound constraints in the traits/features (y). The length is equal to the number of traits/features. If missing is assume infinite for all traits.
+A numeric vector specifying the upper bound constraints in the traits/features (y). The length is equal to the number of traits/features. If missing is assume an infinite value for all traits. Solutions with higher value than the upper bound are assigned a -infinite value which is equivalent to reject the solution when the fitness is calculated.
 }
   \item{constraintsLB}{
-A numeric vector specifying the lower bound constraints in the traits/features (y). The length is equal to the number of traits/features. If missing is assume minus infinite for all traits.
+A numeric vector specifying the lower bound constraints in the traits/features (y). The length is equal to the number of traits/features. If missing is assume minus infinite value for all traits. Solutions with lower value than the lower bound are assigned an infinite value which is equivalent to reject the solution when the fitness is calculated.
 }
   \item{traitWeight}{
 A numeric vector specifying the weights that each trait has in the final selection index. The length is equal to the number of traits/features. If missing is assumed equal weight for all traits.
@@ -39,7 +39,7 @@ A numeric vector specifying the weights that each trait has in the final selecti
 A numeric value indicating how many crosses should occur in the population of solutions at every generation.
 }
   \item{nProgeny}{
-A numeric value indicating how many progeny each cross should generate in the population of solutions at every generation.
+A numeric value indicating how many progeny (solutions) each cross should generate in the population of solutions at every generation.
 }
   \item{nGenerations}{
 The number of generations that the evolutionary process should run for.
@@ -48,10 +48,10 @@ The number of generations that the evolutionary process should run for.
 The number of recombination generations that should occur before selection is applied. This is in case the user wants to allow for more recombination before selection operates.
 }
   \item{nQTLperInd}{
-The number of levels corresponding to the classifier (x) that should show up as present at the begginning of the simulation. If not specified it will be equal to the number of rows in the dataset/5. See details section.
+The number of QTLs/genes (classifier x) that should be fixed for the positive allele at the begginning of the simulation. If not specified it will be equal to the 20\% of the QTLs (number of rows in the dt over 5). See details section.
 }
   \item{A}{
-A relationship matrix between the levels of the classifier variable (x).
+A relationship matrix between the levels of the classifier variable (x) or QTLs (not between the solutions). It would be a kind of linkage disequilibrium matrix.
 }
   \item{lambda}{
 A numeric value indicating the weight assigned to the relationship between levels of the classifiers with respect to the selection index. If not specified is assumed to be 0.
@@ -63,7 +63,7 @@ A numeric value between 0 and 1 indicating the proportion of families/crosses th
 A numeric value between 0 and 1 indicating the proportion of individuals within families/crosses that should be selected.
 }
   \item{fitnessf}{
-An alternative named list defining the fitness function for a given trait. If NULL the default function will be xa - (lam * x'Ax) where x is the contribution vector to the solution, a are the original values assigned to the trait-merit, and A is the covariance between solutions.
+An alternative named list defining the fitness function for a given trait. If NULL the default function will be xa - (lam * x'Ax) where x is the contribution vector to the solution, a are the original values assigned to the trait-merit, and A is the covariance between QTLs.
 }
   \item{verbose}{
 A logical value indicating if we should print logs.

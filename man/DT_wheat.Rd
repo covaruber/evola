@@ -91,6 +91,7 @@ DT2$cov <- apply(A[tp,vp],1,mean)
 head(DT2)
 
 \donttest{
+# we assign a weight to x'Ax of (60*pi)/180=1
 res<-evolafit(cbind(cov, occ)~id, dt= DT2, 
               # constraints: if sum is greater than this ignore 
               constraintsUB = c(Inf, 100), 
@@ -101,7 +102,7 @@ res<-evolafit(cbind(cov, occ)~id, dt= DT2,
               # population parameters
               nCrosses = 100, nProgeny = 10, 
               # coancestry parameters
-              A=As, lambda=c(1,0), nQTLperInd = 80, 
+              A=As, lambda=c( (60*pi)/180 ,0), nQTLperInd = 80, 
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
               nGenerations = 30, verbose = TRUE) 
