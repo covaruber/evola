@@ -27,12 +27,6 @@ evolafit <- function(formula, dt,
       }
       return(Y %*% b - d)
     }
-    # fitnessf <- rep( list( function(xa, xtAx.lam, dt, pop, Q, alpha){xa - xtAx.lam} ), length(traits)) ; names(fitnessf) <- traits }else{
-    # if(is.list(fitnessf)){
-    #   for(iTrait in traits){if(iTrait %in% names(fitnessf)){}else{fitnessf <- c(fitnessf, function(xa, xtAx.lam, dt, pop, Q, alpha){xa - xtAx.lam} ); names(fitnessf)[length(fitnessf)] <- iTrait}}
-    # }else{
-    #   stop("The argument fitnessf should be a list of functions", call. = FALSE)
-    # }
   };  #fitnessf <- fitnessf[traits]
   classifiers <- elements[[2]]
   # check that the user has provided a single value for each QTL
@@ -87,11 +81,9 @@ evolafit <- function(formula, dt,
   ################################
   ################################
   ## FOR GENERATION
-  
   for (j in 1:nGenerations) { # for each generation we breed # j=1
     if(verbose){message(paste("generation",j))}
     if(j > 1){
-      
       # group relationship
       xtAx <- Matrix::diag(Q%*%Matrix::tcrossprod(A,Q))
       # calculate base coancestry Ct
@@ -100,34 +92,30 @@ evolafit <- function(formula, dt,
       # rate of coancestry xtAx/4p^2 - mtAm/4n^2
       deltaC <- ( (xtAx/(4*(apply(Q/2,1,sum)^2))) - mAmt)/(1-mAmt)
       # if there is variation in min and max values in xtAx standardize
-      # if(mapping){
       if((max(xtAx)-min(xtAx)) > 0){ 
         xtAx = (xtAx-min(xtAx))/(max(xtAx)-min(xtAx)) # standardized xAx
       }
-      # }
       ## apply selection between and within
       xtAx.lam = xtAx * lambda#[iTrait]
       names(xtAx.lam) <- pop@id
-      # fit <- (pop@pheno %*% traitWeight) - xtAx.lam
-      # pick <- which(pop@id %in% names(xtAx.lam))
-      best <- selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  b=traitWeight, d=xtAx.lam[pop@id], use = "pheno", simParam = SP, selectTop=selectTop,... )
+      if(j == 2){
+        best <- selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  b=traitWeight, d=xtAx.lam[pop@id], use = "pheno", simParam = SP, selectTop=selectTop,... )
+      }else{
+        best <- c(best, selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  b=traitWeight, d=xtAx.lam[pop@id], use = "pheno", simParam = SP, selectTop=selectTop,... ))
+      }
       popF <- selectFam(pop=pop,nFam = round(nCrosses*propSelBetween), trait = fitnessf, b=traitWeight,d=xtAx.lam[pop@id], use = "pheno", simParam = SP,selectTop=selectTop,...)
       popW <- selectWithinFam(pop = pop, nInd = round(nProgeny*propSelWithin), trait = fitnessf,  b=traitWeight,d=xtAx.lam[pop@id], use = "pheno", simParam = SP,selectTop=selectTop,...)
       selected <- intersect(popF@id,popW@id)
       pop <- pop[which(pop@id %in% selected)]
       ## create new progeny
       for(k in 1:recombGens){
-        # pop0<-pop
         pop <- randCross(pop=pop, nCrosses = nCrosses, nProgeny = nProgeny, simParam = SP)
       }
-      # if(carryParents){pop <- c(pop,pop0)}
       pop <- makeDH(pop=pop, nDH = 1, simParam = SP)
-      # pop <- c(pop,best)
       ## compute constrained traits
       pop <- setPheno(pop=pop, h2=rep(0.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0))  # ignore h2 since we will replace it in line 90
     }
-    # extract solutions for the trait 1 because all traits have the same QTLs, 
-    
+    # extract solutions for the trait 1 because all traits have the same QTLs
     Q <- pullQtlGeno(pop, simParam = SP, trait = 1)  #
     Q <- as(Q, Class = "dgCMatrix")
     constCheckUB <- constCheckLB <- matrix(1, nrow=nrow(Q), ncol=length(traits))
@@ -138,12 +126,9 @@ evolafit <- function(formula, dt,
     for(iTrait in 1:length(traits)){ # iTrait=1
       xaOr <- Q %*% SP$traits[[iTrait]]@addEff # solutions * alpha for the iTrait
       xaFinal[[iTrait]] <- xaOr
-      # if(mapping){
       if((max(xaOr)-min(xaOr)) > 0){ # if there is variation
         xa = (xaOr-min(xaOr))/(max(xaOr)-min(xaOr)) # standardized xa
       }
-      # }else{xa = xaOr}
-      
       # calculate the genetic value of solutions using the objective functions
       pop@pheno[,iTrait] <- xa[,1] # as.vector( do.call(fitnessf[[iTrait]], list(dt=dt, xa=xa, xtAx.lam=xtAx.lam, pop=pop, Q=Q, alpha=alpha,...)) ) # xa - (lambda[iTrait] * xtAx ) # breeding value + coancestry
       
@@ -162,7 +147,6 @@ evolafit <- function(formula, dt,
     if(length(didntMetConst)>0){ # 
       for(iTrait in 1:length(traits)){
         pop <- pop[setdiff(1:nInd(pop),didntMetConst)]
-        # pop@pheno[didntMetConst,iTrait] <- -min(pop@pheno[didntMetConst,iTrait], na.rm=TRUE)#mean(pop@pheno[which(!is.nan(pop@pheno[,iTrait])),iTrait], na.rm=TRUE)
       }
     }
     #  remove individuals that break the constraints LB
@@ -172,13 +156,13 @@ evolafit <- function(formula, dt,
     if(length(didntMetConst)>0){
       for(iTrait in 1:length(traits)){
         pop <- pop[setdiff(1:nInd(pop),didntMetConst)]
-        # pop@pheno[didntMetConst,iTrait] <- max(pop@pheno[didntMetConst,iTrait], na.rm=TRUE)#mean(pop@pheno[which(!is.nan(pop@pheno[,iTrait])),iTrait], na.rm=TRUE)
       }
     }
     #store the performance of the jth generation for plot functions
     score <- do.call(cbind, xaFinal) %*% traitWeight
+    
     if(j > 1){
-      indivPerformance[[j]] <- data.frame(score=as.vector(score),deltaC=as.vector(deltaC), xtAx=as.vector(xtAx), generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
+      indivPerformance[[j]] <- data.frame(score=as.vector(score),deltaC= as.vector(deltaC) , xtAx= as.vector(xtAx), generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
       averagePerformance[j,] <- c( mean(score,na.rm=TRUE), max(score,na.rm=TRUE) , mean(xtAx,na.rm=TRUE),  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
     }
   }# end of for each generation
@@ -187,8 +171,9 @@ evolafit <- function(formula, dt,
   ################################
   # 7) retrieve output of best combinations
   M <- pullQtlGeno(pop, simParam = SP, trait=1); M <- M/2
+  Mb <- pullQtlGeno(best, simParam = SP, trait=1); Mb <- Mb/2
   colnames(M) <- apply(data.frame(dt[,classifiers]),1,function(x){paste(x,collapse = "_")})
   indivPerformance <- do.call(rbind, indivPerformance)
-  return(list(M=M, score=averagePerformance, pheno=pop@pheno, pop=pop, indivPerformance=indivPerformance, constCheckUB=constCheckUB, constCheckLB=constCheckLB))
+  return(list(M=M, Mb=Mb, score=averagePerformance, pheno=pop@pheno,phenoBest=best@pheno, pop=pop, best=best, indivPerformance=indivPerformance, constCheckUB=constCheckUB, constCheckLB=constCheckLB))
 }
 

@@ -24,6 +24,7 @@ The vignettes aim to provide several examples in how to use the evola package un
   4a) gender
   4b) number of times a parent should be used
 5) How to optimize the number of progeny to produce per cross
+6) Predictive model using GA
 
 Because of CRAN requirements I will only run few generations but please when you run your analysis let it run for many generations.
 
@@ -160,7 +161,7 @@ The way to specify this problem is exactly the same than with the optimization o
                 # coancestry parameters
                 A=A, lambda= (20*pi)/180 , nQTLperInd = 100, 
                 # selection parameters
-                propSelBetween = 0.9, propSelWithin =0.9, 
+                propSelBetween = 0.5, propSelWithin =0.5, 
                 nGenerations = 10, verbose=FALSE) 
 best = bestSol(res)[1]
 sum(res$M[best,]) # total # of inds selected
@@ -315,6 +316,71 @@ B) Create a new trait that is computed on the fly while runing the analysis wher
 ```
 
 Where motherN is a new trait that is just a numerical recoding of the mothers (e.g., as.numeric(as.factor(dt$mother)) ). This new fitness function for the trait motherN can be added to the 'fitnessf' argument together with a constraint (e.g., constraintsLB=1) to ensure that only crosses that meet the number of times showing in a cross are among the selected candidates.
+
+### 6) Predictive model using GA
+
+The following example show how the genetic algorithm can be tweeked to do a predictive model of the type of of a linear regression.
+
+```{r}
+data("mtcars")
+mtcars <- as.data.frame(apply(mtcars,2,scale))
+mtcars$inter <- 1
+head(mtcars)
+# relationship between the 2 variables
+plot(mpg~hp, data=mtcars)
+mod <- lm(mpg~hp, data=mtcars);mod
+
+# create initial QTL effects
+a <- seq(-1,1,.1);a
+dt <- as.data.frame(expand.grid(a,a))
+colnames(dt) <- paste0("alpha",1:ncol(dt))
+dt$qtl=paste0("Q",1:nrow(dt))
+dt$inter<-1
+dt$count <- 1; dt$count[1] <- 0
+head(dt)
+
+# create n samples equivalent to the number of progeny
+# you are planning to simulate (e.g., 1000)
+sam <- sample(1:nrow(mtcars),1000,replace = TRUE)
+y <- mtcars$mpg[sam]
+one <- rep(1,length(y))
+x <- mtcars$hp[sam]
+x2 <- mtcars$hp[sam]^2
+X <- cbind(one,x)
+plot(x,y)
+# Task: linear regression
+res0<-evolafit(formula=cbind(alpha1,alpha2)~qtl, dt= dt,
+               # constraints: if greater than this ignore
+               constraintsUB = c(Inf,Inf), 
+               # constraints: if smaller than this ignore
+               constraintsLB= c(-Inf,-Inf), 
+               # weight the traits for the selection
+               traitWeight = c(1,1), 
+               # population parameters
+               nCrosses = 100, nProgeny = 10, recombGens = 1, 
+               # coancestry parameters
+               A=NULL, lambda=0, nQTLperInd = 1, 
+               fitnessf=function(Y,b,d,x,y){ ( y - apply( X*Y,1,sum ) )^2 },
+               # selection parameters
+               propSelBetween = 0.5, propSelWithin =0.5, selectTop=FALSE,
+               nGenerations = 20, dateWarning=TRUE, y=y, x=x
+) 
+
+# develop a joint fitness function that uses all traits
+
+pmonitor(res0)
+# this time the best solution is the one that minimizes the error
+error = ( stan(y) - apply( X*res0$pheno,1,sum ) )^2
+best=which(error == min(error))[1]
+xa=res0$M[best,] %*% as.matrix(dt[,c("inter","alpha1")]); xa
+
+plot( as.matrix(mtcars[,c("inter","hp")]) %*% t(xa)  , mtcars$mpg) # GA
+plot( (mtcars$hp * mod$coefficients[2] ) + mod$coefficients[1] , mtcars$mpg) # LM
+
+cor( as.matrix(mtcars[,c("inter","hp")]) %*% t(xa)  , mtcars$mpg) # GA
+cor( (mtcars$hp * mod$coefficients[2] ) + mod$coefficients[1] , mtcars$mpg) # LM
+
+```
 
 ### 7) How to optimize the number of progeny to produce per cross
 

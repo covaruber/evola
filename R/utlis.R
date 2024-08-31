@@ -27,6 +27,10 @@ varM <- function(object){
   sum(apply(object$M,2,var, na.rm=TRUE))
 }
 
+stan <- function(x){
+  (x-min(x))/(max(x)-min(x))
+}
+
 bestSol <- function(object, selectTop=TRUE){
   apply(object$pheno,2,function(y){
     yg <- y[which( y < Inf)]
