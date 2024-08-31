@@ -10,6 +10,6 @@ importFrom("graphics", "axis", "grid", "layout", "lines", "points",
              "rasterImage", "text", "legend", "par")
 importFrom("stats", "na.omit", "quantile", "var", "as.formula")
 
-export( "evolafit", "pmonitor", "pareto", "varM", "bestSol", "A.mat", "stan")
+export( "evolafit", "pmonitor", "pareto", "varM", "bestSol", "A.mat", "stan", "Jc", "Jr")
 
 
