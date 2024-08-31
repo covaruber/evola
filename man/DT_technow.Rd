@@ -56,7 +56,7 @@ M <- M_technow
                 propSelBetween = 0.5, propSelWithin =0.5, 
                 nGenerations = 20) 
   
-  best = bestSol(res)[1]
+  best = bestSol(res)["pop","GY"]
   xa = (res$M \%*\% DT$GY)[best,]; xa 
   xAx = res$M[best,] \%*\% A \%*\% res$M[best,]; xAx 
   sum(res$M[best,]) # total # of inds selected

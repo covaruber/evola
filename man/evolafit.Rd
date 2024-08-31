@@ -158,7 +158,7 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                nGenerations = 50
 ) 
 
-best = bestSol(res0)[2]
+best = bestSol(res0)["pop","Value"]
 xa = res0$M[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); xa
 
 res0$M[best,]

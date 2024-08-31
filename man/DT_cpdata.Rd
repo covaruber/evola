@@ -50,7 +50,7 @@ res<-evolafit(cbind(Yield, occ)~id, dt= DT,
               propSelBetween = 0.5, propSelWithin =0.5, 
               nGenerations = 40) 
 
-best = bestSol(res)[1];best
+best = bestSol(res)["pop","Yield"];best
 xa = (res$M \%*\% DT$Yield)[best,]; xa 
 xAx = res$M[best,] \%*\% A \%*\% res$M[best,]; xAx 
 sum(res$M[best,]) # total # of inds selected

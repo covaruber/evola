@@ -108,7 +108,7 @@ res<-evolafit(cbind(cov, occ)~id, dt= DT2,
               nGenerations = 30, verbose = TRUE) 
 
 
-best <- bestSol(res)[1]
+best <- bestSol(res)["pop","cov"]
 sum(res$M[best,]) # total # of inds selected
 pareto(res)
 }

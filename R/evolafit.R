@@ -180,6 +180,6 @@ evolafit <- function(formula, dt,
   Mb <- pullQtlGeno(best, simParam = SP, trait=1); Mb <- Mb/2
   colnames(M) <- apply(data.frame(dt[,classifiers]),1,function(x){paste(x,collapse = "_")})
   indivPerformance <- do.call(rbind, indivPerformance)
-  return(list(M=M, Mb=Mb, score=averagePerformance, pheno=pop@pheno,phenoBest=best@pheno, pop=pop, best=best, indivPerformance=indivPerformance, constCheckUB=constCheckUB, constCheckLB=constCheckLB))
+  return(list(M=M, Mb=Mb, score=averagePerformance, pheno=pop@pheno,phenoBest=best@pheno, pop=pop, best=best, indivPerformance=indivPerformance, constCheckUB=constCheckUB, constCheckLB=constCheckLB, traits=traits))
 }
 
