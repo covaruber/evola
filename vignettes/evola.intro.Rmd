@@ -64,7 +64,7 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                # population parameters
                nCrosses = 100, nProgeny = 20, recombGens = 1, 
                # coancestry parameters
-               A=NULL, lambda=c(0,0), nQTLperInd = 1, 
+               A=NULL, lambda=0, nQTLperInd = 1, 
                # selection parameters
                propSelBetween = .9, propSelWithin =0.9, 
                nGenerations = 30, verbose = FALSE
@@ -109,7 +109,7 @@ res<-evolafit(cbind(Yield, occ)~id, dt= DT,
               # population parameters
               nCrosses = 100, nProgeny = 10, 
               # coancestry parameters
-              A=A, lambda=c(0.5,0), nQTLperInd = 2, 
+              A=A, lambda= (30*pi)/180 , nQTLperInd = 2, 
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
               nGenerations = 20, verbose=FALSE) 
@@ -158,7 +158,7 @@ The way to specify this problem is exactly the same than with the optimization o
                 # population parameters
                 nCrosses = 100, nProgeny = 10, 
                 # coancestry parameters
-                A=A, lambda=c(0.3,0), nQTLperInd = 100, 
+                A=A, lambda= (20*pi)/180 , nQTLperInd = 100, 
                 # selection parameters
                 propSelBetween = 0.9, propSelWithin =0.9, 
                 nGenerations = 10, verbose=FALSE) 
@@ -233,7 +233,7 @@ res<-evolafit(cbind(dummy, occ)~id, dt= DT2,
                 nCrosses = 100, nProgeny = 10, 
                 # coancestry parameters
                 A=As,
-                lambda=c(1,0), nQTLperInd = 80, 
+                lambda=(60*pi)/180, nQTLperInd = 80, 
                 # selection parameters
                 propSelBetween = 0.5, propSelWithin =0.5, 
                 nGenerations = 15, verbose = FALSE)
@@ -274,7 +274,7 @@ res<-evolafit(cbind(cov, occ)~id, dt= DT2,
                 nCrosses = 100, nProgeny = 10, 
                 # coancestry parameters
                 A=As,
-                lambda=c(1,0), nQTLperInd = 80, 
+                lambda=(60*pi)/180, nQTLperInd = 80, 
                 # selection parameters
                 propSelBetween = 0.5, propSelWithin =0.5, 
                 nGenerations = 15, verbose = FALSE)

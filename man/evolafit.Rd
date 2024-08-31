@@ -14,7 +14,8 @@ evolafit(formula, dt,
      nCrosses=50, nProgeny=40,nGenerations=30, recombGens=1,
      nQTLperInd=NULL, A=NULL, lambda=NULL,
      propSelBetween=1,propSelWithin=0.5,
-     fitnessf=NULL, verbose=TRUE, dateWarning=TRUE)
+     fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
+     selectTop=TRUE, ...)
 
 }
 
@@ -63,7 +64,12 @@ A numeric value between 0 and 1 indicating the proportion of families/crosses th
 A numeric value between 0 and 1 indicating the proportion of individuals within families/crosses that should be selected.
 }
   \item{fitnessf}{
-An alternative named list defining the fitness function for a given trait. If NULL the default function will be xa - (lam * x'Ax) where x is the contribution vector to the solution, a are the original values assigned to the trait-merit, and A is the covariance between QTLs.
+An alternative fitness function for a linear combination of the traits. If NULL the default function will be:
+
+function(Y,b,d){(Y\%*\%b) - d}
+
+where Y\%*\%b is equivalent to xa, and d is equal to x'Ax, where x is the contribution vector to the solution, a are the QTL values, and A is the covariance between QTLs. If you provide your own fitness function please keep in mind that the variables Y, b and d are already taken.
+
 }
   \item{verbose}{
 A logical value indicating if we should print logs.
@@ -71,6 +77,10 @@ A logical value indicating if we should print logs.
   \item{dateWarning}{
 A logical value indicating if you should be warned when there is a new version on CRAN.
 }
+  \item{selectTop}{
+Selects highest values for the fitness value if TRUE. Selects lowest values if FALSE.
+}
+\item{\dots}{Further arguments to be passed to the fitness function.}
 
 }
 \details{
@@ -142,7 +152,7 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                # population parameters
                nCrosses = 100, nProgeny = 20, recombGens = 1, 
                # coancestry parameters
-               A=NULL, lambda=c(0,0), nQTLperInd = 1, 
+               A=NULL, lambda=0, nQTLperInd = 1, 
                # selection parameters
                propSelBetween = .9, propSelWithin =0.9, 
                nGenerations = 50

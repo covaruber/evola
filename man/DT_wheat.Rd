@@ -102,7 +102,7 @@ res<-evolafit(cbind(cov, occ)~id, dt= DT2,
               # population parameters
               nCrosses = 100, nProgeny = 10, 
               # coancestry parameters
-              A=As, lambda=c( (60*pi)/180 ,0), nQTLperInd = 80, 
+              A=As, lambda= (60*pi)/180 , nQTLperInd = 80, 
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
               nGenerations = 30, verbose = TRUE) 

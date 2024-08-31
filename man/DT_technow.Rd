@@ -51,7 +51,7 @@ M <- M_technow
                 # population parameters
                 nCrosses = 100, nProgeny = 10, 
                 # coancestry parameters
-                A=A, lambda=c( (20*pi)/180 ,0), nQTLperInd = 70, 
+                A=A, lambda= (20*pi)/180 , nQTLperInd = 70, 
                 # selection parameters
                 propSelBetween = 0.5, propSelWithin =0.5, 
                 nGenerations = 20) 

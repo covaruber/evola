@@ -27,11 +27,15 @@ varM <- function(object){
   sum(apply(object$M,2,var, na.rm=TRUE))
 }
 
-bestSol <- function(object){
+bestSol <- function(object, selectTop=TRUE){
   apply(object$pheno,2,function(y){
-    y <- y[which( y < Inf)]
-    y <- y[which( y > -Inf)]
-    best = which(y==max(y,na.rm=TRUE))[1]
+    yg <- y[which( y < Inf)]
+    yg <- yg[which( yg > -Inf)]
+    if(selectTop){
+      best = which(y==max(yg,na.rm=TRUE))[1]
+    }else{
+      best = which(y==min(yg,na.rm=TRUE))[1]
+    }
     return(best)
   })
 } 
