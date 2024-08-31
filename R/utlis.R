@@ -31,6 +31,14 @@ stan <- function(x){
   (x-min(x))/(max(x)-min(x))
 }
 
+Jc <- function(nc){
+  matrix(1,nrow=1,ncol=nc)
+}
+
+Jr <- function(nr){
+  matrix(1,nrow=nr,ncol=1)
+}
+
 bestSol <- function(object, selectTop=TRUE){
   apply(object$pheno,2,function(y){
     yg <- y[which( y < Inf)]
