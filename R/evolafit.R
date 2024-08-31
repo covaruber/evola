@@ -99,12 +99,12 @@ evolafit <- function(formula, dt,
       xtAx.lam = xtAx * lambda#[iTrait]
       names(xtAx.lam) <- pop@id
       if(j == 2){
-        best <- selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  b=traitWeight, d=xtAx.lam[pop@id], use = "pheno", simParam = SP, selectTop=selectTop,... )
+        suppressWarnings( best <- selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  b=traitWeight, d=xtAx.lam[pop@id], use = "pheno", simParam = SP, selectTop=selectTop,... ), classes = "warning")
       }else{
-        best <- c(best, selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  b=traitWeight, d=xtAx.lam[pop@id], use = "pheno", simParam = SP, selectTop=selectTop,... ))
+        best <- c(best, suppressWarnings( selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  b=traitWeight, d=xtAx.lam[pop@id], use = "pheno", simParam = SP, selectTop=selectTop,... ), classes = "warning")  )
       }
-      popF <- selectFam(pop=pop,nFam = round(nCrosses*propSelBetween), trait = fitnessf, b=traitWeight,d=xtAx.lam[pop@id], use = "pheno", simParam = SP,selectTop=selectTop,...)
-      popW <- selectWithinFam(pop = pop, nInd = round(nProgeny*propSelWithin), trait = fitnessf,  b=traitWeight,d=xtAx.lam[pop@id], use = "pheno", simParam = SP,selectTop=selectTop,...)
+      suppressWarnings( popF <- selectFam(pop=pop,nFam = round(nCrosses*propSelBetween), trait = fitnessf, b=traitWeight,d=xtAx.lam[pop@id], use = "pheno", simParam = SP,selectTop=selectTop,...), classes = "warning")
+      suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = round(nProgeny*propSelWithin), trait = fitnessf,  b=traitWeight,d=xtAx.lam[pop@id], use = "pheno", simParam = SP,selectTop=selectTop,...), classes = "warning")
       selected <- intersect(popF@id,popW@id)
       pop <- pop[which(pop@id %in% selected)]
       ## create new progeny
