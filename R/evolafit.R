@@ -99,12 +99,18 @@ evolafit <- function(formula, dt,
       xtAx.lam = xtAx * lambda#[iTrait]
       names(xtAx.lam) <- pop@id
       if(j == 2){
-        suppressWarnings( best <- selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  b=traitWeight, d=xtAx.lam[pop@id], use = "pheno", simParam = SP, selectTop=selectTop,... ), classes = "warning")
+        suppressWarnings( best <- selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  
+                          b=traitWeight, d=xtAx.lam[pop@id], use = "pheno", simParam = SP, selectTop=selectTop, ...), classes = "warning")
       }else{
-        best <- c(best, suppressWarnings( selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  b=traitWeight, d=xtAx.lam[pop@id], use = "pheno", simParam = SP, selectTop=selectTop,... ), classes = "warning")  )
+        best <- c(best, suppressWarnings( selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  
+                                  b=traitWeight, d=xtAx.lam[pop@id], use = "pheno", simParam = SP, selectTop=selectTop, ...), classes = "warning")  )
+       
       }
-      suppressWarnings( popF <- selectFam(pop=pop,nFam = round(nCrosses*propSelBetween), trait = fitnessf, b=traitWeight,d=xtAx.lam[pop@id], use = "pheno", simParam = SP,selectTop=selectTop,...), classes = "warning")
-      suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = round(nProgeny*propSelWithin), trait = fitnessf,  b=traitWeight,d=xtAx.lam[pop@id], use = "pheno", simParam = SP,selectTop=selectTop,...), classes = "warning")
+      suppressWarnings( popF <- selectFam(pop=pop,nFam = round(nCrosses*propSelBetween), trait = fitnessf, 
+                        b=traitWeight,d=xtAx.lam[pop@id], use = "pheno", simParam = SP,selectTop=selectTop,...), classes = "warning")
+      suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = round(nProgeny*propSelWithin), 
+                              trait = fitnessf,  b=traitWeight,d=xtAx.lam[pop@id], use = "pheno", simParam = SP,
+                              selectTop=selectTop,...), classes = "warning")
       selected <- intersect(popF@id,popW@id)
       pop <- pop[which(pop@id %in% selected)]
       ## create new progeny
