@@ -40,7 +40,6 @@ Giovanny Covarrubias-Pazaran (2024).  evola: a simple evolutionary algorithm for
 x <- rnorm(20, 10, 3);x
 stan(x)
 
-}
 
 }
 \seealso{\code{\link{evolafit}} -- the core function of the package }
