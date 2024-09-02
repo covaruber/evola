@@ -21,10 +21,7 @@ evolafit <- function(formula, dt,
   if(!all(traits%in%colnames(dt))){stop("Specified traits are not traits in the dataset. Please correct.", call. = FALSE)}
   # add the fitness function (current options are xa=-1 to ln>=0 )
   if(is.null(fitnessf)){
-    fitnessf <-function (Y, b, d, scale = FALSE) {
-      if (scale) {
-        return(scale(Y) %*% b - d)
-      }
+    fitnessf <-function (Y, b, d, Q) {
       return(Y %*% b - d)
     }
   };  #fitnessf <- fitnessf[traits]
@@ -49,7 +46,7 @@ evolafit <- function(formula, dt,
   for (i in 1:nrow(haplo)) {
     haplo[i,sample(1:ncol(haplo), nQTLperInd )] <- 1
   }
-  colnames(haplo) = paste0("H", 1:ncol(haplo))
+  colnames(haplo) = dt[,classifiers]#paste0("H", 1:ncol(haplo))
   genMap = data.frame(markerName=colnames(haplo),
                       chromosome=1,
                       position=1:ncol(haplo))
@@ -81,6 +78,7 @@ evolafit <- function(formula, dt,
   ################################
   ################################
   ## FOR GENERATION
+  # SP <<- SP
   for (j in 1:nGenerations) { # for each generation we breed # j=1
     if(verbose){message(paste("generation",j))}
     if(j > 1){
@@ -100,16 +98,15 @@ evolafit <- function(formula, dt,
       names(xtAx.lam) <- pop@id
       if(j == 2){
         suppressWarnings( best <- selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  
-                          b=traitWeight, d=xtAx.lam[pop@id], use = "pheno", simParam = SP, selectTop=selectTop, ...), classes = "warning")
+                          b=traitWeight, d=xtAx.lam[pop@id], Q=Q[pop@id,], use = "pheno", simParam = SP, selectTop=selectTop, ...), classes = "warning")
       }else{
         best <- c(best, suppressWarnings( selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  
-                                  b=traitWeight, d=xtAx.lam[pop@id], use = "pheno", simParam = SP, selectTop=selectTop, ...), classes = "warning")  )
-       
+                                  b=traitWeight, d=xtAx.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP, selectTop=selectTop, ...), classes = "warning")  )
       }
       suppressWarnings( popF <- selectFam(pop=pop,nFam = round(nCrosses*propSelBetween), trait = fitnessf, 
-                        b=traitWeight,d=xtAx.lam[pop@id], use = "pheno", simParam = SP,selectTop=selectTop,...), classes = "warning")
+                        b=traitWeight,d=xtAx.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,selectTop=selectTop,...), classes = "warning")
       suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = round(nProgeny*propSelWithin), 
-                              trait = fitnessf,  b=traitWeight,d=xtAx.lam[pop@id], use = "pheno", simParam = SP,
+                              trait = fitnessf,  b=traitWeight,d=xtAx.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,
                               selectTop=selectTop,...), classes = "warning")
       selected <- intersect(popF@id,popW@id)
       pop <- pop[which(pop@id %in% selected)]
@@ -122,8 +119,10 @@ evolafit <- function(formula, dt,
       pop <- setPheno(pop=pop, h2=rep(0.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0))  # ignore h2 since we will replace it in line 90
     }
     # extract solutions for the trait 1 because all traits have the same QTLs
-    Q <- pullQtlGeno(pop, simParam = SP, trait = 1)  #
+    Q <- pullQtlGeno(pop, simParam = SP, trait = 1)  
+    # print(Q[1:4,1:4])
     Q <- as(Q, Class = "dgCMatrix")
+    rownames(Q) <- pop@id
     constCheckUB <- constCheckLB <- matrix(1, nrow=nrow(Q), ncol=length(traits))
     xaFinal <- list()
     ################################

@@ -300,22 +300,72 @@ In this case is better if you only create the cross combinations that are possib
 
 #### Number of times a parent should be used
 
-In this case you would need to do 2 things:
+In this case you can modify the fitness function to set to a low value the fitness of solutions that have used too many times the same parent. Using the DT_technow dataset this would be done the following way:
 
-A) Create two new column with the mother and father of the cross
-B) Create a new trait that is computed on the fly while runing the analysis where the trait is a representation of how many times the parent is present in the current contribution. For example the trait function can be defined for mother as:
+First you create an incidence matrix for parents in columns and hybrids in crosses:
 
 ```{r}
-# data$motherN <- as.numeric(as.factor(data$mother))
-# data$fatherN <- as.numeric(as.factor(data$father))
-# fitnessf <- list(motherN= function(motherN,fatherN){
-# v = table(c(motherN,fatherN))
-# res <- ifelse(any(v > 4), 0, 1)
-# return(res)
-# })
+data(DT_technow)
+DT <- DT_technow
+DT$occ <- 1; DT$occ[1]=0
+M <- M_technow
+A <- A.mat(M)
+
+Z=with(DT,sommer::overlay(dent,flint) )#  Matrix::sparse.model.matrix(~dent-1, data=DT)
+rownames(Z) <- DT$hy # needed to link to the QTL matrix
 ```
 
-Where motherN is a new trait that is just a numerical recoding of the mothers (e.g., as.numeric(as.factor(dt$mother)) ). This new fitness function for the trait motherN can be added to the 'fitnessf' argument together with a constraint (e.g., constraintsLB=1) to ensure that only crosses that meet the number of times showing in a cross are among the selected candidates.
+the secons step is to create a new fitness function for the genetic algorithm. Our objective function to be maximized is normally of the form Yb - d, where Y is the trait values, b is the trait weights, and d is the group relationship x'Ax. We then are going to put some additional constrait that parents of the crosses can't show up more than twice. This can be done in the following way:
+
+```{r}
+# regular fitness function
+fitnessf <-function (Y, b, d, Q, Z) {
+  fit <- Y %*% b - d
+  return(fit)
+}
+# new fitness function with constraint
+fitnessf <-function (Y, b, d, Q, Z) {
+  X=Q%*%Z[colnames(Q),]
+  bad <- which(apply(X,1,sum) > 2)
+  fit <- Y %*% b - d
+  if(length(bad) > 0){fit[bad,1]=min(fit[,1])}
+  return(fit)
+}
+```
+
+Notice that we have added a matrix product Q%*%Z to see how may times each parent is used in the proposed solution of crosses. The next step would be to provide the new fitness function to the evolafit() function and the additional argument Z which is the overlay matrix formed in the first chunck of code:
+
+```{r}
+res<-evolafit(formula = c(GY, occ)~hy,
+              dt= DT, 
+              # constraints: if sum is greater than this ignore
+              constraintsUB = c(Inf,50), 
+              # constraints: if sum is smaller than this ignore
+              constraintsLB= c(-Inf,-Inf),
+              # weight the traits for the selection
+              traitWeight = c(1,0), 
+              # population parameters
+              nCrosses = 100, nProgeny = 10, 
+              # coancestry parameters
+              # fitnessf = fitnessf, Z=Z,
+              A=A, lambda= (10*pi)/180 , nQTLperInd = 40, 
+              # selection parameters
+              propSelBetween = 0.5, propSelWithin =0.5, 
+              nGenerations = 15) 
+
+best = bestSol(res)["pop","GY"]
+xa = (res$M %*% DT$GY)[best,]; xa 
+xAx = res$M[best,] %*% A %*% res$M[best,]; xAx 
+sum(res$M[best,]) # total # of inds selected
+```
+
+Now, last but not least we check how many times each parent was used:
+
+```{r}
+# check how many times an individual was used in the final crosses
+crosses <- data.frame(cross=names(which( res$M[best,] == 1)))
+table(unlist(strsplit(crosses$cross,":")))
+```
 
 ### 6) Predictive model using GA
 
