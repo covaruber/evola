@@ -66,9 +66,9 @@ A numeric value between 0 and 1 indicating the proportion of individuals within 
   \item{fitnessf}{
 An alternative fitness function for a linear combination of the traits. If NULL the default function will be:
 
-function(Y,b,d){(Y\%*\%b) - d}
+function(Y,b,d,Q){(Y\%*\%b) - d}
 
-where Y\%*\%b is equivalent to xa, and d is equal to x'Ax, where x is the contribution vector to the solution, a are the QTL values, and A is the covariance between QTLs. If you provide your own fitness function please keep in mind that the variables Y, b and d are already taken.
+where Y\%*\%b is equivalent to xa, and d is equal to x'Ax, where x is the contribution vector to the solution, a are the QTL values, and A is the covariance between QTLs, Q is the QTL matrix for the solution. If you provide your own fitness function please keep in mind that the variables Y, b, d and Q are already taken and should always be provided on top of what you need.
 
 }
   \item{verbose}{

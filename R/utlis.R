@@ -9,10 +9,10 @@
     stop("This package requires R 3.5.0 or later")
   if(interactive()) {
     packageStartupMessage(blue(paste("[]==================================================================[]")),appendLF=TRUE)
-    packageStartupMessage(blue(paste("[] Evolutionary Algorithm in R (evola) 1.0.1 (2024-07)              []",sep="")),appendLF=TRUE)
+    packageStartupMessage(blue(paste("[] Evolutionary Algorithm in R (evola) 1.0.2 (2024-10)              []",sep="")),appendLF=TRUE)
     packageStartupMessage(paste0(blue("[] Author: Giovanny Covarrubias-Pazaran",paste0(bgGreen(white(" ")), bgWhite(magenta("*")), bgRed(white(" "))),"                        []")),appendLF=TRUE)
     packageStartupMessage(blue("[] Dedicated to the University of Chapingo and UW-Madison           []"),appendLF=TRUE)
-    # packageStartupMessage(blue("[] Type 'vignette('evola.intro')' for a short tutorial             []"),appendLF=TRUE)
+    packageStartupMessage(blue("[] Type 'vignette('evola.intro')' for a short tutorial              []"),appendLF=TRUE)
     packageStartupMessage(blue(paste("[]==================================================================[]")),appendLF=TRUE)
     packageStartupMessage(blue("evola is updated on CRAN every 4-months due to CRAN policies"),appendLF=TRUE)
     packageStartupMessage(blue("Source code is available at https://github.com/covaruber/evola"),appendLF=TRUE)

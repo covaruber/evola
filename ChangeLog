@@ -1,10 +1,14 @@
 2024-07-20 Giovanny Covarrubias Pazaran <cova_ruber@live.com.mx>
 
       * [r1] Initial release: brining  a simple genetic algorithm for complex problems.
+      
+2024-08-20 Giovanny Covarrubias Pazaran <cova_ruber@live.com.mx>
+
+      * [r2] Improve to have a single fitness function across traits. More efficient matrix operations. Additional examples for how to do regression and add contraints.
+      
 
 
 ## TO DO
 + Add the mutation and crossover rate to the parameters of the function (mutRateGenome and ??).
 + Not only allow the posibility of mutation in the genome, but also in the addtive effects (mutRateTrait)
 + Is there any benefit in allowing ploidy? (e.g. more possible solutions)
-+ improve the regression approach

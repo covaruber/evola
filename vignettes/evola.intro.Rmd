@@ -351,7 +351,7 @@ res<-evolafit(formula = c(GY, occ)~hy,
               A=A, lambda= (10*pi)/180 , nQTLperInd = 40, 
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
-              nGenerations = 15) 
+              nGenerations = 15, verbose=FALSE) 
 
 best = bestSol(res)["pop","GY"]
 xa = (res$M %*% DT$GY)[best,]; xa 
@@ -375,7 +375,7 @@ The following example show how the genetic algorithm can be tweeked to do a pred
 data("mtcars")
 mtcars <- as.data.frame(apply(mtcars,2,scale))
 mtcars$inter <- 1
-head(mtcars)
+# head(mtcars)
 # relationship between the 2 variables
 plot(mpg~hp, data=mtcars)
 mod <- lm(mpg~hp, data=mtcars);mod
@@ -410,7 +410,8 @@ res0<-evolafit(formula=cbind(inter,alpha1)~qtl, dt= dt,
                nCrosses = 50, nProgeny = 10, recombGens = 1, 
                # coancestry parameters
                A=NULL, lambda=0, nQTLperInd = 1, 
-               fitnessf=function(Y,b,d,x,y){ apply(( (y%*%Jc(500)) - ( X%*%t(Y)) )^2,2,sum) },
+               # least MSE function (y - Xb)^2
+               fitnessf=function(Y,b,d,Q,x,y){ apply(( (y%*%Jc(500)) - ( X%*%t(Y)) )^2,2,sum) },
                # selection parameters
                propSelBetween = 0.5, propSelWithin =0.5, selectTop=FALSE,
                nGenerations = 20, y=y, x=x, verbose = FALSE
@@ -424,10 +425,13 @@ error = ( stan(y) - apply( X*res0$pheno,1,sum ) )^2
 best=which(error == min(error))[1]
 xa=res0$M[best,] %*% as.matrix(dt[,c("inter","alpha1")]); xa
 
-plot( as.matrix(mtcars[,c("inter","hp")]) %*% t(xa)  , mtcars$mpg) # GA
-plot( (mtcars$hp * mod$coefficients[2] ) + mod$coefficients[1] , mtcars$mpg) # LM
-
-cor( as.matrix(mtcars[,c("inter","hp")]) %*% t(xa)  , mtcars$mpg) # GA
+plot( as.matrix(mtcars[,c("inter","hp")]) %*% t(xa)  , mtcars$mpg,
+      main="Correlation between GA-prediction and observed") # GA
+plot( (mtcars$hp * mod$coefficients[2] ) + mod$coefficients[1] , mtcars$mpg,
+      main="Correlation between lm-prediction and observed") # LM
+# Correlation between GA-prediction and observed 
+cor( as.matrix(mtcars[,c("inter","hp")]) %*% t(xa)  , mtcars$mpg) 
+# Correlation between lm-prediction and observed
 cor( (mtcars$hp * mod$coefficients[2] ) + mod$coefficients[1] , mtcars$mpg) # LM
 
 ```
@@ -438,7 +442,7 @@ The advice here is to upload directly the phased genotypes (haplotypes) to the A
 
 ## Literature
 
-Giovanny Covarrubias-Pazaran (2024).  evola: a simple evolutionary algorithm for complex problems. To be submitted to Bioinformatics.
+Giovanny Covarrubias-Pazaran (2024).  evola: a simple evolutionary algorithm for optimization of complex problems. To be submitted to Bioinformatics.
 
 Gaynor, R. Chris, Gregor Gorjanc, and John M. Hickey. 2021. AlphaSimR: an R package for breeding program simulations. G3 Gene|Genomes|Genetics 11(2):jkaa017. https://doi.org/10.1093/g3journal/jkaa017.
 
