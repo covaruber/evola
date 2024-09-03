@@ -311,7 +311,7 @@ DT$occ <- 1; DT$occ[1]=0
 M <- M_technow
 A <- A.mat(M)
 
-Z=with(DT,sommer::overlay(dent,flint) )#  Matrix::sparse.model.matrix(~dent-1, data=DT)
+Z=with(DT,overlay(dent,flint) )#  Matrix::sparse.model.matrix(~dent-1, data=DT)
 rownames(Z) <- DT$hy # needed to link to the QTL matrix
 ```
 
