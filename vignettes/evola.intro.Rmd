@@ -326,7 +326,8 @@ fitnessf <-function (Y, b, d, Q, Z) {
 # new fitness function with constraint
 fitnessf <-function (Y, b, d, Q, Z) {
   X=Q%*%Z[colnames(Q),]
-  bad <- which(apply(X,1,sum) > 2)
+  bad <- as.vector( apply(X,1, function(x){length(which(x > 5))}) ) 
+  bad <- which(bad > 0)
   fit <- Y %*% b - d
   if(length(bad) > 0){fit[bad,1]=min(fit[,1])}
   return(fit)
@@ -347,8 +348,9 @@ res<-evolafit(formula = c(GY, occ)~hy,
               # population parameters
               nCrosses = 100, nProgeny = 10, 
               # coancestry parameters
-              # fitnessf = fitnessf, Z=Z,
               A=A, lambda= (10*pi)/180 , nQTLperInd = 40, 
+              # new fitness function and additional args
+              fitnessf = fitnessf, Z=Z,
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
               nGenerations = 15, verbose=FALSE) 
@@ -365,6 +367,9 @@ Now, last but not least we check how many times each parent was used:
 # check how many times an individual was used in the final crosses
 crosses <- data.frame(cross=names(which( res$M[best,] == 1)))
 table(unlist(strsplit(crosses$cross,":")))
+# check performance of crosses selected
+plot(DT$GY, col=as.factor(res$M[best,]), 
+       pch=(res$M[best,]*19)+1)
 ```
 
 ### 6) Predictive model using GA
