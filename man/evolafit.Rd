@@ -15,7 +15,7 @@ evolafit(formula, dt,
      nQTLperInd=NULL, A=NULL, lambda=NULL,
      propSelBetween=1,propSelWithin=0.5,
      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
-     selectTop=TRUE, tolVarG=1e-6, ...)
+     selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE, ...)
 
 }
 
@@ -83,8 +83,8 @@ Selects highest values for the fitness value if TRUE. Selects lowest values if F
   \item{tolVarG}{
 A stopping criteria when the variance across traits has been exhausted which is equivalent to solutions havving the same QTL profile. The default value is 1e-6 and is computed as the sum of the diagonal values of the genetic variance covariance matrix.
 }
-  \item{trace}{
-A logical value to indicate if we should store the matrices of solutions selected across iterations together with the pedigrees. This can be particularly useful when the optimization problem requires to keep track of the solutions to recreate the combination of solutions in practice (e.g., optimizing crossing paths to achieve a given combination).
+  \item{keepBest}{
+A TRUE/FALSE value to indicate if we should store the QTL matrix and pedigree of the solutions selected across generations. This can be useful if we want to recreate the path to the best solution (e.g., best crossing path to a product).
 }
 \item{\dots}{Further arguments to be passed to the fitness function.}
 

@@ -6,11 +6,16 @@
 
       * [r2] Improve to have a single fitness function across traits. More efficient matrix operations. Additional examples for how to do regression and add contraints.
       
+2024-09-25 Giovanny Covarrubias Pazaran <cova_ruber@live.com.mx>
+
+      * [r3] Added additional arguments for stopping criteria and to keepBest to trace the path to the best solution.
+      
 
 
 ## TO DO
 + Add to vignettes that inbreeding of the selected crosses can be used as surrogate to decide the size of the population (segregants)
-+ Enable an argument to trace back the selected solutions across generations (this can be particularly useful when finding crossing designs for product development)
 + Add the mutation and crossover rate to the parameters of the function (mutRateGenome and ??).
 + Not only allow the posibility of mutation in the genome, but also in the addtive effects (mutRateTrait)
++ Make a function that traces the pedigree of the best solution easily
 + Is there any benefit in allowing ploidy and heterozigosity? (e.g. more possible solutions)
+

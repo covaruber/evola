@@ -4,7 +4,7 @@ evolafit <- function(formula, dt,
                      nQTLperInd=NULL, A=NULL, lambda=NULL,
                      propSelBetween=1,propSelWithin=0.5,
                      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
-                     selectTop=TRUE, tolVarG=1e-6, trace=FALSE, ...){
+                     selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE, ...){
   
   my.date <- "2024-11-01"
   your.date <- Sys.Date()
@@ -81,7 +81,8 @@ evolafit <- function(formula, dt,
   # SP <<- SP
   j =0 # in 1:nGenerations
   nonStop=TRUE
-  traceM <- tracePed <- list()
+  pedBest <- list()
+  best <- pop[0]; pedBest <- data.frame(matrix(NA,nrow=0, ncol=4)); colnames(pedBest) <- c("id","mother","father","gen")
   while(nonStop) { # for each generation we breed # j=1
     j=j+1
     if(verbose){message(paste("generation",j))}
@@ -100,24 +101,17 @@ evolafit <- function(formula, dt,
       ## apply selection between and within
       xtAx.lam = xtAx * lambda#[iTrait]
       names(xtAx.lam) <- pop@id
-      if(j == 2){
-        suppressWarnings( best <- selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  
-                          b=traitWeight, d=xtAx.lam[pop@id], Q=Q[pop@id,], use = "pheno", simParam = SP, selectTop=selectTop, ...), classes = "warning")
-      }else{
-        best <- c(best, suppressWarnings( selectInd(pop=pop, nInd =min(c(10,nInd(pop))), trait = fitnessf,  
-                                  b=traitWeight, d=xtAx.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP, selectTop=selectTop, ...), classes = "warning")  )
-      }
       suppressWarnings( popF <- selectFam(pop=pop,nFam = round(nCrosses*propSelBetween), trait = fitnessf, 
-                        b=traitWeight,d=xtAx.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,selectTop=selectTop,...), classes = "warning")
+                                          b=traitWeight,d=xtAx.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,selectTop=selectTop,...), classes = "warning")
       suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = round(nProgeny*propSelWithin), 
-                              trait = fitnessf,  b=traitWeight,d=xtAx.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,
-                              selectTop=selectTop,...), classes = "warning")
+                                                trait = fitnessf,  b=traitWeight,d=xtAx.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,
+                                                selectTop=selectTop,...), classes = "warning")
       selected <- intersect(popF@id,popW@id)
       pop <- pop[which(pop@id %in% selected)]
       # solutions selected for tracing
-      if(trace){
-        Qtrace = as(pullQtlGeno(pop, simParam = SP, trait = 1) , Class = "dgCMatrix") 
-        pedTrace = data.frame(id=pop@id, mother=pop@mother, father=pop@father, gen=j)
+      if(keepBest){
+        best <- c(best, pop)
+        pedBest = rbind(pedBest, data.frame(id=pop@id, mother=pop@mother, father=pop@father, gen=j) )
       }
       ## create new progeny
       for(k in 1:recombGens){
@@ -181,7 +175,7 @@ evolafit <- function(formula, dt,
     }
     if(j == nGenerations){nonStop = FALSE}
     if(sum(diag(varG(pop = pop))) < tolVarG){nonStop = FALSE; message("Variance across traits exhausted. Early stop.")}
-    if(trace){if(j > 1){traceM[[j]] <- Qtrace; tracePed[[j]] <- pedTrace}}
+    # if(trace){if(j > 1){traceM[[j]] <- Qtrace; tracePed[[j]] <- pedTrace}}
   }# end of for each generation
   ################################
   ################################
@@ -193,6 +187,6 @@ evolafit <- function(formula, dt,
   indivPerformance <- do.call(rbind, indivPerformance)
   return(list(M=M, Mb=Mb, score=averagePerformance[1:j,], pheno=pop@pheno,phenoBest=best@pheno, pop=pop, best=best, 
               indivPerformance=indivPerformance, constCheckUB=constCheckUB, constCheckLB=constCheckLB,
-              traits=traits, traceM=do.call(rbind,traceM), tracePed=do.call(rbind, tracePed) ))
+              traits=traits, pedBest=pedBest ))
 }
 
