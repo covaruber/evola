@@ -9,6 +9,8 @@
 
 
 ## TO DO
++ Add to vignettes that inbreeding of the selected crosses can be used as surrogate to decide the size of the population (segregants)
++ Enable an argument to trace back the selected solutions across generations (this can be particularly useful when finding crossing designs for product development)
 + Add the mutation and crossover rate to the parameters of the function (mutRateGenome and ??).
 + Not only allow the posibility of mutation in the genome, but also in the addtive effects (mutRateTrait)
-+ Is there any benefit in allowing ploidy? (e.g. more possible solutions)
++ Is there any benefit in allowing ploidy and heterozigosity? (e.g. more possible solutions)

@@ -15,7 +15,7 @@ evolafit(formula, dt,
      nQTLperInd=NULL, A=NULL, lambda=NULL,
      propSelBetween=1,propSelWithin=0.5,
      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
-     selectTop=TRUE, ...)
+     selectTop=TRUE, tolVarG=1e-6, ...)
 
 }
 
@@ -80,6 +80,12 @@ A logical value indicating if you should be warned when there is a new version o
   \item{selectTop}{
 Selects highest values for the fitness value if TRUE. Selects lowest values if FALSE.
 }
+  \item{tolVarG}{
+A stopping criteria when the variance across traits has been exhausted which is equivalent to solutions havving the same QTL profile. The default value is 1e-6 and is computed as the sum of the diagonal values of the genetic variance covariance matrix.
+}
+  \item{trace}{
+A logical value to indicate if we should store the matrices of solutions selected across iterations together with the pedigrees. This can be particularly useful when the optimization problem requires to keep track of the solutions to recreate the combination of solutions in practice (e.g., optimizing crossing paths to achieve a given combination).
+}
 \item{\dots}{Further arguments to be passed to the fitness function.}
 
 }
@@ -93,10 +99,16 @@ Using the AlphaSimR machinery (runMacs) it recreates the evolutionary forces app
 \describe{
 
 \item{$M}{the matrix of haplotypes/solutions after selection.}
+\item{$Mb}{the matrix of the best parental haplotypes/solutions selected for new crosses in the next cycle.}
 \item{$score}{a matrix with scores for different metrics () across generations of evolution.}
 \item{$pheno}{the matrix of phenotypes of individuals/solutions present in the last generation.}
+\item{$phenoBest}{the matrix of phenotypes of individuals/solutions selected as parents across generations.}
 \item{indivPerformance}{the matrix of x'a, x'Ax, deltaC, nQTLs per solution per generation.}
 \item{pop}{AlphaSimR object used for the evolutionary algorithm.}
+\item{best}{AlphaSimR object corresponding to the best parental haplotypes/solutions selected for new crosses in the next cycle.}
+\item{traceM}{if the argument trace=TRUE this contains the selected solutions across iterations.}
+\item{tracePed}{if the argument trace=TRUE this contains the pedigree of the selected solutions across iterations.}
+\item{traits}{a character vector corresponding to the name of the variables used in the fitness function.}
 
 }
 

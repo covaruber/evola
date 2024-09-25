@@ -4,7 +4,7 @@ evolafit <- function(formula, dt,
                      nQTLperInd=NULL, A=NULL, lambda=NULL,
                      propSelBetween=1,propSelWithin=0.5,
                      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
-                     selectTop=TRUE, ...){
+                     selectTop=TRUE, tolVarG=1e-6, trace=FALSE, ...){
   
   my.date <- "2024-11-01"
   your.date <- Sys.Date()
@@ -79,7 +79,11 @@ evolafit <- function(formula, dt,
   ################################
   ## FOR GENERATION
   # SP <<- SP
-  for (j in 1:nGenerations) { # for each generation we breed # j=1
+  j =0 # in 1:nGenerations
+  nonStop=TRUE
+  traceM <- tracePed <- list()
+  while(nonStop) { # for each generation we breed # j=1
+    j=j+1
     if(verbose){message(paste("generation",j))}
     if(j > 1){
       # group relationship
@@ -110,6 +114,11 @@ evolafit <- function(formula, dt,
                               selectTop=selectTop,...), classes = "warning")
       selected <- intersect(popF@id,popW@id)
       pop <- pop[which(pop@id %in% selected)]
+      # solutions selected for tracing
+      if(trace){
+        Qtrace = as(pullQtlGeno(pop, simParam = SP, trait = 1) , Class = "dgCMatrix") 
+        pedTrace = data.frame(id=pop@id, mother=pop@mother, father=pop@father, gen=j)
+      }
       ## create new progeny
       for(k in 1:recombGens){
         pop <- randCross(pop=pop, nCrosses = nCrosses, nProgeny = nProgeny, simParam = SP)
@@ -170,6 +179,9 @@ evolafit <- function(formula, dt,
       indivPerformance[[j]] <- data.frame(score=as.vector(score),deltaC= as.vector(deltaC) , xtAx= as.vector(xtAx), generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
       averagePerformance[j,] <- c( mean(score,na.rm=TRUE), max(score,na.rm=TRUE) , mean(xtAx,na.rm=TRUE),  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
     }
+    if(j == nGenerations){nonStop = FALSE}
+    if(sum(diag(varG(pop = pop))) < tolVarG){nonStop = FALSE; message("Variance across traits exhausted. Early stop.")}
+    if(trace){if(j > 1){traceM[[j]] <- Qtrace; tracePed[[j]] <- pedTrace}}
   }# end of for each generation
   ################################
   ################################
@@ -179,6 +191,8 @@ evolafit <- function(formula, dt,
   Mb <- pullQtlGeno(best, simParam = SP, trait=1); Mb <- Mb/2
   colnames(M) <- apply(data.frame(dt[,classifiers]),1,function(x){paste(x,collapse = "_")})
   indivPerformance <- do.call(rbind, indivPerformance)
-  return(list(M=M, Mb=Mb, score=averagePerformance, pheno=pop@pheno,phenoBest=best@pheno, pop=pop, best=best, indivPerformance=indivPerformance, constCheckUB=constCheckUB, constCheckLB=constCheckLB, traits=traits))
+  return(list(M=M, Mb=Mb, score=averagePerformance[1:j,], pheno=pop@pheno,phenoBest=best@pheno, pop=pop, best=best, 
+              indivPerformance=indivPerformance, constCheckUB=constCheckUB, constCheckLB=constCheckLB,
+              traits=traits, traceM=do.call(rbind,traceM), tracePed=do.call(rbind, tracePed) ))
 }
 

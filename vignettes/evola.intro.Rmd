@@ -13,22 +13,22 @@ The evola package is nice wrapper of the AlphaSimR package that enables the use 
 
 The vignettes aim to provide several examples in how to use the evola package under different optimization scenarios. We will spend the rest of the space providing examples for: 
 
-1) Optimizing the selection of one feature with a constraint in other
-2) Obtaining a subsample of a population to maximize a feature while constraining the relationship between possibilities
-  2a) best parents for the next generation
-  2b) best crosses of the next generation
-3) Optimizing a subsample of size N to be representative
-  3a) Of its own
+1) Optimizing the selection of one feature with a constraint in another feature
+2) Obtaining an optimal subsample of a population to maximize a feature while constraining the relationship between individuals in the population
+  2a) best parents for the next generation in breeding
+  2b) best crosses of the next generation in breeding
+3) Optimizing a subsample of size N to be representative of:
+  3a) Of its own entire population
   3b) For another sample
-4) How to specify constraints:
-  4a) gender
-  4b) number of times a parent should be used
+4) How to specify constraints for additional traits/features:
+  4a) gender in breeding
+  4b) number of times a parent should be used in breeding
 5) How to optimize the number of progeny to produce per cross
-6) Predictive model using GA
+6) Customizing a fitness function (linear regression example)
 
 Because of CRAN requirements I will only run few generations but please when you run your analysis let it run for many generations.
 
-### 1) Optimizing the selection of one feature with a constraint in other
+### 1) Optimizing the selection of one feature with a constraint in another feature
 
 The example presented here is a list of gems (Color) that have different weights in Kg (Weight) and a given value (Value). 
 
@@ -49,7 +49,7 @@ Gems <- data.frame(
 head(Gems)
 ```
 
-The task to optimize here is to be able to pick in your bag all the possible gems that maximize the value with the contraint that your bag would break after 10Kg. In the evolafit function this would be specified as follows:
+The task to optimize here is to be able to pick in your bag all the possible gems (explanatory variable) that maximize the Value (response variable) with the constraint (Weight) that your bag would break after 10Kg. In the evolafit function this would be specified as follows:
 
 ```{r}
 # Task: Gem selection. 
@@ -70,25 +70,29 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                propSelBetween = .9, propSelWithin =0.9, 
                nGenerations = 30, verbose = FALSE
 ) 
+pmonitor(res0)
 ```
 
-Noticed that the formula cbind(Weight,Value)~Color specified the traits to be considered in the optimization problem are specified in the left side of the formula whereas the right side of the formula specifies the term corresponding to the genes that will form the 'genome' of the solution. Each trait in the formula requires a value for the contraints, weights in the fitness function (i.e., selection index) and lambda (weight for group relationship between the genes in the genome). The rest of the parameters are the parameters controling the evolution of the population of solutions.
+Notice that the formula cbind(Weight,Value)~Color specifies the traits to be considered in the optimization problem and are indicated in the left side of the formula whereas the right side of the formula specifies the term corresponding to the genes that will form the 'genome' of the possible solutions (progeny). Each trait in the formula requires a value for the constraints, weights in the fitness function (e.g., a selection index or any other customized fitness function). Please notice that the default fitness function is a classical base selection index. In this example only Value contributes to the fitness and Weight is purely used as a constraint. Lambda (weight for the group relationship between the genes in the genome; equivalent to the linkage disequilibrium). The rest of the parameters are the parameters controlling the evolution of the population of solutions.
 
 When looking at the results of the evolution we can observe that the best solution for the traits under the contraints can be extracted with the bestSol() function.
 
 ```{r}
-best=bestSol(res0)["pop","Value"]; best # best solution for trait 1
-res0$M[best,]
+# index for the best solution for trait Value
+best=bestSol(res0)["pop","Value"]; best 
+# actual solution
+res0$M[best,] 
+# value and weight for the selected solution 
 xa = res0$M[best,] %*% as.matrix(Gems[,c("Weight","Value")]); xa
 ```
 
 The best selection of Gems was the one one found in the M element of the resulting object.
 
-### 2) Obtaining subsample of a population to maximize a feature while constraining the relationship between possibilities
+### 2) Obtaining subsample of a population to maximize a feature while constraining the relationship between individuals in the population
 
 #### 2a) Best parents for the next generation
 
-One situation that occurs in plant and animal breeding is the so called 'optimal contribution' problem where we want to pick a set of parents that can maximize the gain while managing genetic variance as much as possible. In the following example we take a population of 363 possible parents and pick the best 20 while conserving genetic variance.
+One situation that occurs in plant and animal breeding is the so called 'optimal contribution' problem where we want to pick a set of parents that can maximize the gain while managing genetic variance as much as possible. In the following example we take a population of 363 possible parents (which will become the genes) and pick the best 20 while conserving genetic variance (group relationship).
 
 ```{r, fig.show='hold'}
 data(DT_cpdata)
@@ -96,7 +100,7 @@ DT <- DT_cpdata
 head(DT)
 ```
 
-Our surrogate of fitness will be the Yield trait and we will have a second trait to control the number of individuals we can select. We will set a contraint for the occurrence (occ) trait to 20 but the only trait contributing to fitness will be Yield (traitWeight parameter). 
+Our surrogate of fitness will be the Yield trait and we will have a second trait to control the number of individuals we can select. We will set a constraint for the occurrence (occ) trait to 20 but the only trait contributing to fitness will be Yield (using the traitWeight argument). 
 
 ```{r, fig.show='hold'}
 # get best 20 individuals weighting variance by 0.5
@@ -116,14 +120,14 @@ res<-evolafit(cbind(Yield, occ)~id, dt= DT,
               nGenerations = 20, verbose=FALSE) 
 ```
 
-We then use the bestSol() function to extract the solution that maximizes our fitness function and constraints.
+We then use the bestSol() function to extract the solution that maximized our fitness function and constraints.
 
 ```{r, fig.show='hold'}
 best = bestSol(res)["pop","Yield"];
 sum(res$M[best,]) # total # of inds selected
 ```
 
-We can use the pmonitor() function to see if convergence was achieved between the best and teh average solutions.
+We can use the pmonitor() function to see if convergence was achieved between the best and the average solutions.
 
 ```{r, fig.show='hold'}
 pmonitor(res)
@@ -132,7 +136,7 @@ plot(DT$Yield, col=as.factor(res$M[best,]),
 
 ```
 
-#### 2b) Obtaining optimal N crosses from a population for a given feature
+#### 2b) Obtaining optimal N crosses from a population for a given trait/feature
 
 A variation of the same problem is when we want to pick the best crosses instead of the best parents to directly find the optimal solution for a crossing block. In the following example we use a dataset of crosses with marker and phenotype information to show how to optimize this problem.
 
@@ -145,7 +149,7 @@ A <- A.mat(M)
 head(DT)
 ```
 
-The way to specify this problem is exactly the same than with the optimization of parents but the input information is at the level of predicted crosses instead of individuals.
+The way to specify this problem is exactly the same than with the optimization of parents but the input information is at the level of predicted crosses instead of individuals (genes).
 
 ```{r}
 # run the genetic algorithm
@@ -295,7 +299,8 @@ plot(PCWheat[,1], PCWheat[,2], col = TreeWheat, cex=cex,
 
 ### 6) How to specify constraints
 
-#### Gender
+#### Gender in breeding
+
 In this case is better if you only create the cross combinations that are possible (e.g., where male and female can couple) and you handed them to the evolutionary algorithm. That means, the rows of the crosses to be in the searching space only include the realistic ones.
 
 #### Number of times a parent should be used
@@ -372,7 +377,7 @@ plot(DT$GY, col=as.factor(res$M[best,]),
        pch=(res$M[best,]*19)+1)
 ```
 
-### 6) Predictive model using GA
+### 6) Customizing a fitness function (linear regression example)
 
 The following example show how the genetic algorithm can be tweeked to do a predictive model of the type of of a linear regression.
 
