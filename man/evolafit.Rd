@@ -161,7 +161,7 @@ head(Gems)
 # Task: Gem selection. 
 # Aim: Get highest combined value.
 # Restriction: Max weight of the gem combined = 10. 
-res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
+res0<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
                # constraints: if greater than this ignore
                constraintsUB = c(10,Inf), 
                # constraints: if smaller than this ignore

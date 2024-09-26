@@ -395,8 +395,7 @@ a <- seq(-1,1,.1);a
 dt <- as.data.frame(expand.grid(a,a))
 colnames(dt) <- paste0("alpha",1:ncol(dt))
 dt$qtl=paste0("Q",1:nrow(dt))
-dt$inter <-1; dt$inter[1] <- 0
-dt$count <- 1; dt$count[1] <- 0
+dt$inter <- rnorm(nrow(dt))
 head(dt)
 
 # create n samples equivalent to the number of progeny
@@ -407,7 +406,7 @@ one <- rep(1,length(y))
 x <- mtcars$hp[sam]
 x2 <- mtcars$hp[sam]^2
 X <- cbind(one,x)
-# plot(x,y)
+plot(x,y)
 # Task: linear regression
 res0<-evolafit(formula=cbind(inter,alpha1)~qtl, dt= dt,
                # constraints: if greater than this ignore
@@ -429,16 +428,16 @@ res0<-evolafit(formula=cbind(inter,alpha1)~qtl, dt= dt,
 
 # develop a joint fitness function that uses all traits
 
-# pmonitor(res0)
+pmonitor(res0)
 # this time the best solution is the one that minimizes the error
 error = ( stan(y) - apply( X*res0$pheno,1,sum ) )^2
 best=which(error == min(error))[1]
 xa=res0$M[best,] %*% as.matrix(dt[,c("inter","alpha1")]); xa
 
-# plot( as.matrix(mtcars[,c("inter","hp")]) %*% t(xa)  , mtcars$mpg,
-#       main="Correlation between GA-prediction and observed") # GA
-# plot( (mtcars$hp * mod$coefficients[2] ) + mod$coefficients[1] , mtcars$mpg,
-#       main="Correlation between lm-prediction and observed") # LM
+plot( as.matrix(mtcars[,c("inter","hp")]) %*% t(xa)  , mtcars$mpg,
+      main="Correlation between GA-prediction and observed") # GA
+plot( (mtcars$hp * mod$coefficients[2] ) + mod$coefficients[1] , mtcars$mpg,
+      main="Correlation between lm-prediction and observed") # LM
 # Correlation between GA-prediction and observed 
 cor( as.matrix(mtcars[,c("inter","hp")]) %*% t(xa)  , mtcars$mpg) 
 # Correlation between lm-prediction and observed

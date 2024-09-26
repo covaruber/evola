@@ -50,11 +50,12 @@ M <- M_technow
                 traitWeight = c(1,0), 
                 # population parameters
                 nCrosses = 100, nProgeny = 10, 
+                recombGens=1, nChr=1, mutRate=0,
                 # coancestry parameters
                 A=A, lambda= (20*pi)/180 , nQTLperInd = 70, 
                 # selection parameters
                 propSelBetween = 0.5, propSelWithin =0.5, 
-                nGenerations = 20) 
+                nGenerations = 20, keepBest=FALSE) 
   
   best = bestSol(res)["pop","GY"]
   xa = (res$M \%*\% DT$GY)[best,]; xa 
