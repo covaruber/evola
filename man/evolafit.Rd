@@ -51,7 +51,7 @@ The number of generations that the evolutionary process should run for.
 The number of recombination generations that should occur before selection is applied. This is in case the user wants to allow for more recombination before selection operates. The default is 1.
 }
   \item{nChr}{
-The number of chromosomes where features/genes should be allocated to. The default value is 1 but this number can be increased to mimic more recombination events at every generation.
+The number of chromosomes where features/genes should be allocated to. The default value is 1 but this number can be increased to mimic more recombination events at every generation. STILL NOT FUNCTIONAL.
 }
   \item{mutRate}{
 A value between 0 and 1 to indicate the proportion of random QTLs that should mutate in each individual. For example, a value of 0.1 means that a random 10\% of the QTLs will mutate in each individual randomly taking values of 0 or 1. Is important to notice that this implies that the stopping criteria based in variance will never be reached because we keep introducing variance through random mutation. 
@@ -74,7 +74,7 @@ A numeric value between 0 and 1 indicating the proportion of individuals within 
   \item{fitnessf}{
 An alternative fitness function for a linear combination of the traits. If NULL the default function will be:
 
-function(Y,b,d,Q){(Y\%*\%b) - d}
+function(Y,b,d,Q)\{(Y\%*\%b) - d\}
 
 where Y\%*\%b is equivalent to xa in contribution theory, and d is equal to x'Ax, being x the contribution vector to the solution, a are the QTL effects, and A is the covariance between QTLs, Q is the QTL matrix for the solution. If you provide your own fitness function please keep in mind that the variables Y, b, d and Q are already reserved and should always be added to your function (even if not used) in addition to your new variables.
 

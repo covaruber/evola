@@ -8,12 +8,15 @@ Extract the index of the best solution
 Extracts the index of the best solution for all traits under the constraints specified. 
 }
 \usage{
-bestSol(object)
+bestSol(object, selectTop=TRUE)
 }
 
 \arguments{
   \item{object}{
 A resulting object from the function evolafit.
+}
+  \item{selectTop}{
+Selects highest values for the fitness value if TRUE. Selects lowest values if FALSE.
 }
 
 }

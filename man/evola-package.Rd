@@ -12,7 +12,7 @@ Giovanny Covarrubias-Pazaran
 }
 \description{
 
-The evola package is nice wrapper of the AlphaSimR package that enables the use of the evolutionary algorithm to solve complex questions in a simple manner.
+The evola package is nice wrapper of the AlphaSimR package that enables the use of the evolutionary algorithm to solve complex questions in a simple form.
 
 The \code{\link{evolafit}} function is the core function of the package which allows the user to specify the problem and constraints to find a close-to-optimal solution using the evolutionary forces.
 
@@ -40,9 +40,9 @@ For tutorials on how to perform different analysis with evola please look at the
 \section{Getting started}{
 The package has been equiped with several datasets to learn how to use the evola package: 
 
-* \code{\link{DT_technow}} datasets to perform optimal cross selection. 
+* \code{\link{DT_technow}} dataset to perform optimal cross selection. 
 
-* \code{\link{DT_wheat}} TBD.
+* \code{\link{DT_wheat}} dataset to perform optimal training population selection.
 
 * \code{\link{DT_cpdata}} dataset to perform optimal individual. 
 

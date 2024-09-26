@@ -1,12 +1,12 @@
 evolafit <- function(formula, dt, 
                      constraintsUB, constraintsLB, traitWeight,
                      nCrosses=50, nProgeny=40,nGenerations=30, 
-                     recombGens=1, nChr=1,
+                     recombGens=1, nChr=1, mutRate=0,
                      nQTLperInd=NULL, A=NULL, lambda=NULL,
                      propSelBetween=1,propSelWithin=0.5,
                      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
                      selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE, 
-                     mutRate=0,...){
+                     ...){
   
   my.date <- "2024-11-01"
   your.date <- Sys.Date()

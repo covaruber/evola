@@ -1,6 +1,6 @@
 Package: evola
 Version: 1.0.2
-Date: 2024-09-30
+Date: 2024-09-24
 Title: Evolutionary Algorithm
 Authors@R: c(
     person("Giovanny","Covarrubias-Pazaran", email="cova_ruber@live.com.mx", role=c("aut","cre"),
