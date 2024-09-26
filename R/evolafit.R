@@ -1,10 +1,12 @@
 evolafit <- function(formula, dt, 
                      constraintsUB, constraintsLB, traitWeight,
-                     nCrosses=50, nProgeny=40,nGenerations=30, recombGens=1,
+                     nCrosses=50, nProgeny=40,nGenerations=30, 
+                     recombGens=1, nChr=1,
                      nQTLperInd=NULL, A=NULL, lambda=NULL,
                      propSelBetween=1,propSelWithin=0.5,
                      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
-                     selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE, ...){
+                     selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE, 
+                     mutRate=0,...){
   
   my.date <- "2024-11-01"
   your.date <- Sys.Date()
@@ -40,7 +42,7 @@ evolafit <- function(formula, dt,
   # if(length(lambda) != length(traits)){stop(paste0("Lambda need to have the same length than traits (",length(traits),")"), call. = FALSE)}
   if(is.null(A)){A <- Matrix::Diagonal(nrow(dt))}
   if(is.null(nQTLperInd)){nQTLperInd <- nrow(dt)/5}
-  
+  nMutations = round(mutRate * nrow(dt)) # number of mutations per individual per generation
   # 1) initialize the population with customized haplotypes to ensure a single QTL per individual
   haplo = matrix(0, nrow=nrow(dt)*2, ncol = nrow(dt)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )
   for (i in 1:nrow(haplo)) {
@@ -48,7 +50,7 @@ evolafit <- function(formula, dt,
   }
   colnames(haplo) = dt[,classifiers]#paste0("H", 1:ncol(haplo))
   genMap = data.frame(markerName=colnames(haplo),
-                      chromosome=1,
+                      chromosome=1:nChr,
                       position=1:ncol(haplo))
   ped = data.frame(id=paste0("I", 1:nrow(dt)),
                    mother=0, father=0)
@@ -120,6 +122,23 @@ evolafit <- function(formula, dt,
       pop <- makeDH(pop=pop, nDH = 1, simParam = SP)
       ## compute constrained traits
       pop <- setPheno(pop=pop, h2=rep(0.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0))  # ignore h2 since we will replace it in line 90
+    }
+    if(mutRate > 0){
+      if(nMutations == 1){
+        pointMut = t(as.matrix(apply(data.frame(1:nInd(pop)), 1, function(x){
+          sample(1:nrow(dt), nMutations, replace = FALSE)
+        }) ))
+      }else{
+        pointMut = as.matrix(apply(data.frame(1:nInd(pop)), 1, function(x){
+          sample(1:nrow(dt), nMutations, replace = FALSE)
+        }) )
+      }
+      U = pullSegSiteGeno(pop, simParam = SP)
+      for(iQtl in unique(as.vector(pointMut))){
+        modif=which(pointMut == iQtl, arr.ind = TRUE)[,"col"]
+        allele = sample(0:1, 1)
+        pop = editGenome(pop, ind=modif,chr=1, segSites=iQtl, simParam=SP, allele = allele)
+      }
     }
     # extract solutions for the trait 1 because all traits have the same QTLs
     Q <- pullQtlGeno(pop, simParam = SP, trait = 1)  

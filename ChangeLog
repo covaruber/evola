@@ -13,9 +13,9 @@
 
 
 ## TO DO
-+ Add to vignettes that inbreeding of the selected crosses can be used as surrogate to decide the size of the population (segregants)
-+ Add the mutation and crossover rate to the parameters of the function (mutRateGenome and ??).
++ Add recombination rate through the use of the number of chromosomes and chromosome size
++ Add the mutation rate by using the function editGenomeTopQtl().
 + Not only allow the posibility of mutation in the genome, but also in the addtive effects (mutRateTrait)
-+ Make a function that traces the pedigree of the best solution easily
++ Make a function that traces the pedigree of the best solution easily? maybe just let the user download a package that builds pedigree plots and that way they can recreate the crossing path. 
 + Is there any benefit in allowing ploidy and heterozigosity? (e.g. more possible solutions)
 

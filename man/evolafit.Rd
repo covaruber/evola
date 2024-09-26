@@ -5,17 +5,19 @@
 Fits a genetic algorithm for a set of traits and constraints.
 }
 \description{
-Using the AlphaSimR machinery it recreates the evolutionary forces applied to a problem where possible solutions replace individuals and combinations of variables in the problem replace the genes or QTLs. Then evolutionary forces (mutation, selection and drift) are applied to find a close-to-optimal solution. 
+Using the AlphaSimR machinery it recreates the evolutionary forces applied to a problem where possible solutions replace individuals and combinations of variables to optimize in the problem replace the genes or QTLs. Then evolutionary forces (mutation, selection and drift) are applied to find a close-to-optimal solution. 
 }
 \usage{
 
 evolafit(formula, dt, 
      constraintsUB, constraintsLB, traitWeight,
-     nCrosses=50, nProgeny=40,nGenerations=30, recombGens=1,
+     nCrosses=50, nProgeny=40,nGenerations=30, 
+     recombGens=1, nChr=1, mutRate=0,
      nQTLperInd=NULL, A=NULL, lambda=NULL,
      propSelBetween=1,propSelWithin=0.5,
      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
-     selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE, ...)
+     selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE,
+     ...)
 
 }
 
@@ -47,6 +49,12 @@ The number of generations that the evolutionary process should run for.
 }
   \item{recombGens}{
 The number of recombination generations that should occur before selection is applied. This is in case the user wants to allow for more recombination before selection operates.
+}
+  \item{nChr}{
+The number of chromosomes where features/genes should be allocated to. The default value is 1 but this number can be increased to mimic more recombination events at every generation.
+}
+  \item{mutRate}{
+A value between 0 and 1 to indicate the proportion of random QTLs that should mutate in each individual. For example, a value of 0.1 means that a random 10\% of the QTLs will mutate in each individual randomly taking values of 0 or 1. Is important to notice that this implies that the stopping criteria based in variance will never be reached because we keep introducing variance through random mutation. 
 }
   \item{nQTLperInd}{
 The number of QTLs/genes (classifier x) that should be fixed for the positive allele at the begginning of the simulation. If not specified it will be equal to the 20\% of the QTLs (number of rows in the dt over 5). See details section.
@@ -162,9 +170,11 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                # weight the traits for the selection
                traitWeight = c(0,1), 
                # population parameters
-               nCrosses = 100, nProgeny = 20, recombGens = 1, 
+               nCrosses = 100, nProgeny = 20, 
+               # genome parameters
+               recombGens = 1, nChr=1, mutRate=0, nQTLperInd = 1, 
                # coancestry parameters
-               A=NULL, lambda=0, nQTLperInd = 1, 
+               A=NULL, lambda=0, 
                # selection parameters
                propSelBetween = .9, propSelWithin =0.9, 
                nGenerations = 50

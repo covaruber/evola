@@ -448,7 +448,7 @@ cor( (mtcars$hp * mod$coefficients[2] ) + mod$coefficients[1] , mtcars$mpg) # LM
 
 ### 7) How to optimize the number of progeny to produce per cross
 
-The advice here is to upload directly the phased genotypes (haplotypes) to the AlphaSimR machinery and simulate the possible crosses to explore how many individuals are required to sample a given trait (oligogenic or polygenic) with a given probablility. No need to use the evola package.
+The advice here is to upload directly the phased genotypes (haplotypes) to the AlphaSimR machinery and simulate the possible crosses to explore how many individuals are required to sample a given trait (oligogenic or polygenic) with a given probablility. You can also use the inbreeding value of each cross to decide the number of progeny for a given cross since there is a negative relationship between inbreeding of a cross and the expected variance observed in the progeny of such cross. No need to use the evola package. 
 
 ## Literature
 

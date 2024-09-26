@@ -50,18 +50,25 @@ bestSol <- function(object, selectTop=TRUE){
     }
     return(best)
   })
-  res2 <- apply(object$phenoBest,2,function(y){
-    yg <- y[which( y < Inf)]
-    yg <- yg[which( yg > -Inf)]
-    if(selectTop){
-      best = which(y==max(yg,na.rm=TRUE))[1]
-    }else{
-      best = which(y==min(yg,na.rm=TRUE))[1]
-    }
-    return(best)
-  })
-  res <- rbind(res1,res2)
-  rownames(res) <- c("pop","best")
+  if(nInd(object$best) > 0){
+    res2 <- apply(object$phenoBest,2,function(y){
+      yg <- y[which( y < Inf)]
+      yg <- yg[which( yg > -Inf)]
+      if(selectTop){
+        best = which(y==max(yg,na.rm=TRUE))[1]
+      }else{
+        best = which(y==min(yg,na.rm=TRUE))[1]
+      }
+      return(best)
+    })
+    res <- rbind(res1,res2)
+    rownames(res) <- c("pop","best")
+  }else{
+    res <- t(as.matrix(res1))
+    rownames(res) <- c("pop")
+  }
+  
+  
   colnames(res) <- object$traits
   return(res)
 } 
