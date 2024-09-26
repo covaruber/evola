@@ -133,7 +133,7 @@ evolafit <- function(formula, dt,
           sample(1:nrow(dt), nMutations, replace = FALSE)
         }) )
       }
-      U = pullSegSiteGeno(pop, simParam = SP)
+      # U = pullSegSiteGeno(pop, simParam = SP)
       for(iQtl in unique(as.vector(pointMut))){
         modif=which(pointMut == iQtl, arr.ind = TRUE)[,"col"]
         allele = sample(0:1, 1)
@@ -193,7 +193,13 @@ evolafit <- function(formula, dt,
       averagePerformance[j,] <- c( mean(score,na.rm=TRUE), max(score,na.rm=TRUE) , mean(xtAx,na.rm=TRUE),  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
     }
     if(j == nGenerations){nonStop = FALSE}
-    if(sum(diag(varG(pop = pop))) < tolVarG){nonStop = FALSE; message("Variance across traits exhausted. Early stop.")}
+    # print(nrow(pop@gv))
+    if(nrow(pop@gv) > 0){
+      if(sum(diag(varG(pop = pop))) < tolVarG){nonStop = FALSE; message("Variance across traits exhausted. Early stop.")}
+    }else{
+      nonStop = FALSE; message("All individuals discarded. Consider changing some parameter values (e.g., mutRate).")
+    }
+    
     # if(trace){if(j > 1){traceM[[j]] <- Qtrace; tracePed[[j]] <- pedTrace}}
   }# end of for each generation
   ################################

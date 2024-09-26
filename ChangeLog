@@ -14,8 +14,7 @@
 
 ## TO DO
 + Add recombination rate through the use of the number of chromosomes and chromosome size
-+ Add the mutation rate by using the function editGenomeTopQtl().
 + Not only allow the posibility of mutation in the genome, but also in the addtive effects (mutRateTrait)
 + Make a function that traces the pedigree of the best solution easily? maybe just let the user download a package that builds pedigree plots and that way they can recreate the crossing path. 
-+ Is there any benefit in allowing ploidy and heterozigosity? (e.g. more possible solutions)
++ Is there any benefit in allowing ploidy and heterozigosity? (e.g. more possible solutions stored in haplotypes), we may need to calculate values per haplotype instead of genotype. How we would select what passes? any individual that contains at least one good haplotype? may not be the best idea. I'll keep thinking about it.
 
