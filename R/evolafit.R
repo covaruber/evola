@@ -172,7 +172,7 @@ evolafit <- function(formula, dt,
         allele = sample(0:1, 1)
         pop = editGenome(pop, ind=modif,chr=1, segSites=iQtl, simParam=SP, allele = allele)
       }
-    }
+    }else{pointMut=as.data.frame(matrix(NA, nrow=0, ncol=1))}
     # extract solutions for the trait 1 because all traits have the same QTLs
     Q <- pullQtlGeno(pop, simParam = SP, trait = 1)  
     Q <- as(Q, Class = "dgCMatrix")
