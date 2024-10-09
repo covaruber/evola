@@ -1,6 +1,6 @@
 evolafit <- function(formula, dt, 
                      constraintsUB, constraintsLB, traitWeight,
-                     nCrosses=50, nProgeny=40,nGenerations=30, 
+                     nCrosses=50, nProgeny=20,nGenerations=20, 
                      recombGens=1, nChr=1, mutRate=0,
                      nQTLperInd=NULL, A=NULL, lambda=NULL,
                      propSelBetween=1,propSelWithin=0.5,
@@ -28,12 +28,11 @@ evolafit <- function(formula, dt,
     fitnessf <-function (Y, b, d, Q) {
       return(Y %*% b - d)
     }
-  };  #fitnessf <- fitnessf[traits]
+  };
   classifiers <- elements[[2]]
   # check that the user has provided a single value for each QTL
   checkNQtls <- table(dt[,classifiers])
   if(length(which(checkNQtls > 1)) > 0){stop("You cannot provide more than one alpha value per QTL. Make sure that your x variable has only one value.", call. = FALSE)}
-  # print(classifiers)
   if(missing(constraintsUB)){constraintsUB <- rep(Inf,length(traits))}
   if(length(constraintsUB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
   if(missing(constraintsLB)){constraintsLB <- rep(-Inf,length(traits))}
@@ -41,7 +40,6 @@ evolafit <- function(formula, dt,
   if(missing(traitWeight)){traitWeight <- rep(1,length(traits))}
   if(length(traitWeight) != length(traits)){stop(paste0("Weights need to have the same length than traits (",length(traits),")"), call. = FALSE)}
   if(is.null(lambda)){lambda <- 0}
-  # if(length(lambda) != length(traits)){stop(paste0("Lambda need to have the same length than traits (",length(traits),")"), call. = FALSE)}
   if(is.null(A)){A <- Matrix::Diagonal(nrow(dt))}
   if(is.null(nQTLperInd)){nQTLperInd <- nrow(dt)/5}
   nMutations = round(mutRate * nrow(dt)) # number of mutations per individual per generation
@@ -84,7 +82,6 @@ evolafit <- function(formula, dt,
   }else{
     pop@pheno <- apply(pop@pheno,2,function(xx){rnorm(length(xx))}) # rnorm(length(pop@pheno))
   }
-  # pop = setPheno(pop,h2=rep(.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0) ) # ignore h2 since we will replace it in line 56
   # ***) creating the frame for the plot
   indivPerformance <- list() # store results by generation
   averagePerformance <- matrix(NA, nrow=nGenerations,ncol=5) # to store results
@@ -95,7 +92,6 @@ evolafit <- function(formula, dt,
   ################################
   ################################
   ## FOR GENERATION
-  # SP <<- SP
   spacing9=paste(rep(" ",10), collapse = "");spacing99=paste(rep(" ",9), collapse = "");spacing999=paste(rep(" ",8), collapse = "")
   j =0 # in 1:nGenerations
   nonStop=TRUE
@@ -103,7 +99,6 @@ evolafit <- function(formula, dt,
   best <- pop[0]; pedBest <- data.frame(matrix(NA,nrow=0, ncol=4)); colnames(pedBest) <- c("id","mother","father","gen")
   while(nonStop) { # for each generation we breed # j=1
     j=j+1
-    # if(verbose){message(paste("generation",j))}
     if(j > 1){
       # group relationship
       xtAx <- Matrix::diag(Q%*%Matrix::tcrossprod(A,Q))
@@ -154,7 +149,6 @@ evolafit <- function(formula, dt,
       }else{
         pop@pheno <- apply(pop@pheno,2,function(xx){rnorm(length(xx))}) # rnorm(length(pop@pheno))
       }
-      # pop <- setPheno(pop=pop, h2=rep(0.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0))  # ignore h2 since we will replace it in line 90
     }
     if(mutRate > 0){
       if(nMutations == 1){
@@ -166,7 +160,7 @@ evolafit <- function(formula, dt,
           sample(1:nrow(dt), nMutations, replace = FALSE)
         }) )
       }
-      # U = pullSegSiteGeno(pop, simParam = SP)
+      # 
       for(iQtl in unique(as.vector(pointMut))){
         modif=which(pointMut == iQtl, arr.ind = TRUE)[,"col"]
         allele = sample(0:1, 1)
@@ -229,7 +223,7 @@ evolafit <- function(formula, dt,
       averagePerformance[j,] <- c( mean(score,na.rm=TRUE), max(score,na.rm=TRUE) , mean(xtAx,na.rm=TRUE),  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
     }
     if(j == nGenerations){nonStop = FALSE}
-    # print(nrow(pop@gv))
+    
     if(nrow(pop@gv) > 0){
       totalVarG = sum(diag(varG(pop = pop)))
       if(totalVarG < tolVarG){nonStop = FALSE; message("Variance across traits exhausted. Early stop.")}
@@ -248,7 +242,6 @@ evolafit <- function(formula, dt,
                     round(totalVarG,3)
                     ))
     }
-    # if(trace){if(j > 1){traceM[[j]] <- Qtrace; tracePed[[j]] <- pedTrace}}
   }# end of for each generation
   ################################
   ################################

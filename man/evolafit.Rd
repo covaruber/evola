@@ -11,7 +11,7 @@ Using the AlphaSimR machinery it recreates the evolutionary forces applied to a 
 
 evolafit(formula, dt, 
      constraintsUB, constraintsLB, traitWeight,
-     nCrosses=50, nProgeny=40,nGenerations=30, 
+     nCrosses=50, nProgeny=20,nGenerations=20, 
      recombGens=1, nChr=1, mutRate=0,
      nQTLperInd=NULL, A=NULL, lambda=NULL,
      propSelBetween=1,propSelWithin=0.5,
