@@ -120,13 +120,13 @@ evolafit <- function(formula, dt,
       if( propSelBetween < 1){
         suppressWarnings( popF <- selectFam(pop=pop,nFam = round(nc*propSelBetween), trait = fitnessf, 
                                             b=traitWeight,d=xtAx.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,
-                                            selectTop=selectTop#,...
+                                            selectTop=selectTop,...
                                             ), classes = "warning")
       }else{popF = pop}
       if( propSelWithin < 1 ){
         suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = round(np*propSelWithin), 
                                                   trait = fitnessf,  b=traitWeight,d=xtAx.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,
-                                                  selectTop=selectTop#, ...
+                                                  selectTop=selectTop, ...
                                                   ), classes = "warning")
       }else{popW=pop}
       selected <- intersect(popF@id,popW@id)
