@@ -11,11 +11,15 @@
       * [r2] Added additional arguments for stopping criteria and to keepBest to trace the path to the best solution.
       * [r2] Added mutRate and nChr arguments to control the mutation rate and recombination rate.
       
+2024-10-15 Giovanny Covarrubias Pazaran <cova_ruber@live.com.mx>
+
+      * [r3] Now the traits with zero variance also work without errors
+      * [r3] We print in the console the generation, number of removed solutions/individuals based on constraints, total number of individuals left and genetic variance
+      * [r3] Now we allow to set different number of chromosomes which allows for a greater recombination rate by avoiding the LD and interference of having too many QTLs in the same chromosome
+
 
 
 ## TO DO
-+ Add recombination rate through the use of the number of chromosomes and chromosome size. Is already there but still not functional
++ Double check that mutation goes both directions, maybe an additional argument.
 + Not only allow the posibility of mutation in the genome, but also in the addtive effects (mutRateTrait)
-+ Make a function that traces the pedigree of the best solution easily? maybe just let the user download a package that builds pedigree plots and that way they can recreate the crossing path. 
-+ Is there any benefit in allowing ploidy and heterozigosity? (e.g. more possible solutions stored in haplotypes), we may need to calculate values per haplotype instead of genotype. How we would select what passes? any individual that contains at least one good haplotype? may not be the best idea. I'll keep thinking about it.
 

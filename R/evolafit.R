@@ -8,7 +8,7 @@ evolafit <- function(formula, dt,
                      selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE, 
                      ...){
   
-  my.date <- "2024-11-01"
+  my.date <- "2025-01-01"
   your.date <- Sys.Date()
   ## if your month is greater than my month you are outdated
   if(dateWarning & verbose){
@@ -16,6 +16,8 @@ evolafit <- function(formula, dt,
       warning("Version out of date. Please update evola to the newest version using:\ninstall.packages('evola') in a new session\n Use the 'dateWarning' argument to disable the warning message.", call. = FALSE)
     }
   }
+  if(propSelBetween==0 | propSelWithin==0){stop("Please ensure that parameters propSelWithin and propSelBetween are different than zero.", call. = FALSE)}
+  if(propSelBetween>0 & nCrosses==0){stop("If you apply selection between families you need to set nCrosses to a value > 0.", call. = FALSE)}
   if(missing(formula)){stop("Please provide the formula to know traits and classifiers.", call. = FALSE)}
   elements <- strsplit(as.character(formula), split = "[+]")#[[1]]
   elements <- lapply(elements[-c(1)], function(x){all.vars(as.formula(paste("~",x)))})
@@ -48,10 +50,16 @@ evolafit <- function(formula, dt,
   for (i in 1:nrow(haplo)) {
     haplo[i,sample(1:ncol(haplo), nQTLperInd )] <- 1
   }
-  colnames(haplo) = dt[,classifiers]#paste0("H", 1:ncol(haplo))
+  colnames(haplo) = dt[,classifiers]
+  
+  nQtlPerChr = rep( floor(length(colnames(haplo))/nChr), nChr)
+  nQtlPerChr[length(nQtlPerChr)] = nQtlPerChr[length(nQtlPerChr)] + ( length(colnames(haplo)) - sum(nQtlPerChr) )
+  
+  chromosome = as.vector(unlist(apply( data.frame(nQtlPerChr,1:nChr), 1, function(x){rep(x[2],x[1])})))
+  position = as.vector(unlist(apply( data.frame(nQtlPerChr,1:nChr), 1, function(x){1:x[1]})))
   genMap = data.frame(markerName=colnames(haplo),
-                      chromosome=1:nChr,
-                      position=1:ncol(haplo))
+                      chromosome=chromosome,
+                      position=position)
   ped = data.frame(id=paste0("I", 1:nrow(dt)),
                    mother=0, father=0)
   founderPop = importHaplo(haplo=haplo, 
@@ -62,14 +70,21 @@ evolafit <- function(formula, dt,
   SP = SimParam$new(founderPop)
   # 2) add the traits (columns from user) to take the values (rows) as marker effects
   for(iTrait in 1:length(traits)){
-    SP$importTrait(markerNames = names(SP$genMap$`1`), addEff = dt[,traits[iTrait]]/2) # over 2 because QTL data is diplodized
+    SP$importTrait(markerNames =unlist(lapply(SP$genMap,names)), addEff = dt[,traits[iTrait]]/2) # over 2 because QTL data is diplodized
   }
   alpha = do.call(cbind,lapply(SP$traits, function(x){x@addEff}))
   # 3) set the population
   pop = newPop(founderPop, simParam = SP)
-  pop = randCross(pop, nCrosses = nCrosses, nProgeny = nProgeny, simParam = SP)
+  if(nCrosses > 0){
+    pop = randCross(pop, nCrosses = nCrosses, nProgeny = nProgeny, simParam = SP)
+  }
   variances = diag(varG(pop))
-  pop = setPheno(pop,h2=rep(.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0) ) # ignore h2 since we will replace it in line 56
+  if(all(SP$varG>0)){
+    pop = setPheno(pop,h2=rep(.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0) )
+  }else{
+    pop@pheno <- apply(pop@pheno,2,function(xx){rnorm(length(xx))}) # rnorm(length(pop@pheno))
+  }
+  # pop = setPheno(pop,h2=rep(.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0) ) # ignore h2 since we will replace it in line 56
   # ***) creating the frame for the plot
   indivPerformance <- list() # store results by generation
   averagePerformance <- matrix(NA, nrow=nGenerations,ncol=5) # to store results
@@ -81,13 +96,14 @@ evolafit <- function(formula, dt,
   ################################
   ## FOR GENERATION
   # SP <<- SP
+  spacing9=paste(rep(" ",10), collapse = "");spacing99=paste(rep(" ",9), collapse = "");spacing999=paste(rep(" ",8), collapse = "")
   j =0 # in 1:nGenerations
   nonStop=TRUE
   pedBest <- list()
   best <- pop[0]; pedBest <- data.frame(matrix(NA,nrow=0, ncol=4)); colnames(pedBest) <- c("id","mother","father","gen")
   while(nonStop) { # for each generation we breed # j=1
     j=j+1
-    if(verbose){message(paste("generation",j))}
+    # if(verbose){message(paste("generation",j))}
     if(j > 1){
       # group relationship
       xtAx <- Matrix::diag(Q%*%Matrix::tcrossprod(A,Q))
@@ -103,11 +119,21 @@ evolafit <- function(formula, dt,
       ## apply selection between and within
       xtAx.lam = xtAx * lambda#[iTrait]
       names(xtAx.lam) <- pop@id
-      suppressWarnings( popF <- selectFam(pop=pop,nFam = round(nCrosses*propSelBetween), trait = fitnessf, 
-                                          b=traitWeight,d=xtAx.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,selectTop=selectTop,...), classes = "warning")
-      suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = round(nProgeny*propSelWithin), 
-                                                trait = fitnessf,  b=traitWeight,d=xtAx.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,
-                                                selectTop=selectTop,...), classes = "warning")
+      structure = table(paste(pop@mother, pop@father))
+      nc = length(structure)
+      np = floor(median(structure))
+      if( propSelBetween < 1){
+        suppressWarnings( popF <- selectFam(pop=pop,nFam = round(nc*propSelBetween), trait = fitnessf, 
+                                            b=traitWeight,d=xtAx.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,
+                                            selectTop=selectTop#,...
+                                            ), classes = "warning")
+      }else{popF = pop}
+      if( propSelWithin < 1 ){
+        suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = round(np*propSelWithin), 
+                                                  trait = fitnessf,  b=traitWeight,d=xtAx.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,
+                                                  selectTop=selectTop#, ...
+                                                  ), classes = "warning")
+      }else{popW=pop}
       selected <- intersect(popF@id,popW@id)
       pop <- pop[which(pop@id %in% selected)]
       # solutions selected for tracing
@@ -117,11 +143,18 @@ evolafit <- function(formula, dt,
       }
       ## create new progeny
       for(k in 1:recombGens){
+        if(nCrosses > 0){
         pop <- randCross(pop=pop, nCrosses = nCrosses, nProgeny = nProgeny, simParam = SP)
+        }
       }
       pop <- makeDH(pop=pop, nDH = 1, simParam = SP)
       ## compute constrained traits
-      pop <- setPheno(pop=pop, h2=rep(0.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0))  # ignore h2 since we will replace it in line 90
+      if(all(SP$varG>0)){
+        pop = setPheno(pop,h2=rep(.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0) )
+      }else{
+        pop@pheno <- apply(pop@pheno,2,function(xx){rnorm(length(xx))}) # rnorm(length(pop@pheno))
+      }
+      # pop <- setPheno(pop=pop, h2=rep(0.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0))  # ignore h2 since we will replace it in line 90
     }
     if(mutRate > 0){
       if(nMutations == 1){
@@ -142,11 +175,11 @@ evolafit <- function(formula, dt,
     }
     # extract solutions for the trait 1 because all traits have the same QTLs
     Q <- pullQtlGeno(pop, simParam = SP, trait = 1)  
-    # print(Q[1:4,1:4])
     Q <- as(Q, Class = "dgCMatrix")
     rownames(Q) <- pop@id
     constCheckUB <- constCheckLB <- matrix(1, nrow=nrow(Q), ncol=length(traits))
     xaFinal <- list()
+    
     ################################
     ################################
     ## FOR EACH TRAIT
@@ -172,34 +205,49 @@ evolafit <- function(formula, dt,
     didntMetConst <- which(metConstCheck < length(traits))
     # remove individuals that break the constraints UB
     if(length(didntMetConst)>0){ # 
+      # message(paste(length(didntMetConst),"individuals discarded for breaking the lower bounds.", nInd(pop)-length(didntMetConst), "left." ))
       for(iTrait in 1:length(traits)){
         pop <- pop[setdiff(1:nInd(pop),didntMetConst)]
       }
     }
     #  remove individuals that break the constraints LB
-    metConstCheck <- apply(constCheckLB,1,sum) 
-    didntMetConst <- which(metConstCheck < length(traits))
+    metConstCheckL <- apply(constCheckLB,1,sum) 
+    didntMetConstL <- which(metConstCheckL < length(traits))
     # impute with mean value the ones that do not met the constraints
-    if(length(didntMetConst)>0){
+    if(length(didntMetConstL)>0){
+      # message(paste(length(didntMetConst),"individuals discarded for breaking the lower bounds.", nInd(pop)-length(didntMetConst), "left." ))
       for(iTrait in 1:length(traits)){
-        pop <- pop[setdiff(1:nInd(pop),didntMetConst)]
+        pop <- pop[setdiff(1:nInd(pop),didntMetConstL)]
       }
     }
     #store the performance of the jth generation for plot functions
     score <- do.call(cbind, xaFinal) %*% traitWeight
-    
     if(j > 1){
-      indivPerformance[[j]] <- data.frame(score=as.vector(score),deltaC= as.vector(deltaC) , xtAx= as.vector(xtAx), generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
+      if(length(as.vector(score)) == length(as.vector(deltaC))){
+        indivPerformance[[j]] <- data.frame(score=as.vector(score),deltaC= as.vector(deltaC) , xtAx= as.vector(xtAx), generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
+      }
       averagePerformance[j,] <- c( mean(score,na.rm=TRUE), max(score,na.rm=TRUE) , mean(xtAx,na.rm=TRUE),  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
     }
     if(j == nGenerations){nonStop = FALSE}
     # print(nrow(pop@gv))
     if(nrow(pop@gv) > 0){
-      if(sum(diag(varG(pop = pop))) < tolVarG){nonStop = FALSE; message("Variance across traits exhausted. Early stop.")}
+      totalVarG = sum(diag(varG(pop = pop)))
+      if(totalVarG < tolVarG){nonStop = FALSE; message("Variance across traits exhausted. Early stop.")}
     }else{
+      totalVarG = 0
       nonStop = FALSE; message("All individuals discarded. Consider changing some parameter values (e.g., mutRate).")
     }
-    
+    if(verbose){
+      if(j==1){message("generation  constrainedUB  constrainedLB  total          varG")}
+      nup=length(didntMetConst)
+      nlb=length(didntMetConstL)
+      nin=nInd(pop)
+      message(paste("   ", j, ifelse(j <10,spacing9, spacing99), nup, ifelse(nup <10,spacing9, ifelse(nup <100,spacing99, spacing999)), 
+                    nlb, ifelse(nlb <10,spacing9, ifelse(nlb <100,spacing99, spacing999)), 
+                    nin, ifelse(nin <10,spacing9, ifelse(nin <100,spacing99, spacing999)), 
+                    round(totalVarG,3)
+                    ))
+    }
     # if(trace){if(j > 1){traceM[[j]] <- Qtrace; tracePed[[j]] <- pedTrace}}
   }# end of for each generation
   ################################
@@ -211,6 +259,7 @@ evolafit <- function(formula, dt,
   colnames(M) <- apply(data.frame(dt[,classifiers]),1,function(x){paste(x,collapse = "_")})
   indivPerformance <- do.call(rbind, indivPerformance)
   return(list(M=M, Mb=Mb, score=averagePerformance[1:j,], pheno=pop@pheno,phenoBest=best@pheno, pop=pop, best=best, 
+              simParam= SP, pointMut=nrow(pointMut),
               indivPerformance=indivPerformance, constCheckUB=constCheckUB, constCheckLB=constCheckLB,
               traits=traits, pedBest=pedBest ))
 }

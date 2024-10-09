@@ -11,6 +11,6 @@ importFrom("graphics", "axis", "grid", "layout", "lines", "points",
 importFrom("stats", "na.omit", "quantile", "var", "as.formula","model.matrix")
 
 export( "evolafit", "pmonitor", "pareto", "varM", "bestSol", "A.mat", "stan", "Jc", "Jr",
-        "overlay")
+        "overlay", "fitnessf")
 
 

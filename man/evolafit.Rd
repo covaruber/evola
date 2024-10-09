@@ -51,32 +51,32 @@ The number of generations that the evolutionary process should run for.
 The number of recombination generations that should occur before selection is applied. This is in case the user wants to allow for more recombination before selection operates. The default is 1.
 }
   \item{nChr}{
-The number of chromosomes where features/genes should be allocated to. The default value is 1 but this number can be increased to mimic more recombination events at every generation. STILL NOT FUNCTIONAL.
+The number of chromosomes where features/genes should be allocated to. The default value is 1 but this number can be increased to mimic more recombination events at every generation and avoid linkage disequilibrium. 
 }
   \item{mutRate}{
 A value between 0 and 1 to indicate the proportion of random QTLs that should mutate in each individual. For example, a value of 0.1 means that a random 10\% of the QTLs will mutate in each individual randomly taking values of 0 or 1. Is important to notice that this implies that the stopping criteria based in variance will never be reached because we keep introducing variance through random mutation. 
 }
   \item{nQTLperInd}{
-The number of QTLs/genes (classifier x) that should be fixed for the positive allele at the begginning of the simulation. If not specified it will be equal to the 20\% of the QTLs (number of rows in the dt over 5). See details section.
+The number of QTLs/genes (classifier x) that should be fixed for the positive allele at the begginning of the simulation. If not specified it will be equal to the 20\% of the QTLs (calculated as the number of rows in the dt argument over 5). See details section.
 }
   \item{A}{
-A relationship matrix between the levels of the classifier variable (x or QTLs; not between the solutions). It is a kind of a linkage disequilibrium matrix. This function can be used or ignored in the fitness function.
+A relationship matrix between the levels of the 'x' variable or QTLs (not between the solutions). It is a kind of a linkage disequilibrium matrix. This function can be used or ignored in the fitness function. By default the weight to the x'Ax component is 0 though the lambda argument, where x is an individual/solution.
 }
   \item{lambda}{
 A numeric value indicating the weight assigned to the relationship between levels of the classifiers in comparison with the trait value. If not specified is assumed to be 0. This can be used or ignored in your customized fitness function.
 }
   \item{propSelBetween}{
-A numeric value between 0 and 1 indicating the proportion of families/crosses that should be selected. The default is 1, meaning all crosses are selected.
+A numeric value between 0 and 1 indicating the proportion of families/crosses of solutions/individuals that should be selected. The default is 1, meaning all crosses are selected or passed to the next generation.
 }
   \item{propSelWithin}{
-A numeric value between 0 and 1 indicating the proportion of individuals within families/crosses that should be selected. The default value is 0.5, meaning that 50\% of the top individuals are selected.
+A numeric value between 0 and 1 indicating the proportion of individuals/solutions within families/crosses that should be selected. The default value is 0.5, meaning that 50\% of the top individuals are selected.
 }
   \item{fitnessf}{
-An alternative fitness function for a linear combination of the traits. If NULL the default function will be:
+An alternative fitness function for a linear combination of the traits specified in 'y' in the formula argument. If NULL, the default function will be:
 
 function(Y,b,d,Q)\{(Y\%*\%b) - d\}
 
-where Y\%*\%b is equivalent to xa in contribution theory, and d is equal to x'Ax, being x the contribution vector to the solution, a are the QTL effects, and A is the covariance between QTLs, Q is the QTL matrix for the solution. If you provide your own fitness function please keep in mind that the variables Y, b, d and Q are already reserved and should always be added to your function (even if not used) in addition to your new variables.
+where Y\%*\%b is equivalent to xa in contribution theory, and d is equal to x'Ax, being x the contribution vector to the solution, a are the QTL effects, and A is the covariance between QTLs, Q is the QTL matrix for the solution, b are the weights for each trait, Y is the matrix of trait-values for each solution. If you provide your own fitness function please keep in mind that the variables Y, b, d and Q are already reserved and should always be added to your function (even if not used) in addition to your new variables.
 
 }
   \item{verbose}{
@@ -106,8 +106,8 @@ Using the AlphaSimR machinery (runMacs) it recreates the evolutionary forces app
 
 \describe{
 
-\item{$M}{the matrix of haplotypes/solutions at the end of the run.}
-\item{$Mb}{the matrix of top (parents) haplotypes/solutions at the end of the run.}
+\item{$M}{the matrix of genotypes for the solutions/individuals selected at the end of the run.}
+\item{$Mb}{the matrix of top (parents) genotypes for the solutions/individuals at the end of the run.}
 \item{$score}{a matrix with scores for different metrics across n generations of evolution.}
 \item{$pheno}{the matrix of phenotypes of individuals/solutions present in the last generation.}
 \item{$phenoBest}{the matrix of phenotypes of top (parents) individuals/solutions present in the last generation.}

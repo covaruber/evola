@@ -179,6 +179,7 @@ plot(DT$GY, col=as.factor(res$M[best,]),
        pch=(res$M[best,]*19)+1)
 ```
 
+Notice that we have maximized te GY variable which is the pure phenotype, but alternatively you could use the GEBVs to get crosses with maximum GEBV or predict the TGV (total genetic value) to maximize the F1 performance (including the dominance). 
 
 ### 3) Optimizing a subsample of size N to be representative
 
