@@ -101,20 +101,30 @@ A TRUE/FALSE value to indicate if we should store the QTL matrix and pedigree of
 
 Using the AlphaSimR machinery (runMacs) it recreates the evolutionary forces applied to a problem where possible solutions replace individuals and combinations of variables in the problem replace the genes. Then evolutionary forces are applied to find a close-to-optimal solution. The number of solutions are controlled with the nCrosses and nProgeny parameters, whereas the number of initial QTLs activated in a solution is controlled by the nQTLperInd parameter. The number of activated QTLs of course will increase if has a positive effect in the fitness of the solutions. The drift force can be controlled by the recombGens parameter. The mutation rate can be controlled with the mutRate parameter. The recombination rate can be controlled with the nChr argument.
 
+The indivPerformance output contains the columns x'a, x'Ax, deltaC and nQTLs. These mean the following:
+
+In x'a or score : 'x' represents the contribution vector, 'a' is the vector of QTN effects, so x'a is the breeding value of a solution. Internally, we multiply all the matrix of solutions (Q) by the QTN effects (a).
+In deltaC : it represents the change in coancestry (e.g., inbreeding), it can be thought as the rate of coancestry.
+In x'Ax : 'x' represents the contribution vector, 'A' is the linkage disequilibrium matrix between QTNs (whatever the QTNs represent for your specific problem). In practice we do QAQ' and extract the diagonal values.
+In generation : it represents the generation at which this solution appeared.
+In nQTNs : it represent the final number of QTNs that are activated in homozygote state for the positive effect.
+
 }
 \value{
 
 \describe{
 
-\item{$M}{the matrix of genotypes for the solutions/individuals selected at the end of the run.}
-\item{$Mb}{the matrix of top (parents) genotypes for the solutions/individuals at the end of the run.}
+\item{indivPerformance}{the matrix of x'a (score), deltaC, x'Ax, generation, nQTNs per solution per generation. See details section above. }
+\item{pedBest}{if the argument keepBest=TRUE this contains the pedigree of the selected solutions across iterations.}
+\item{$M}{the matrix of QTN genotypes for the solutions/individuals selected at the end of the run.}
+\item{$Mb}{the matrix of top (parents) QTN genotypes for the solutions/individuals at the end of the run.}
 \item{$score}{a matrix with scores for different metrics across n generations of evolution.}
 \item{$pheno}{the matrix of phenotypes of individuals/solutions present in the last generation.}
 \item{$phenoBest}{the matrix of phenotypes of top (parents) individuals/solutions present in the last generation.}
-\item{indivPerformance}{the matrix of x'a, x'Ax, deltaC, nQTLs per solution per generation.}
 \item{pop}{AlphaSimR object used for the evolutionary algorithm at the last iteration.}
 \item{best}{AlphaSimR object corresponding to the best parental haplotypes/solutions selected for new crosses across all cycles.}
-\item{pedBest}{if the argument keepBest=TRUE this contains the pedigree of the selected solutions across iterations.}
+\item{constCheckUB}{A matrix with as many rows as solutions and columns as traits to be constrained. 0s indicate that such trait went beyond the bound in that particular solution.}
+\item{constCheckLB}{A matrix with as many rows as solutions and columns as traits to be constrained. 0s indicate that such trait went beyond the bound in that particular solution.}
 \item{traits}{a character vector corresponding to the name of the variables used in the fitness function.}
 
 }
@@ -161,12 +171,24 @@ head(Gems)
 # Task: Gem selection. 
 # Aim: Get highest combined value.
 # Restriction: Max weight of the gem combined = 10. 
+
+# simple specification
+res00<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
+               # constraints on traits: if greater than this ignore
+               constraintsUB = c(10,Inf), nGenerations = 10
+)
+best = bestSol(res00)["pop","Value"]
+xa = res00$M[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); xa
+res00$M[best,]
+res00$score[nrow(res00$score),]
+
+# more complete specification
 res0<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
-               # constraints: if greater than this ignore
+               # constraints on traits: if greater than this ignore
                constraintsUB = c(10,Inf), 
-               # constraints: if smaller than this ignore
+               # constraints on traits: if smaller than this ignore
                constraintsLB= c(-Inf,-Inf), 
-               # weight the traits for the selection
+               # weight the traits for the selection (fitness function)
                traitWeight = c(0,1), 
                # population parameters
                nCrosses = 100, nProgeny = 20, 
@@ -181,7 +203,6 @@ res0<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
 
 best = bestSol(res0)["pop","Value"]
 xa = res0$M[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); xa
-
 res0$M[best,]
 res0$score[nrow(res0$score),]
 

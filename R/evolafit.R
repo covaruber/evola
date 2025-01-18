@@ -8,7 +8,7 @@ evolafit <- function(formula, dt,
                      selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE, 
                      ...){
   
-  my.date <- "2025-01-01"
+  my.date <- "2025-04-01"
   your.date <- Sys.Date()
   ## if your month is greater than my month you are outdated
   if(dateWarning & verbose){

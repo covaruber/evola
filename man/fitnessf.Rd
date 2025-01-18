@@ -2,7 +2,7 @@
 \alias{fitnessf}
 
 \title{
-Fitness function for contribution theory
+Fitness function from contribution theory
 }
 \description{
 Simple function for fitness where an index of traits is weighted by the group relationship. 
@@ -13,10 +13,10 @@ fitnessf(Y,b,d,Q)
 
 \arguments{
   \item{Y}{
-A matrix of traits. See details.
+A matrix of trait values. See details.
 }
   \item{b}{
-A vector of weights. See details.
+A vector of trait weights. See details.
 }
   \item{d}{
 A vector of group relationships. See details.
@@ -36,9 +36,9 @@ Internally, we use this function in the following way:
 
 The Y matrix is the matrix of trait-GEBVs and b is the user-specified trait weights. 
 
-d = xtAx * lambda; where xtAx is equal to Matrix::diag(Q\%*\%Matrix::tcrossprod(A,Q))
+d = xtAx * lambda; where xtAx is equal to Matrix::diag(Q\%*\%Matrix::tcrossprod(A,Q)) of dimensions n x n
 
-Notice that Q represents the marker of QTLs (columns) for all solutions (rows). The user can modify this function as needed and provide it to the evolafit function along with other arguments.
+Notice that Q represents the marker of QTLs (columns) for all solutions (rows) and A the LD between QTLs. The user can modify this function as needed and provide it to the evolafit function along with other arguments.
 
 }
 \value{
@@ -56,10 +56,10 @@ Giovanny Covarrubias-Pazaran (2024).  evola: a simple evolutionary algorithm for
 \examples{
 
 
-Y=matrix(1:9,3,3)
-b=c(1,2,3)
-d=c(1,1,1)
-fitnessf(Y,b,d)
+Y=matrix(1:12,4,3) # 4 solutions with 3 traits
+b=c(1,2,3) # weights for each trait
+d=c(1,1,1,1) # coancestry for each solution
+fitnessf(Y,b,d) # Yb - d where d is QAQ' and A is the LD between QTNs
 
 }
 \seealso{\code{\link{evolafit}} -- the core function of the package }
