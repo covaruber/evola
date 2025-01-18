@@ -68,7 +68,7 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                A=NULL, lambda=0, nQTLperInd = 1, 
                # selection parameters
                propSelBetween = .9, propSelWithin =0.9, 
-               nGenerations = 30, verbose = FALSE
+               nGenerations = 15, verbose = FALSE
 ) 
 pmonitor(res0)
 ```
@@ -117,7 +117,7 @@ res<-evolafit(cbind(Yield, occ)~id, dt= DT,
               A=A, lambda= (30*pi)/180 , nQTLperInd = 2, 
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
-              nGenerations = 20, verbose=FALSE) 
+              nGenerations = 15, verbose=FALSE) 
 ```
 
 We then use the bestSol() function to extract the solution that maximized our fitness function and constraints.
@@ -152,31 +152,32 @@ head(DT)
 The way to specify this problem is exactly the same than with the optimization of parents but the input information is at the level of predicted crosses instead of individuals (genes).
 
 ```{r}
+# silent for CRAN checks restriction on vignettes time
 # run the genetic algorithm
-  res<-evolafit(formula = c(GY, occ)~hy, dt= DT, 
-                # constraints: if sum is greater than this ignore
-                constraintsUB = c(Inf,100), 
-                # constraints: if sum is smaller than this ignore
-                constraintsLB= c(-Inf,-Inf),
-                # weight the traits for the selection
-                traitWeight = c(1,0), 
-                # population parameters
-                nCrosses = 100, nProgeny = 10, 
-                # coancestry parameters
-                A=A, lambda= (20*pi)/180 , nQTLperInd = 100, 
-                # selection parameters
-                propSelBetween = 0.5, propSelWithin =0.5, 
-                nGenerations = 10, verbose=FALSE) 
-best = bestSol(res)["pop","GY"]
-sum(res$M[best,]) # total # of inds selected
+#   res<-evolafit(formula = c(GY, occ)~hy, dt= DT, 
+#                 # constraints: if sum is greater than this ignore
+#                 constraintsUB = c(Inf,100), 
+#                 # constraints: if sum is smaller than this ignore
+#                 constraintsLB= c(-Inf,-Inf),
+#                 # weight the traits for the selection
+#                 traitWeight = c(1,0), 
+#                 # population parameters
+#                 nCrosses = 100, nProgeny = 10, 
+#                 # coancestry parameters
+#                 A=A, lambda= (20*pi)/180 , nQTLperInd = 100, 
+#                 # selection parameters
+#                 propSelBetween = 0.5, propSelWithin =0.5, 
+#                 nGenerations = 15, verbose=FALSE) 
+# best = bestSol(res)["pop","GY"]
+# sum(res$M[best,]) # total # of inds selected
 ```
 
 You can use the pmonitor() or pareto() functions to see the evolution of the solution and see the performance of the solution selected.
 
 ```{r}
-pmonitor(res)
-plot(DT$GY, col=as.factor(res$M[best,]), 
-       pch=(res$M[best,]*19)+1)
+# pmonitor(res)
+# plot(DT$GY, col=as.factor(res$M[best,]), 
+#        pch=(res$M[best,]*19)+1)
 ```
 
 Notice that we have maximized te GY variable which is the pure phenotype, but alternatively you could use the GEBVs to get crosses with maximum GEBV or predict the TGV (total genetic value) to maximize the F1 performance (including the dominance). 
@@ -343,39 +344,40 @@ fitnessf <-function (Y, b, d, Q, Z) {
 Notice that we have added a matrix product Q%*%Z to see how may times each parent is used in the proposed solution of crosses. The next step would be to provide the new fitness function to the evolafit() function and the additional argument Z which is the overlay matrix formed in the first chunck of code:
 
 ```{r}
-res<-evolafit(formula = c(GY, occ)~hy,
-              dt= DT, 
-              # constraints: if sum is greater than this ignore
-              constraintsUB = c(Inf,50), 
-              # constraints: if sum is smaller than this ignore
-              constraintsLB= c(-Inf,-Inf),
-              # weight the traits for the selection
-              traitWeight = c(1,0), 
-              # population parameters
-              nCrosses = 100, nProgeny = 10, 
-              # coancestry parameters
-              A=A, lambda= (10*pi)/180 , nQTLperInd = 40, 
-              # new fitness function and additional args
-              fitnessf = fitnessf, Z=Z,
-              # selection parameters
-              propSelBetween = 0.5, propSelWithin =0.5, 
-              nGenerations = 15, verbose=FALSE) 
-
-best = bestSol(res)["pop","GY"]
-xa = (res$M %*% DT$GY)[best,]; xa 
-xAx = res$M[best,] %*% A %*% res$M[best,]; xAx 
-sum(res$M[best,]) # total # of inds selected
+# silent for CRAN checks restriction on time
+# res<-evolafit(formula = c(GY, occ)~hy,
+#               dt= DT, 
+#               # constraints: if sum is greater than this ignore
+#               constraintsUB = c(Inf,50), 
+#               # constraints: if sum is smaller than this ignore
+#               constraintsLB= c(-Inf,-Inf),
+#               # weight the traits for the selection
+#               traitWeight = c(1,0), 
+#               # population parameters
+#               nCrosses = 100, nProgeny = 10, 
+#               # coancestry parameters
+#               A=A, lambda= (10*pi)/180 , nQTLperInd = 40, 
+#               # new fitness function and additional args
+#               fitnessf = fitnessf, Z=Z,
+#               # selection parameters
+#               propSelBetween = 0.5, propSelWithin =0.5, 
+#               nGenerations = 15, verbose=FALSE) 
+# 
+# best = bestSol(res)["pop","GY"]
+# xa = (res$M %*% DT$GY)[best,]; xa 
+# xAx = res$M[best,] %*% A %*% res$M[best,]; xAx 
+# sum(res$M[best,]) # total # of inds selected
 ```
 
 Now, last but not least we check how many times each parent was used:
 
 ```{r}
-# check how many times an individual was used in the final crosses
-crosses <- data.frame(cross=names(which( res$M[best,] == 1)))
-table(unlist(strsplit(crosses$cross,":")))
-# check performance of crosses selected
-plot(DT$GY, col=as.factor(res$M[best,]), 
-       pch=(res$M[best,]*19)+1)
+# # check how many times an individual was used in the final crosses
+# crosses <- data.frame(cross=names(which( res$M[best,] == 1)))
+# table(unlist(strsplit(crosses$cross,":")))
+# # check performance of crosses selected
+# plot(DT$GY, col=as.factor(res$M[best,]), 
+#        pch=(res$M[best,]*19)+1)
 ```
 
 ### 6) Customizing a fitness function (linear regression example)
@@ -424,7 +426,7 @@ res0<-evolafit(formula=cbind(inter,alpha1)~qtl, dt= dt,
                fitnessf=function(Y,b,d,Q,x,y){ apply(( (y%*%Jc(500)) - ( X%*%t(Y)) )^2,2,sum) },
                # selection parameters
                propSelBetween = 0.5, propSelWithin =0.5, selectTop=FALSE,
-               nGenerations = 20, y=y, x=x, verbose = FALSE
+               nGenerations = 15, y=y, x=x, verbose = FALSE
 ) 
 
 # develop a joint fitness function that uses all traits
