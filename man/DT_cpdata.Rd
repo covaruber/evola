@@ -59,7 +59,7 @@ sum(res$Q[best,]) # total # of inds selected
 pmonitor(res)
 
 plot(DT$Yield, col=as.factor(res$M[best,]), 
-     pch=(res$M[best,]*19)+1)
+     pch=(res$Q[best,]*19)+1)
 
 pareto(res)
  

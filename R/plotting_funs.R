@@ -1,19 +1,23 @@
-pmonitor <- function(object,...){
+pmonitor <- function(object, kind=1, ...){
   x <- object$score#[,"Best.qa"]
-  x2 <- x[which(x[,"Average.qa"] < Inf & x[,"Average.qa"] > -Inf),"Average.qa"]
-  x3 <- x[which(x[,"Best.qa"] < Inf & x[,"Best.qa"] > -Inf),"Best.qa"]
+ 
+  if(kind==1){i=1;j=2}else if(kind==2){i=3;j=5}else{i=4; j=4}
+  
+  x2 <- x[which(x[,i] < Inf & x[,i] > -Inf),i]
+  x3 <- x[which(x[,j] < Inf & x[,j] > -Inf),j]
   mmin <- min(c(0, x2))
   mmax <- max(c( x3, x2 ) )
-  plot(x[,1], type="o", ylim=c(mmin,mmax), xlab="Generation", ylab="Value")
+  
+  plot(x[,i], type="o", ylim=c(mmin,mmax), xlab="Generation", ylab="Value", col=i)
   oldpar <- par(no.readonly = TRUE) # code line i
   on.exit(par(oldpar)) # code line i + 1
   if(ncol(x) > 1){
-    for(i in 2:ncol(x)){
+    # for(i in 2){
       par(new=TRUE)
-      plot(x[,i], col=i, ylim=c(mmin,mmax), ylab="",xlab="", type="o",...)
-    }
+      plot(x[,j], col=j, ylim=c(mmin,mmax), ylab="",xlab="", type="o",...)
+    # }
   }
-  legend("topright",legend = colnames(x), col=1:(ncol(x)), bty="n", lty=1)
+  legend("topleft",legend = colnames(x)[c(i,j)], col=c(i,j), bty="n", lty=1)
 }
 
 pareto <- function(object, scaled=TRUE, pch=20, xlim, ...){
