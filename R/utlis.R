@@ -9,7 +9,7 @@
     stop("This package requires R 3.5.0 or later")
   if(interactive()) {
     packageStartupMessage(blue(paste("[]==================================================================[]")),appendLF=TRUE)
-    packageStartupMessage(blue(paste("[] Evolutionary Algorithm in R (evola) 1.0.4 (2025-04)              []",sep="")),appendLF=TRUE)
+    packageStartupMessage(blue(paste("[] Evolutionary Algorithm in R (evola) 1.0.5 (2025-04)              []",sep="")),appendLF=TRUE)
     packageStartupMessage(paste0(blue("[] Author: Giovanny Covarrubias-Pazaran",paste0(bgGreen(white(" ")), bgWhite(magenta("*")), bgRed(white(" "))),"                        []")),appendLF=TRUE)
     packageStartupMessage(blue("[] Dedicated to the University of Chapingo and UW-Madison           []"),appendLF=TRUE)
     packageStartupMessage(blue("[] Type 'vignette('evola.intro')' for a short tutorial              []"),appendLF=TRUE)
@@ -36,7 +36,7 @@ ocsFun <-function (Y, b, d, Q, D) {
 }
 
 varM <- function(object){
-  sum(apply(object@Q,2,var, na.rm=TRUE))
+  sum(apply(object$pop@Q,2,var, na.rm=TRUE))
 }
 
 stan <- function(x){

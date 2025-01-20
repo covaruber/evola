@@ -5,8 +5,8 @@ update.evolaMod <- function(object, formula., ..., evaluate = TRUE) {
   # call <- getCall(object)
   
   extras <- match.call(expand.dots = FALSE)$...
-  extras[["initPop"]] <- object
-  extras[["simParam"]] <- SPE # it should be in the global environment
+  extras[["initPop"]] <- object$pop
+  extras[["simParam"]] <- object$simParam # it should be in the global environment
   
   if (!missing(formula.)){
     call$formula <- update.formula(formula(object), formula.)
@@ -28,7 +28,7 @@ update.evolaMod <- function(object, formula., ..., evaluate = TRUE) {
   ## Error in as.list.environment(X[[i]], ...) :
   ## promise already under evaluation: recursive default argument reference or earlier problems?
   
-  ff <- environment(formula(object@call))
+  ff <- environment(formula(object$call))
   pf <- parent.frame()
   sf <- sys.frames()[[1]]
   

@@ -58,13 +58,13 @@ M <- M_technow
                 nGenerations = 20, keepBest=FALSE) 
   
   best = bestSol(res)["pop","GY"]
-  qa = (res@Q \%*\% DT$GY)[best,]; qa 
-  qAq = res@Q[best,] \%*\% A \%*\% res@Q[best,]; qAq 
-  sum(res@Q[best,]) # total # of inds selected
+  qa = (res$pop@Q \%*\% DT$GY)[best,]; qa 
+  qAq = res$pop@Q[best,] \%*\% A \%*\% res$pop@Q[best,]; qAq 
+  sum(res$pop@Q[best,]) # total # of inds selected
   
   pmonitor(res)
-  plot(DT$GY, col=as.factor(res@Q[best,]), 
-       pch=(res$Q[best,]*19)+1)
+  plot(DT$GY, col=as.factor(res$pop@Q[best,]), 
+       pch=(res$pop@Q[best,]*19)+1)
        
   pareto(res)
 

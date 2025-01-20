@@ -261,14 +261,6 @@ evolafit <- function(formula, dt,
   colnames(Q) <- apply(data.frame(dt[,classifiers]),1,function(x){paste(x,collapse = "_")})
   indivPerformance <- do.call(rbind, indivPerformance)
   
-  setClass(
-    "evolaMod",
-    contains="Pop",
-    slots=c(Q="matrix", Qb="matrix", score="matrix", pointMut="numeric", indivPerformance="data.frame",
-            constCheckUB="matrix", constCheckLB="matrix", traits="character", pedBest="data.frame",
-            call="call")
-  ) -> evolaMod
-  
   result <- as(pop,"evolaMod")
   result@Q <- Q
   result@Qb <- Qb
@@ -279,15 +271,16 @@ evolafit <- function(formula, dt,
   result@constCheckLB <- constCheckLB
   result@traits <- traits
   result@pedBest <- pedBest
-  result@call <- mc
+  # result@call <- mc
   
-  assign("SPE",SP,envir = globalenv())
+  # assign("SPE",SP,envir = globalenv())
   
   # result <- list(Q=Q, Qb=Qb, score=averagePerformance[1:j,], pheno=pop@pheno,phenoBest=best@pheno, pop=pop, best=best, 
   #             simParam= SP, pointMut=nrow(pointMut),
   #             indivPerformance=indivPerformance, constCheckUB=constCheckUB, constCheckLB=constCheckLB,
   #             traits=traits, pedBest=pedBest, call=mc )
   # class(result) <- "evolaMod"
-  return(result)
+  res <- list(pop=result, simParam=SP, call=mc)
+  return(res)
 }
 
