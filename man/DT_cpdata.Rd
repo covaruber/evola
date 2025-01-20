@@ -52,13 +52,13 @@ res<-evolafit(formula=cbind(Yield, occ)~id, dt= DT,
               nGenerations = 40, keepBest=FALSE) 
 
 best = bestSol(res)["pop","Yield"];best
-qa = (res$Q \%*\% DT$Yield)[best,]; qa 
-qDq = res$Q[best,] \%*\% A \%*\% res$Q[best,]; qDq 
-sum(res$Q[best,]) # total # of inds selected
+qa = (res@Q \%*\% DT$Yield)[best,]; qa 
+qDq = res@Q[best,] \%*\% A \%*\% res@Q[best,]; qDq 
+sum(res@Q[best,]) # total # of inds selected
 
 pmonitor(res)
 
-plot(DT$Yield, col=as.factor(res$M[best,]), 
+plot(DT$Yield, col=as.factor(res@Q[best,]), 
      pch=(res$Q[best,]*19)+1)
 
 pareto(res)

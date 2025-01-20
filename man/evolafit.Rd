@@ -17,6 +17,7 @@ evolafit(formula, dt,
      propSelBetween=1,propSelWithin=0.5,
      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
      selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE,
+     initPop=NULL, simParam=NULL,
      ...)
 
 }
@@ -107,6 +108,12 @@ A stopping criteria (tolerance for genetic variance) when the variance across tr
 }
   \item{keepBest}{
 A \code{TRUE/FALSE} value to indicate if we should store the QTL matrix and pedigree of the solutions selected across generations. This can be useful if we want to recreate the path to the best solution (e.g., best crossing path to a product).
+}
+  \item{initPop}{
+an object of Pop-class.
+}
+  \item{simParam}{
+  an object of SimParam.
 }
 \item{\dots}{Further arguments to be passed to the fitness function if required.}
 
@@ -209,9 +216,9 @@ res00<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
                constraintsUB = c(10,Inf), nGenerations = 10
 )
 best = bestSol(res00)["pop","Value"]
-qa = res00$Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
-res00$Q[best,]
-res00$score[nrow(res00$score),]
+qa = res00@Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
+res00@Q[best,]
+res00@score[nrow(res00@score),]
 
 # more complete specification
 res0<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
@@ -233,9 +240,9 @@ res0<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
 ) 
 
 best = bestSol(res0)["pop","Value"]
-qa = res0$Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
-res0$Q[best,]
-res0$score[nrow(res0$score),]
+qa = res0@Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
+res0@Q[best,]
+res0@score[nrow(res0$score),]
 
 # $`Genes`
 # Red   Blue Purple Orange  Green   Pink  White  Black Yellow 

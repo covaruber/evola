@@ -14,4 +14,8 @@ importFrom("stats", "na.omit", "quantile", "var", "as.formula","model.matrix",
 export( "evolafit", "pmonitor", "pareto", "varM", "bestSol", "A.mat", "stan", "Jc", "Jr",
         "overlay", "ocsFun")
 
+exportMethods(
+              "update"
+              )
+
 

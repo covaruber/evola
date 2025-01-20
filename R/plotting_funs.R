@@ -1,5 +1,5 @@
 pmonitor <- function(object, kind=1, ...){
-  x <- object$score#[,"Best.qa"]
+  x <- object@score#[,"Best.qa"]
  
   if(kind==1){i=1;j=2}else if(kind==2){i=3;j=5}else{i=4; j=4}
   
@@ -26,8 +26,8 @@ pareto <- function(object, scaled=TRUE, pch=20, xlim, ...){
                                                   c[3]/255, alpha))
     return(res)
   }
-  dt <- object$indivPerformance 
-  dt2 <- as.data.frame(object$score)
+  dt <- object@indivPerformance 
+  dt2 <- as.data.frame(object@score)
   # prepare rate ot coancestry
   dt$deltaC <- dt$deltaC * -1
   # prepare performance

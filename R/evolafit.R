@@ -6,7 +6,7 @@ evolafit <- function(formula, dt,
                      propSelBetween=1,propSelWithin=0.5,
                      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
                      selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE, 
-                     ...){
+                     initPop=NULL, simParam = NULL, ...){
   
   my.date <- "2025-04-01"
   your.date <- Sys.Date()
@@ -19,67 +19,78 @@ evolafit <- function(formula, dt,
   if(propSelBetween==0 | propSelWithin==0){stop("Please ensure that parameters propSelWithin and propSelBetween are different than zero.", call. = FALSE)}
   if(propSelBetween>0 & nCrosses==0){stop("If you apply selection between families you need to set nCrosses to a value > 0.", call. = FALSE)}
   if(missing(formula)){stop("Please provide the formula to know traits and classifiers.", call. = FALSE)}
-  elements <- strsplit(as.character(formula), split = "[+]")#[[1]]
-  elements <- lapply(elements[-c(1)], function(x){all.vars(as.formula(paste("~",x)))})
-  traits <- elements[[1]]
-  if(!all(traits%in%colnames(dt))){stop("Specified traits are not traits in the dataset. Please correct.", call. = FALSE)}
+  mc <- match.call() # create a call
   # add the fitness function (current options are qa=-1 to ln>=0 )
   if(is.null(fitnessf)){
     fitnessf <- ocsFun
   };
+  
+  elements <- strsplit(as.character(formula), split = "[+]")#[[1]]
+  elements <- lapply(elements[-c(1)], function(x){all.vars(as.formula(paste("~",x)))})
+  traits <- elements[[1]]
+  if(!all(traits%in%colnames(dt))){stop("Specified traits are not traits in the dataset. Please correct.", call. = FALSE)}
   classifiers <- elements[[2]]
-  # check that the user has provided a single value for each QTL
-  checkNQtls <- table(dt[,classifiers])
-  if(length(which(checkNQtls > 1)) > 0){stop("You cannot provide more than one alpha value per QTL. Make sure that your x variable has only one value.", call. = FALSE)}
-  if(missing(constraintsUB)){constraintsUB <- rep(Inf,length(traits))}
-  if(length(constraintsUB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
-  if(missing(constraintsLB)){constraintsLB <- rep(-Inf,length(traits))}
-  if(length(constraintsLB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
-  if(missing(b)){b <- rep(1,length(traits))}
-  if(length(b) != length(traits)){stop(paste0("Weights need to have the same length than traits (",length(traits),")"), call. = FALSE)}
-  if(is.null(lambda)){lambda <- 0}
-  if(is.null(D)){D <- Matrix::Diagonal(nrow(dt))}
-  if(is.null(nQTLperInd)){nQTLperInd <- nrow(dt)/5}
-  nMutations = round(mutRate * nrow(dt)) # number of mutations per individual per generation
-  # 1) initialize the population with customized haplotypes to ensure a single QTL per individual
-  haplo = matrix(0, nrow=nrow(dt)*2, ncol = nrow(dt)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )
-  for (i in 1:nrow(haplo)) {
-    haplo[i,sample(1:ncol(haplo), nQTLperInd )] <- 1
-  }
-  colnames(haplo) = dt[,classifiers]
   
-  nQtlPerChr = rep( floor(length(colnames(haplo))/nChr), nChr)
-  nQtlPerChr[length(nQtlPerChr)] = nQtlPerChr[length(nQtlPerChr)] + ( length(colnames(haplo)) - sum(nQtlPerChr) )
-  
-  chromosome = as.vector(unlist(apply( data.frame(nQtlPerChr,1:nChr), 1, function(x){rep(x[2],x[1])})))
-  position = as.vector(unlist(apply( data.frame(nQtlPerChr,1:nChr), 1, function(x){1:x[1]})))
-  genMap = data.frame(markerName=colnames(haplo),
-                      chromosome=chromosome,
-                      position=position)
-  ped = data.frame(id=paste0("I", 1:nrow(dt)),
-                   mother=0, father=0)
-  founderPop = importHaplo(haplo=haplo, 
-                           genMap=genMap,
-                           ploidy=2L,
-                           ped=ped)
-  # founderPop = quickHaplo(nInd=Ne,nChr=1,segSites=nrow(dt), inbred = TRUE)
-  SP = SimParam$new(founderPop)
-  # 2) add the traits (columns from user) to take the values (rows) as marker effects
-  for(iTrait in 1:length(traits)){
-    SP$importTrait(markerNames =unlist(lapply(SP$genMap,names)), addEff = dt[,traits[iTrait]]/2) # over 2 because QTL data is diplodized
-  }
-  alpha = do.call(cbind,lapply(SP$traits, function(x){x@addEff}))
-  # 3) set the population
-  pop = newPop(founderPop, simParam = SP)
-  if(nCrosses > 0){
-    pop = randCross(pop, nCrosses = nCrosses, nProgeny = nProgeny, simParam = SP)
-  }
-  variances = diag(varG(pop))
-  if(all(SP$varG>0)){
-    pop = setPheno(pop,h2=rep(.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0) )
+  if(is.null(initPop)){
+    # check that the user has provided a single value for each QTL
+    checkNQtls <- table(dt[,classifiers])
+    if(length(which(checkNQtls > 1)) > 0){stop("You cannot provide more than one alpha value per QTL. Make sure that your x variable has only one value.", call. = FALSE)}
+    if(missing(constraintsUB)){constraintsUB <- rep(Inf,length(traits))}
+    if(length(constraintsUB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
+    if(missing(constraintsLB)){constraintsLB <- rep(-Inf,length(traits))}
+    if(length(constraintsLB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
+    if(missing(b)){b <- rep(1,length(traits))}
+    if(length(b) != length(traits)){stop(paste0("Weights need to have the same length than traits (",length(traits),")"), call. = FALSE)}
+    if(is.null(lambda)){lambda <- 0}
+    if(is.null(D)){D <- Matrix::Diagonal(nrow(dt))}
+    if(is.null(nQTLperInd)){nQTLperInd <- nrow(dt)/5}
+    nMutations = round(mutRate * nrow(dt)) # number of mutations per individual per generation
+    # 1) initialize the population with customized haplotypes to ensure a single QTL per individual
+    haplo = matrix(0, nrow=nrow(dt)*2, ncol = nrow(dt)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )
+    for (i in 1:nrow(haplo)) {
+      haplo[i,sample(1:ncol(haplo), nQTLperInd )] <- 1
+    }
+    colnames(haplo) = dt[,classifiers]
+    
+    nQtlPerChr = rep( floor(length(colnames(haplo))/nChr), nChr)
+    nQtlPerChr[length(nQtlPerChr)] = nQtlPerChr[length(nQtlPerChr)] + ( length(colnames(haplo)) - sum(nQtlPerChr) )
+    
+    chromosome = as.vector(unlist(apply( data.frame(nQtlPerChr,1:nChr), 1, function(x){rep(x[2],x[1])})))
+    position = as.vector(unlist(apply( data.frame(nQtlPerChr,1:nChr), 1, function(x){1:x[1]})))
+    genMap = data.frame(markerName=colnames(haplo),
+                        chromosome=chromosome,
+                        position=position)
+    ped = data.frame(id=paste0("I", 1:nrow(dt)),
+                     mother=0, father=0)
+    founderPop = importHaplo(haplo=haplo, 
+                             genMap=genMap,
+                             ploidy=2L,
+                             ped=ped)
+    # founderPop = quickHaplo(nInd=Ne,nChr=1,segSites=nrow(dt), inbred = TRUE)
+    SP = SimParam$new(founderPop)
+    # 2) add the traits (columns from user) to take the values (rows) as marker effects
+    for(iTrait in 1:length(traits)){
+      SP$importTrait(markerNames =unlist(lapply(SP$genMap,names)), addEff = dt[,traits[iTrait]]/2) # over 2 because QTL data is diplodized
+    }
+    alpha = do.call(cbind,lapply(SP$traits, function(x){x@addEff}))
+    # 3) set the population
+    pop = newPop(founderPop, simParam = SP)
+    if(nCrosses > 0){
+      pop = randCross(pop, nCrosses = nCrosses, nProgeny = nProgeny, simParam = SP)
+    }
+    variances = diag(varG(pop))
+    if(all(SP$varG>0)){
+      pop = setPheno(pop,h2=rep(.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0) )
+    }else{
+      pop@pheno <- apply(pop@pheno,2,function(xx){rnorm(length(xx))}) # rnorm(length(pop@pheno))
+    }
   }else{
-    pop@pheno <- apply(pop@pheno,2,function(xx){rnorm(length(xx))}) # rnorm(length(pop@pheno))
+    pop=initPop
+    SP=simParam
+    variances = diag(varG(pop))
   }
+  
+  
   # ***) creating the frame for the plot
   indivPerformance <- list() # store results by generation
   averagePerformance <- matrix(NA, nrow=nGenerations,ncol=5) # to store results
@@ -119,13 +130,13 @@ evolafit <- function(formula, dt,
         suppressWarnings( popF <- selectFam(pop=pop,nFam = round(nc*propSelBetween), trait = fitnessf, 
                                             b=b,d=qtDq.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,
                                             selectTop=selectTop,...
-                                            ), classes = "warning")
+        ), classes = "warning")
       }else{popF = pop}
       if( propSelWithin < 1 ){
         suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = round(np*propSelWithin), 
                                                   trait = fitnessf,  b=b,d=qtDq.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,
                                                   selectTop=selectTop, ...
-                                                  ), classes = "warning")
+        ), classes = "warning")
       }else{popW=pop}
       selected <- intersect(popF@id,popW@id)
       pop <- pop[which(pop@id %in% selected)]
@@ -137,7 +148,7 @@ evolafit <- function(formula, dt,
       ## create new progeny
       for(k in 1:recombGens){
         if(nCrosses > 0){
-        pop <- randCross(pop=pop, nCrosses = nCrosses, nProgeny = nProgeny, simParam = SP)
+          pop <- randCross(pop=pop, nCrosses = nCrosses, nProgeny = nProgeny, simParam = SP)
         }
       }
       pop <- makeDH(pop=pop, nDH = 1, simParam = SP)
@@ -238,7 +249,7 @@ evolafit <- function(formula, dt,
                     nlb, ifelse(nlb <10,spacing9, ifelse(nlb <100,spacing99, spacing999)), 
                     nin, ifelse(nin <10,spacing9, ifelse(nin <100,spacing99, spacing999)), 
                     round(totalVarG,3)
-                    ))
+      ))
     }
   }# end of for each generation
   ################################
@@ -249,9 +260,34 @@ evolafit <- function(formula, dt,
   Qb <- pullQtlGeno(best, simParam = SP, trait=1); Qb <- Qb/2
   colnames(Q) <- apply(data.frame(dt[,classifiers]),1,function(x){paste(x,collapse = "_")})
   indivPerformance <- do.call(rbind, indivPerformance)
-  return(list(Q=Q, Qb=Qb, score=averagePerformance[1:j,], pheno=pop@pheno,phenoBest=best@pheno, pop=pop, best=best, 
-              simParam= SP, pointMut=nrow(pointMut),
-              indivPerformance=indivPerformance, constCheckUB=constCheckUB, constCheckLB=constCheckLB,
-              traits=traits, pedBest=pedBest ))
+  
+  setClass(
+    "evolaMod",
+    contains="Pop",
+    slots=c(Q="matrix", Qb="matrix", score="matrix", pointMut="numeric", indivPerformance="data.frame",
+            constCheckUB="matrix", constCheckLB="matrix", traits="character", pedBest="data.frame",
+            call="call")
+  ) -> evolaMod
+  
+  result <- as(pop,"evolaMod")
+  result@Q <- Q
+  result@Qb <- Qb
+  result@score <- averagePerformance[1:j,]
+  result@pointMut <- nrow(pointMut)
+  result@indivPerformance <- indivPerformance
+  result@constCheckUB <- constCheckUB
+  result@constCheckLB <- constCheckLB
+  result@traits <- traits
+  result@pedBest <- pedBest
+  result@call <- mc
+  
+  assign("SPE",SP,envir = globalenv())
+  
+  # result <- list(Q=Q, Qb=Qb, score=averagePerformance[1:j,], pheno=pop@pheno,phenoBest=best@pheno, pop=pop, best=best, 
+  #             simParam= SP, pointMut=nrow(pointMut),
+  #             indivPerformance=indivPerformance, constCheckUB=constCheckUB, constCheckLB=constCheckLB,
+  #             traits=traits, pedBest=pedBest, call=mc )
+  # class(result) <- "evolaMod"
+  return(result)
 }
 
