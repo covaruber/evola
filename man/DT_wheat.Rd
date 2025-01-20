@@ -91,26 +91,26 @@ DT2$cov <- apply(A[tp,vp],1,mean)
 head(DT2)
 
 \donttest{
-# we assign a weight to x'Ax of (60*pi)/180=1
+# we assign a weight to x'Dx of (60*pi)/180=1
 res<-evolafit(formula=cbind(cov, occ)~id, dt= DT2, 
               # constraints: if sum is greater than this ignore 
               constraintsUB = c(Inf, 100), 
               # constraints: if sum is smaller than this ignore
               constraintsLB= c(-Inf, -Inf), 
               # weight the traits for the selection
-              traitWeight = c(1,0), 
+              b = c(1,0), 
               # population parameters
               nCrosses = 100, nProgeny = 10, 
               recombGens=1, nChr=1, mutRate=0,
               # coancestry parameters
-              A=As, lambda= (60*pi)/180 , nQTLperInd = 80, 
+              D=As, lambda= (60*pi)/180 , nQTLperInd = 80, 
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
               nGenerations = 30, verbose = TRUE, keepBest=FALSE) 
 
 
 best <- bestSol(res)["pop","cov"]
-sum(res$M[best,]) # total # of inds selected
+sum(res$Q[best,]) # total # of inds selected
 pareto(res)
 }
 

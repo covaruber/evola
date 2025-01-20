@@ -62,11 +62,11 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                # constraints: if smaller than this ignore
                constraintsLB= c(-Inf,-Inf), 
                # weight the traits for the selection
-               traitWeight = c(0,1), 
+               b = c(0,1), 
                # population parameters
                nCrosses = 100, nProgeny = 20, recombGens = 1, 
                # coancestry parameters
-               A=NULL, lambda=c(0,0), nQTLperInd = 1, 
+               D=NULL, lambda=c(0,0), nQTLperInd = 1, 
                # selection parameters
                propSelBetween = .9, propSelWithin =0.9, 
                nGenerations = 50

@@ -41,20 +41,20 @@ res<-evolafit(formula=cbind(Yield, occ)~id, dt= DT,
               # constraints: if sum is smaller than this ignore
               constraintsLB= c(-Inf,-Inf), 
               # weight the traits for the selection
-              traitWeight = c(1,0), 
+              b = c(1,0), 
               # population parameters
               nCrosses = 100, nProgeny = 10, 
               recombGens=1, nChr=1, mutRate=0,
               # coancestry parameters
-              A=A, lambda= (30*pi)/180 , nQTLperInd = 2, 
+              D=A, lambda= (30*pi)/180 , nQTLperInd = 2, 
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
               nGenerations = 40, keepBest=FALSE) 
 
 best = bestSol(res)["pop","Yield"];best
-xa = (res$M \%*\% DT$Yield)[best,]; xa 
-xAx = res$M[best,] \%*\% A \%*\% res$M[best,]; xAx 
-sum(res$M[best,]) # total # of inds selected
+qa = (res$Q \%*\% DT$Yield)[best,]; qa 
+qDq = res$Q[best,] \%*\% A \%*\% res$Q[best,]; qDq 
+sum(res$Q[best,]) # total # of inds selected
 
 pmonitor(res)
 

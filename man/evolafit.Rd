@@ -10,10 +10,10 @@ Using the AlphaSimR machinery it recreates the evolutionary forces applied to a 
 \usage{
 
 evolafit(formula, dt, 
-     constraintsUB, constraintsLB, traitWeight,
+     constraintsUB, constraintsLB, b,
      nCrosses=50, nProgeny=20,nGenerations=20, 
      recombGens=1, nChr=1, mutRate=0,
-     nQTLperInd=NULL, A=NULL, lambda=NULL,
+     nQTLperInd=NULL, D=NULL, lambda=NULL,
      propSelBetween=1,propSelWithin=0.5,
      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
      selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE,
@@ -24,19 +24,19 @@ evolafit(formula, dt,
 \arguments{
 
   \item{formula}{
-Formula of the form y~x where 'y' refers to the traits or features defining the average allelic substitution effects of the QTLs, and 'x'refers to the variable defining the genes or QTLs to be combined in the possible solutions.
+Formula of the form \emph{y~x where} \code{y} refers to the average allelic substitution effects of the QTLs (alpha) for each trait, and \code{x} refers to the variable defining the genes or QTLs to be combined in the possible solutions.
 }
   \item{dt}{
-A dataset containing the features/traits and classifiers/genes/QTLs.
+A dataset containing the average allelic effects (a) and classifiers/genes/QTLs.
 }
   \item{constraintsUB}{
-A numeric vector specifying the upper bound constraints in the traits/features (y). The length is equal to the number of traits/features in the formula. If missing is assume an infinite value for all traits. Solutions with higher value than the upper bound are assigned a -infinite value if the argument selectTop=TRUE and to +infinite when selectTop=FALSE, which is equivalent to reject/discard a solution based on the fitness function.
+A numeric vector specifying the upper bound constraints for the breeding values applied at each trait. The length is equal to the number of traits/features in the formula. If missing is assume an infinite value for all traits. Solutions (individuals in the population) with higher value than the upper bound are assigned a -infinite value if the argument \code{selectTop=TRUE} and to +infinite when \code{selectTop=FALSE}, which is equivalent to reject/discard a solution based on the fitness function.
 }
   \item{constraintsLB}{
-A numeric vector specifying the lower bound constraints in the traits/features (y). The length is equal to the number of traits/features in the formula. If missing is assume a -infinite value for all traits. Solutions with lower value than the lower bound are assigned a +infinite value if the argument selectTop=TRUE and to -infinite when selectTop=FALSE, which is equivalent to reject/discard a solution based on the fitness function.
+A numeric vector specifying the lower bound constraints for the breeding values applied at each trait. The length is equal to the number of traits/features in the formula. If missing is assume a -infinite value for all traits. Solutions with lower value than the lower bound are assigned a +infinite value if the argument \code{selectTop=TRUE} and to -infinite when \code{selectTop=FALSE}, which is equivalent to reject/discard a solution based on the fitness function.
 }
-  \item{traitWeight}{
-A numeric vector specifying the weights that each trait has in the fitness function (e.g., a selection index). The length is equal to the number of traits/features. If missing is assumed equal weight (1) for all traits.
+  \item{b}{
+A numeric vector specifying the weights that each trait has in the fitness function (i.e., a selection index). The length should be equal to the number of traits/features. If missing is assumed equal weight (1) for all traits.
 }
   \item{nCrosses}{
 A numeric value indicating how many crosses should occur in the population of solutions at every generation.
@@ -57,13 +57,13 @@ The number of chromosomes where features/genes should be allocated to. The defau
 A value between 0 and 1 to indicate the proportion of random QTLs that should mutate in each individual. For example, a value of 0.1 means that a random 10\% of the QTLs will mutate in each individual randomly taking values of 0 or 1. Is important to notice that this implies that the stopping criteria based in variance will never be reached because we keep introducing variance through random mutation. 
 }
   \item{nQTLperInd}{
-The number of QTLs/genes (classifier x) that should be fixed for the positive allele at the begginning of the simulation. If not specified it will be equal to the 20\% of the QTLs (calculated as the number of rows in the dt argument over 5). See details section.
+The number of QTLs/genes (classifier \code{x} in the formula) that should be fixed for the positive allele at the begginning of the simulation. If not specified it will be equal to the 20\% of the QTLs (calculated as the number of rows in the dt argument over 5). See details section.
 }
-  \item{A}{
-A relationship matrix between the levels of the 'x' variable or QTLs (not between the solutions). It is a kind of a linkage disequilibrium matrix. This function can be used or ignored in the fitness function. By default the weight to the x'Ax component is 0 though the lambda argument, where x is an individual/solution.
+  \item{D}{
+A relationship matrix between the QTLs (a kind of linkage disequilibrium) specified in the right side of the formula (levels of the \code{x} variable). This matrix can be used or ignored in the fitness function. By default the weight to the q'Dq component is 0 though the lambda argument, where x is an individual in the population of a solution.
 }
   \item{lambda}{
-A numeric value indicating the weight assigned to the relationship between levels of the classifiers in comparison with the trait value. If not specified is assumed to be 0. This can be used or ignored in your customized fitness function.
+A numeric value indicating the weight assigned to the relationship between QTLs in the fitness function. If not specified is assumed to be 0. This can be used or ignored in your customized fitness function.
 }
   \item{propSelBetween}{
 A numeric value between 0 and 1 indicating the proportion of families/crosses of solutions/individuals that should be selected. The default is 1, meaning all crosses are selected or passed to the next generation.
@@ -72,52 +72,83 @@ A numeric value between 0 and 1 indicating the proportion of families/crosses of
 A numeric value between 0 and 1 indicating the proportion of individuals/solutions within families/crosses that should be selected. The default value is 0.5, meaning that 50\% of the top individuals are selected.
 }
   \item{fitnessf}{
-An alternative fitness function for a linear combination of the traits specified in 'y' in the formula argument. If NULL, the default function will be:
+An alternative fitness function to be applied at the level of individuals or solutions. It could be a linear combination of the trait breeding values. The available variables internally are:
 
-function(Y,b,d,Q)\{(Y\%*\%b) - d\}
+\strong{Y}: matrix of trait breeding values for the individuals/solutions. Of dimensions s x t, s soultions and t traits.
 
-where Y\%*\%b is equivalent to xa in contribution theory, and d is equal to x'Ax, being x the contribution vector to the solution, a are the QTL effects, and A is the covariance between QTLs, Q is the QTL matrix for the solution, b are the weights for each trait, Y is the matrix of trait-values for each solution. If you provide your own fitness function please keep in mind that the variables Y, b, d and Q are already reserved and should always be added to your function (even if not used) in addition to your new variables.
+\strong{b}: vector of trait weights, specified in the 'b' argument. Of dimensions t x 1, t traits by 1
+
+\strong{Q}: matrix of QTLs for the individuals/solutions. Of dimensions s x p, s solutions and p QTL columns.
+
+\strong{D}: matrix of relationship between the QTLs, specified in the 'D' argument. Of dimensions p x p, for p QTL columns
+
+\strong{d}: vector of inbreeding contribution for each individual/solution calculated as diag(Q'DQ). Of dimensions s x 1, s solutions by 1
+
+If \code{fitnessf=NULL}, the default function will be the \code{\link{ocsFun}} function:
+
+\code{ function(Y,b,d,Q,D)\{(Y\%*\%b) - d\} }
+
+where \code{(Y\%*\%b)} is equivalent to [(Q'a)b] in genetic contribution theory, and \code{d} is equal to the diagonal values from Q'DQ from contribution theory, 
+
+\strong{\emph{If you provide your own fitness function please keep in mind that the variables Y, b, Q, D, and d are already reserved and these variables should always be added to your function (even if you do not use them) in addition to your new variables.}}
 
 }
   \item{verbose}{
 A logical value indicating if we should print logs.
 }
   \item{dateWarning}{
-A logical value indicating if you should be warned when there is a new version on CRAN.
+A logical value indicating if you should be warned when there is a new version on \code{CRAN}.
 }
   \item{selectTop}{
-Selects highest values for the fitness value if TRUE. Selects lowest values if FALSE.
+Selects highest values for the fitness value if \code{TRUE}. Selects lowest values if \code{FALSE}.
 }
   \item{tolVarG}{
-A stopping criteria (tolerance for genetic variance) when the variance across traits is smaller than this value, which is equivalent to assume that all solutions having the same QTL profile (depleted variance). The default value is 1e-6 and is computed as the sum of the diagonal values of the genetic variance covariance matrix between traits.
+A stopping criteria (tolerance for genetic variance) when the variance across traits is smaller than this value, which is equivalent to assume that all solutions having the same QTL profile (depleted variance). The default value is \code{1e-6} and is computed as the sum of the diagonal values of the genetic variance covariance matrix between traits.
 }
   \item{keepBest}{
-A TRUE/FALSE value to indicate if we should store the QTL matrix and pedigree of the solutions selected across generations. This can be useful if we want to recreate the path to the best solution (e.g., best crossing path to a product).
+A \code{TRUE/FALSE} value to indicate if we should store the QTL matrix and pedigree of the solutions selected across generations. This can be useful if we want to recreate the path to the best solution (e.g., best crossing path to a product).
 }
-\item{\dots}{Further arguments to be passed to the fitness function.}
+\item{\dots}{Further arguments to be passed to the fitness function if required.}
 
 }
 \details{
 
-Using the AlphaSimR machinery (runMacs) it recreates the evolutionary forces applied to a problem where possible solutions replace individuals and combinations of variables in the problem replace the genes. Then evolutionary forces are applied to find a close-to-optimal solution. The number of solutions are controlled with the nCrosses and nProgeny parameters, whereas the number of initial QTLs activated in a solution is controlled by the nQTLperInd parameter. The number of activated QTLs of course will increase if has a positive effect in the fitness of the solutions. The drift force can be controlled by the recombGens parameter. The mutation rate can be controlled with the mutRate parameter. The recombination rate can be controlled with the nChr argument.
+Using the \code{AlphaSimR} machinery (runMacs) it recreates the evolutionary forces applied to a problem where possible solutions replace individuals and combinations of variables in the problem replace the genes. Then evolutionary forces are applied to find a close-to-optimal solution. The number of solutions are controlled with the nCrosses and nProgeny parameters, whereas the number of initial QTLs activated in a solution is controlled by the nQTLperInd parameter. The number of activated QTLs of course will increase if has a positive effect in the fitness of the solutions. The drift force can be controlled by the recombGens parameter. The mutation rate can be controlled with the mutRate parameter. The recombination rate can be controlled with the nChr argument.
 
-The indivPerformance output contains the columns x'a, x'Ax, deltaC and nQTLs. These mean the following:
+The \code{indivPerformance} output slot contains the columns q'a, q'Dq, deltaC and nQTLs. These mean the following:
 
-In x'a or score : 'x' represents the contribution vector, 'a' is the vector of QTN effects, so x'a is the breeding value of a solution. Internally, we multiply all the matrix of solutions (Q) by the QTN effects (a).
-In deltaC : it represents the change in coancestry (e.g., inbreeding), it can be thought as the rate of coancestry.
-In x'Ax : 'x' represents the contribution vector, 'A' is the linkage disequilibrium matrix between QTNs (whatever the QTNs represent for your specific problem). In practice we do QAQ' and extract the diagonal values.
-In generation : it represents the generation at which this solution appeared.
-In nQTNs : it represent the final number of QTNs that are activated in homozygote state for the positive effect.
+\strong{score} : 'q' represents the fitness function value of a solution.
+
+\strong{In deltaC} : it represents the change in coancestry (e.g., inbreeding), it can be thought as the rate of coancestry.
+
+\strong{In q'Dq} : 'q' represents the contribution vector, 'D' is the linkage disequilibrium matrix between QTNs (whatever the QTNs represent for your specific problem). In practice we do QAQ' and extract the diagonal values.
+
+\strong{In generation} : it represents the generation at which this solution appeared.
+
+\strong{In nQTNs} : it represent the final number of QTNs that are activated in homozygote state for the positive effect.
+
+During the run the columns printed in the console mean the following:
+
+\strong{generation}: generation of reproduction
+
+\strong{constrainedUB}: number of solutions constrained by the upper bound specified
+
+\strong{constrainedLB}: number of solutions constrained by the lower bound specified
+
+\strong{total}: total number of solutions/progeny/rows available in a given generation
+
+\strong{varG}: genetic variance present in the population due to the QTNs
+
 
 }
 \value{
 
 \describe{
 
-\item{indivPerformance}{the matrix of x'a (score), deltaC, x'Ax, generation, nQTNs per solution per generation. See details section above. }
+\item{indivPerformance}{the matrix of q'a (score), deltaC, q'Dq, generation, nQTNs per solution per generation. See details section above. }
 \item{pedBest}{if the argument keepBest=TRUE this contains the pedigree of the selected solutions across iterations.}
-\item{$M}{the matrix of QTN genotypes for the solutions/individuals selected at the end of the run.}
-\item{$Mb}{the matrix of top (parents) QTN genotypes for the solutions/individuals at the end of the run.}
+\item{$Q}{the matrix of QTN genotypes for the solutions/individuals selected at the end of the run.}
+\item{$Qb}{the matrix of top (parents) QTN genotypes for the solutions/individuals at the end of the run.}
 \item{$score}{a matrix with scores for different metrics across n generations of evolution.}
 \item{$pheno}{the matrix of phenotypes of individuals/solutions present in the last generation.}
 \item{$phenoBest}{the matrix of phenotypes of top (parents) individuals/solutions present in the last generation.}
@@ -178,8 +209,8 @@ res00<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
                constraintsUB = c(10,Inf), nGenerations = 10
 )
 best = bestSol(res00)["pop","Value"]
-xa = res00$M[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); xa
-res00$M[best,]
+qa = res00$Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
+res00$Q[best,]
 res00$score[nrow(res00$score),]
 
 # more complete specification
@@ -189,21 +220,21 @@ res0<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
                # constraints on traits: if smaller than this ignore
                constraintsLB= c(-Inf,-Inf), 
                # weight the traits for the selection (fitness function)
-               traitWeight = c(0,1), 
+               b = c(0,1), 
                # population parameters
                nCrosses = 100, nProgeny = 20, 
                # genome parameters
                recombGens = 1, nChr=1, mutRate=0, nQTLperInd = 1, 
                # coancestry parameters
-               A=NULL, lambda=0, 
+               D=NULL, lambda=0, 
                # selection parameters
                propSelBetween = .9, propSelWithin =0.9, 
                nGenerations = 50
 ) 
 
 best = bestSol(res0)["pop","Value"]
-xa = res0$M[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); xa
-res0$M[best,]
+qa = res0$Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
+res0$Q[best,]
 res0$score[nrow(res0$score),]
 
 # $`Genes`

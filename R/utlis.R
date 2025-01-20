@@ -26,12 +26,12 @@
 ##################################################################################################
 ##################################################################################################
 
-fitnessf <-function (Y, b, d, Q) {
+ocsFun <-function (Y, b, d, Q, D) {
   return(Y %*% b - d)
 }
 
 varM <- function(object){
-  sum(apply(object$M,2,var, na.rm=TRUE))
+  sum(apply(object$Q,2,var, na.rm=TRUE))
 }
 
 stan <- function(x){

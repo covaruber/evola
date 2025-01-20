@@ -17,6 +17,13 @@
       * [r3] We print in the console the generation, number of removed solutions/individuals based on constraints, total number of individuals left and genetic variance
       * [r3] Now we allow to set different number of chromosomes which allows for a greater recombination rate by avoiding the LD and interference of having too many QTLs in the same chromosome
 
+2025-01-18 Giovanny Covarrubias Pazaran <cova_ruber@live.com.mx>
+
+      * [r4] We set the OMP_THREAD_LIMITS to 2 with the .onLoad function to avoid CRAN checks to reject for using more than 2 cores during the vignette building step
+
+2025-04-18 Giovanny Covarrubias Pazaran <cova_ruber@live.com.mx>
+
+      * [r5] We changed the name of the argument to make the use of fitness functions more straightforward.
 
 
 ## TO DO

@@ -39,7 +39,7 @@ M <- M_technow
 \donttest{
   A <- A.mat(M)
   # run the genetic algorithm
-  # we assig a weight to x'Ax of (20*pi)/180=0.34
+  # we assig a weight to x'Dx of (20*pi)/180=0.34
   res<-evolafit(formula = c(GY, occ)~hy,
                 dt= DT, 
                 # constraints: if sum is greater than this ignore
@@ -47,24 +47,24 @@ M <- M_technow
                 # constraints: if sum is smaller than this ignore
                 constraintsLB= c(-Inf,-Inf),
                 # weight the traits for the selection
-                traitWeight = c(1,0), 
+                b = c(1,0), 
                 # population parameters
                 nCrosses = 100, nProgeny = 10, 
                 recombGens=1, nChr=1, mutRate=0,
                 # coancestry parameters
-                A=A, lambda= (20*pi)/180 , nQTLperInd = 70, 
+                D=A, lambda= (20*pi)/180 , nQTLperInd = 70, 
                 # selection parameters
                 propSelBetween = 0.5, propSelWithin =0.5, 
                 nGenerations = 20, keepBest=FALSE) 
   
   best = bestSol(res)["pop","GY"]
-  xa = (res$M \%*\% DT$GY)[best,]; xa 
-  xAx = res$M[best,] \%*\% A \%*\% res$M[best,]; xAx 
-  sum(res$M[best,]) # total # of inds selected
+  qa = (res$Q \%*\% DT$GY)[best,]; qa 
+  qAq = res$Q[best,] \%*\% A \%*\% res$Q[best,]; qAq 
+  sum(res$Q[best,]) # total # of inds selected
   
   pmonitor(res)
-  plot(DT$GY, col=as.factor(res$M[best,]), 
-       pch=(res$M[best,]*19)+1)
+  plot(DT$GY, col=as.factor(res$Q[best,]), 
+       pch=(res$Q[best,]*19)+1)
        
   pareto(res)
 
