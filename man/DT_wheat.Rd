@@ -109,7 +109,7 @@ res<-evolafit(formula=cbind(cov, occ)~id, dt= DT2,
               nGenerations = 30, verbose = TRUE, keepBest=FALSE) 
 
 
-best <- bestSol(res)["pop","cov"]
+best <- bestSol(res$pop)[1]
 sum(res$pop@Q[best,]) # total # of inds selected
 pareto(res)
 }

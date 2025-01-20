@@ -274,7 +274,7 @@ evolafit <- function(formula, dt,
   bestEvolaMod@Q <- Qb
   bestEvolaMod@pedTrack <- pedBest
   
-  res <- list(pop=popEvolaMod, simParam=SP, call=mc, popBest=bestEvolaMod)
+  res <- list(pop=popEvolaMod, simParam=SP, popBest=bestEvolaMod, call=mc)
   return(res)
 }
 

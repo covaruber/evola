@@ -51,7 +51,7 @@ res<-evolafit(formula=cbind(Yield, occ)~id, dt= DT,
               propSelBetween = 0.5, propSelWithin =0.5, 
               nGenerations = 40, keepBest=FALSE) 
 
-best = bestSol(res)["pop","Yield"];best
+best = bestSol(res$pop)[1];best
 qa = (res$pop@Q \%*\% DT$Yield)[best,]; qa 
 qDq = res$pop@Q[best,] \%*\% A \%*\% res$pop@Q[best,]; qDq 
 sum(res$pop@Q[best,]) # total # of inds selected

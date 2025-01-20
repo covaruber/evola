@@ -52,7 +52,9 @@ Jr <- function(nr){
 }
 
 bestSol <- function(object, selectTop=TRUE){
-  res1 <- apply(object@pheno,2,function(y){
+  if(!inherits(object, c("Pop","evolaMod"))){stop("Object of type Pop or evolaMod expected", call. = FALSE)}
+  if(nInd(object) > 0){
+  res1 <- apply(object@gv,2,function(y){
     yg <- y[which( y < Inf)]
     yg <- yg[which( yg > -Inf)]
     if(selectTop){
@@ -62,6 +64,9 @@ bestSol <- function(object, selectTop=TRUE){
     }
     return(best)
   })
+  }else{
+    stop("No individuals in the object provided")
+  }
   # if(nInd(object$best) > 0){
   #   res2 <- apply(object$phenoBest,2,function(y){
   #     yg <- y[which( y < Inf)]
@@ -76,13 +81,13 @@ bestSol <- function(object, selectTop=TRUE){
   #   res <- rbind(res1,res2)
   #   rownames(res) <- c("pop","best")
   # }else{
-    res <- t(as.matrix(res1))
-    rownames(res) <- c("pop")
-  # }
-  
-  
-  colnames(res) <- object@traits
-  return(res)
+  #   res <- t(as.matrix(res1))
+  #   rownames(res) <- c("pop")
+  # # }
+  # 
+  # 
+  names(res1) <- object@traits
+  return(res1)
 } 
 
 A.mat <- function (X, min.MAF = NULL) 
