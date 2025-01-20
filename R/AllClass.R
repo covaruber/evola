@@ -1,28 +1,9 @@
-#' lmebreed class
-#'
-#'
-
-# setClass("lmebreed", representation = list(relfac = "list"),
-#          contains = "merMod")
-# setClass("glmerlmebreed", representation = list(resp="glmResp"),
-#          contains = "lmebreed")
-# setClass("lmerlmebreed", representation = list(resp="lmerResp"),
-#          contains = "lmebreed")
-
-setClass("lmebreed", slots = c(relfac = "list", udu = "list"),
-         contains = "merMod")
-setClass("glmerlmebreed", slots = c(resp="glmResp"),
-         contains = "lmebreed")
-setClass("lmerlmebreed", slots = c(resp="lmerResp"),
-         contains = "lmebreed")
-
-# setClass("lmebreed", representation = list(relfac = "list", udu="list"),
-#          contains = "merMod")
-# setClass("glmerlmebreed", representation = list(resp="glmResp"),
-#          contains = "lmebreed")
-# setClass("lmerlmebreed", representation = list(resp="lmerResp"),
-#          contains = "lmebreed")
-
-
+# class for evola population class
+setClass(
+  "evolaMod",
+  contains="Pop",
+  slots=c(Q="matrix", Qb="matrix", score="matrix", pointMut="numeric", indivPerformance="data.frame",
+          constCheckUB="matrix", constCheckLB="matrix", traits="character", pedBest="data.frame")
+) #-> evolaMod
 
 
