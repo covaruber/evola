@@ -258,29 +258,23 @@ evolafit <- function(formula, dt,
   # 7) retrieve output of best combinations
   Q <- pullQtlGeno(pop, simParam = SP, trait=1); Q <- Q/2
   Qb <- pullQtlGeno(best, simParam = SP, trait=1); Qb <- Qb/2
-  colnames(Q) <- apply(data.frame(dt[,classifiers]),1,function(x){paste(x,collapse = "_")})
+  colnames(Q) <- colnames(Qb) <- apply(data.frame(dt[,classifiers]),1,function(x){paste(x,collapse = "_")})
   indivPerformance <- do.call(rbind, indivPerformance)
+  # transform the Pop 
+  popEvolaMod <- as(pop,"evolaMod")
+  popEvolaMod@Q <- Q
+  popEvolaMod@score <- averagePerformance[1:j,]
+  popEvolaMod@pointMut <- nrow(pointMut)
+  popEvolaMod@indivPerformance <- indivPerformance
+  popEvolaMod@constCheckUB <- constCheckUB
+  popEvolaMod@constCheckLB <- constCheckLB
+  popEvolaMod@traits <- traits
+  # transform the Pop
+  bestEvolaMod <- as(best,"evolaMod")
+  bestEvolaMod@Q <- Qb
+  bestEvolaMod@pedTrack <- pedBest
   
-  result <- as(pop,"evolaMod")
-  result@Q <- Q
-  result@Qb <- Qb
-  result@score <- averagePerformance[1:j,]
-  result@pointMut <- nrow(pointMut)
-  result@indivPerformance <- indivPerformance
-  result@constCheckUB <- constCheckUB
-  result@constCheckLB <- constCheckLB
-  result@traits <- traits
-  result@pedBest <- pedBest
-  # result@call <- mc
-  
-  # assign("SPE",SP,envir = globalenv())
-  
-  # result <- list(Q=Q, Qb=Qb, score=averagePerformance[1:j,], pheno=pop@pheno,phenoBest=best@pheno, pop=pop, best=best, 
-  #             simParam= SP, pointMut=nrow(pointMut),
-  #             indivPerformance=indivPerformance, constCheckUB=constCheckUB, constCheckLB=constCheckLB,
-  #             traits=traits, pedBest=pedBest, call=mc )
-  # class(result) <- "evolaMod"
-  res <- list(pop=result, simParam=SP, call=mc)
+  res <- list(pop=popEvolaMod, simParam=SP, call=mc, popBest=bestEvolaMod)
   return(res)
 }
 
