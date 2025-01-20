@@ -35,8 +35,8 @@ ocsFun <-function (Y, b, d, Q, D) {
   return(Y %*% b - d)
 }
 
-varM <- function(object){
-  sum(apply(object$pop@Q,2,var, na.rm=TRUE))
+varQ <- function(object){
+  sum(apply(object@Q,2,var, na.rm=TRUE))
 }
 
 stan <- function(x){

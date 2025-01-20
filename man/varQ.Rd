@@ -1,5 +1,5 @@
-\name{varM}
-\alias{varM}
+\name{varQ}
+\alias{varQ}
 
 \title{
 Extract the variance existing in the genome solutions
@@ -8,7 +8,7 @@ Extract the variance existing in the genome solutions
 Extracts the variance found across the M element of the resulting object of the evolafit() function which contains the different solution and somehow represents the genome of the population. 
 }
 \usage{
-varM(object)
+varQ(object)
 }
 
 \arguments{
@@ -69,7 +69,7 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                nGenerations = 50
 ) 
 
-varM(res0)
+varQ(res0$pop)
 }
 
 }

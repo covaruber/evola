@@ -1,5 +1,5 @@
-\name{fitnessf}
-\alias{fitnessf}
+\name{ocsFun}
+\alias{ocsFun}
 
 \title{
 Fitness function from contribution theory
@@ -8,7 +8,7 @@ Fitness function from contribution theory
 Simple function for fitness where an index of traits is weighted by the group relationship. 
 }
 \usage{
-fitnessf(Y,b,d,Q)
+ocsFun(Y,b,d,Q)
 }
 
 \arguments{
@@ -36,7 +36,7 @@ Internally, we use this function in the following way:
 
 The Y matrix is the matrix of trait-GEBVs and b is the user-specified trait weights. 
 
-d = xtAx * lambda; where xtAx is equal to Matrix::diag(Q\%*\%Matrix::tcrossprod(A,Q)) of dimensions n x n
+d = qtDq * lambda; where qtDq is equal to Matrix::diag(Q\%*\%Matrix::tcrossprod(A,Q)) of dimensions n x n
 
 Notice that Q represents the marker of QTLs (columns) for all solutions (rows) and A the LD between QTLs. The user can modify this function as needed and provide it to the evolafit function along with other arguments.
 
@@ -59,7 +59,7 @@ Giovanny Covarrubias-Pazaran (2024).  evola: a simple evolutionary algorithm for
 Y=matrix(1:12,4,3) # 4 solutions with 3 traits
 b=c(1,2,3) # weights for each trait
 d=c(1,1,1,1) # coancestry for each solution
-fitnessf(Y,b,d) # Yb - d where d is QAQ' and A is the LD between QTNs
+ocsFun(Y,b,d) # Yb - d where d is QAQ' and A is the LD between QTNs
 
 }
 \seealso{\code{\link{evolafit}} -- the core function of the package }

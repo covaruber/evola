@@ -72,7 +72,7 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                nGenerations = 50
 ) 
 
-bestSol(res0)
+bestSol(res0$pop)
 }
 
 }
