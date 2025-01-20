@@ -83,7 +83,7 @@ best=bestSol(res0)["pop","Value"]; best
 # actual solution
 res0$M[best,] 
 # value and weight for the selected solution 
-xa = res0$M[best,] %*% as.matrix(Gems[,c("Weight","Value")]); xa
+qa = res0$M[best,] %*% as.matrix(Gems[,c("Weight","Value")]); qa
 ```
 
 The best selection of Gems was the one one found in the M element of the resulting object.
@@ -124,15 +124,15 @@ We then use the bestSol() function to extract the solution that maximized our fi
 
 ```{r, fig.show='hold'}
 best = bestSol(res)["pop","Yield"];
-sum(res$M[best,]) # total # of inds selected
+sum(res$Q[best,]) # total # of inds selected
 ```
 
 We can use the pmonitor() function to see if convergence was achieved between the best and the average solutions.
 
 ```{r, fig.show='hold'}
 pmonitor(res)
-plot(DT$Yield, col=as.factor(res$M[best,]), 
-     pch=(res$M[best,]*19)+1)
+plot(DT$Yield, col=as.factor(res$Q[best,]), 
+     pch=(res$Q[best,]*19)+1)
 
 ```
 
@@ -169,15 +169,15 @@ The way to specify this problem is exactly the same than with the optimization o
 #                 propSelBetween = 0.5, propSelWithin =0.5, 
 #                 nGenerations = 15, verbose=FALSE) 
 # best = bestSol(res)["pop","GY"]
-# sum(res$M[best,]) # total # of inds selected
+# sum(res$Q[best,]) # total # of inds selected
 ```
 
 You can use the pmonitor() or pareto() functions to see the evolution of the solution and see the performance of the solution selected.
 
 ```{r}
 # pmonitor(res)
-# plot(DT$GY, col=as.factor(res$M[best,]), 
-#        pch=(res$M[best,]*19)+1)
+# plot(DT$GY, col=as.factor(res$Q[best,]), 
+#        pch=(res$Q[best,]*19)+1)
 ```
 
 Notice that we have maximized te GY variable which is the pure phenotype, but alternatively you could use the GEBVs to get crosses with maximum GEBV or predict the TGV (total genetic value) to maximize the F1 performance (including the dominance). 
@@ -246,7 +246,7 @@ res<-evolafit(cbind(dummy, occ)~id, dt= DT2,
                 nGenerations = 15, verbose = FALSE)
 
 best = bestSol(res)["pop","dummy"]
-sum(res$M[best,]) # total # of inds selected
+sum(res$Q[best,]) # total # of inds selected
 ```
 
 You can see which individuals were selected.
@@ -254,7 +254,7 @@ You can see which individuals were selected.
 ```{r}
 cex <- rep(0.5,nrow(PCWheat))
 names(cex) <- rownames(PCWheat)
-cex[names(which(res$M[best,]==1))]=2
+cex[names(which(res$Q[best,]==1))]=2
 plot(PCWheat[,1], PCWheat[,2], col = TreeWheat, cex=cex,
      pch = TreeWheat, xlab = "pc1", ylab = "pc2")
 ```
@@ -286,7 +286,7 @@ res<-evolafit(cbind(cov, occ)~id, dt= DT2,
                 propSelBetween = 0.5, propSelWithin =0.5, 
                 nGenerations = 15, verbose = FALSE)
 best = bestSol(res)["pop","cov"]
-sum(res$M[best,]) # total # of inds selected
+sum(res$Q[best,]) # total # of inds selected
 ```
 
 You can plot the final results and see which individuals were picked.
@@ -294,7 +294,7 @@ You can plot the final results and see which individuals were picked.
 ```{r}
 cex <- rep(0.5,nrow(PCWheat))
 names(cex) <- rownames(PCWheat)
-cex[names(which(res$M[best,]==1))]=2
+cex[names(which(res$Q[best,]==1))]=2
 plot(PCWheat[,1], PCWheat[,2], col = TreeWheat, cex=cex,
      pch = TreeWheat, xlab = "pc1", ylab = "pc2")
 ```
@@ -364,20 +364,20 @@ Notice that we have added a matrix product Q%*%Z to see how may times each paren
 #               nGenerations = 15, verbose=FALSE) 
 # 
 # best = bestSol(res)["pop","GY"]
-# xa = (res$M %*% DT$GY)[best,]; xa 
-# xAx = res$M[best,] %*% A %*% res$M[best,]; xAx 
-# sum(res$M[best,]) # total # of inds selected
+# qa = (res$Q %*% DT$GY)[best,]; qa 
+# qDq = res$Q[best,] %*% A %*% res$Q[best,]; qDq 
+# sum(res$Q[best,]) # total # of inds selected
 ```
 
 Now, last but not least we check how many times each parent was used:
 
 ```{r}
 # # check how many times an individual was used in the final crosses
-# crosses <- data.frame(cross=names(which( res$M[best,] == 1)))
+# crosses <- data.frame(cross=names(which( res$Q[best,] == 1)))
 # table(unlist(strsplit(crosses$cross,":")))
 # # check performance of crosses selected
-# plot(DT$GY, col=as.factor(res$M[best,]), 
-#        pch=(res$M[best,]*19)+1)
+# plot(DT$GY, col=as.factor(res$Q[best,]), 
+#        pch=(res$Q[best,]*19)+1)
 ```
 
 ### 6) Customizing a fitness function (linear regression example)
@@ -435,14 +435,14 @@ pmonitor(res0)
 # this time the best solution is the one that minimizes the error
 error = ( stan(y) - apply( X*res0$pheno,1,sum ) )^2
 best=which(error == min(error))[1]
-xa=res0$M[best,] %*% as.matrix(dt[,c("inter","alpha1")]); xa
+qa=res0$M[best,] %*% as.matrix(dt[,c("inter","alpha1")]); qa
 
-plot( as.matrix(mtcars[,c("inter","hp")]) %*% t(xa)  , mtcars$mpg,
+plot( as.matrix(mtcars[,c("inter","hp")]) %*% t(qa)  , mtcars$mpg,
       main="Correlation between GA-prediction and observed") # GA
 plot( (mtcars$hp * mod$coefficients[2] ) + mod$coefficients[1] , mtcars$mpg,
       main="Correlation between lm-prediction and observed") # LM
 # Correlation between GA-prediction and observed 
-cor( as.matrix(mtcars[,c("inter","hp")]) %*% t(xa)  , mtcars$mpg) 
+cor( as.matrix(mtcars[,c("inter","hp")]) %*% t(qa)  , mtcars$mpg) 
 # Correlation between lm-prediction and observed
 cor( (mtcars$hp * mod$coefficients[2] ) + mod$coefficients[1] , mtcars$mpg) # LM
 

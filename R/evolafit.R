@@ -25,7 +25,7 @@ evolafit <- function(formula, dt,
   if(!all(traits%in%colnames(dt))){stop("Specified traits are not traits in the dataset. Please correct.", call. = FALSE)}
   # add the fitness function (current options are qa=-1 to ln>=0 )
   if(is.null(fitnessf)){
-    fitnessf <- ocsFun()
+    fitnessf <- ocsFun
   };
   classifiers <- elements[[2]]
   # check that the user has provided a single value for each QTL
