@@ -36,7 +36,26 @@ ocsFun <-function (Y, b, d, Q, D) {
 }
 
 varQ <- function(object){
-  sum(apply(object@Q,2,var, na.rm=TRUE))
+  nTraits <- length(object$pop@traits)
+  n <- numeric()
+  for(iTrait in 1:nTraits){
+    Q <- pullQtlGeno(object$pop, simParam = object$simParam, trait=iTrait); Q <- Q/2
+    n[iTrait] <- sum(apply(Q,2,var, na.rm=TRUE))
+  }
+  names(n) <- object$pop@traits
+  return(n)
+}
+
+nQtl <- function(object){
+  nTraits <- length(object$pop@traits)
+  n <- matrix(NA, nrow = nInd(object$pop), ncol = nTraits)
+  for(iTrait in 1:nTraits){
+    Q <- pullQtlGeno(object$pop, simParam = object$simParam, trait=iTrait); Q <- Q/2
+    n[,iTrait] <- apply(Q, 1, function(x){length(which(x > 0))})
+  }
+  colnames(n) <- object$pop@traits
+  rownames(n) <- object$pop@id
+  return(n)
 }
 
 stan <- function(x){

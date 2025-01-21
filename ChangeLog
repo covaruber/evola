@@ -28,6 +28,7 @@
 
 
 ## TO DO
++ Rename score by fitness in the score table
 + Double check that mutation goes both directions, maybe an additional argument.
 + Not only allow the posibility of mutation in the genome, but also in the addtive effects (mutRateTrait)
 
