@@ -81,7 +81,7 @@ When looking at the results of the evolution we can observe that the best soluti
 # index for the best solution for trait Value
 best=bestSol(res0$pop)["Value"]; best 
 # actual solution
-Q <- pullQtlGeno(res00$pop, simParam = res00$simParam, trait=1); Q <- Q/2
+Q <- pullQtlGeno(res0$pop, simParam = res0$simParam, trait=1); Q <- Q/2
 Q[best,] 
 # value and weight for the selected solution 
 qa = Q[best,] %*% as.matrix(Gems[,c("Weight","Value")]); qa
@@ -441,7 +441,7 @@ res0<-evolafit(formula=cbind(inter,alpha1)~qtl, dt= dt,
 Q <- pullQtlGeno(res0$pop, simParam = res0$simParam, trait=1); Q <- Q/2
 pmonitor(res0)
 # this time the best solution is the one that minimizes the error
-error = ( stan(y) - apply( X*pheno,1,sum ) )^2
+error = ( stan(y) - apply( X*res0$pop@pheno,1,sum ) )^2
 best=which(error == min(error))[1]
 qa=Q[best,] %*% as.matrix(dt[,c("inter","alpha1")]); qa
 

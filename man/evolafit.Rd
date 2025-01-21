@@ -237,7 +237,7 @@ res0<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
                nGenerations = 50
 ) 
 
-Q <- pullQtlGeno(res00$pop, simParam = res00$simParam, trait=2); Q <- Q/2
+Q <- pullQtlGeno(res0$pop, simParam = res0$simParam, trait=2); Q <- Q/2
 best = bestSol(res0$pop)["Value"]
 qa = Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
 Q[best,]
