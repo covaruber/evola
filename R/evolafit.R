@@ -177,16 +177,21 @@ evolafit <- function(formula, dt,
       }
     }else{pointMut=as.data.frame(matrix(NA, nrow=0, ncol=1))}
     # extract solutions for the trait 1 because all traits have the same QTLs
-    Q <- pullQtlGeno(pop, simParam = SP, trait = 1)  
-    Q <- as(Q, Class = "dgCMatrix")
-    rownames(Q) <- pop@id
-    constCheckUB <- constCheckLB <- matrix(1, nrow=nrow(Q), ncol=length(traits))
+    # Q <- pullQtlGeno(pop, simParam = SP, trait = 1)  
+    # Q <- as(Q, Class = "dgCMatrix")
+    # rownames(Q) <- pop@id
+    constCheckUB <- constCheckLB <- matrix(1, nrow=nrow( pullQtlGeno(pop, simParam = SP, trait = 1)  ), ncol=length(traits))
     qaFinal <- list()
     
     ################################
     ################################
     ## FOR EACH TRAIT
     for(iTrait in 1:length(traits)){ # iTrait=1
+      
+      Q <- pullQtlGeno(pop, simParam = SP, trait = iTrait)  
+      Q <- as(Q, Class = "dgCMatrix")
+      rownames(Q) <- pop@id
+      
       qaOr <- Q %*% SP$traits[[iTrait]]@addEff # solutions * alpha for the iTrait
       qaFinal[[iTrait]] <- qaOr
       if((max(qaOr)-min(qaOr)) > 0){ # if there is variation
@@ -256,13 +261,13 @@ evolafit <- function(formula, dt,
   ################################
   ################################
   # 7) retrieve output of best combinations
-  Q <- pullQtlGeno(pop, simParam = SP, trait=1); Q <- Q/2
-  Qb <- pullQtlGeno(best, simParam = SP, trait=1); Qb <- Qb/2
-  colnames(Q) <- colnames(Qb) <- apply(data.frame(dt[,classifiers]),1,function(x){paste(x,collapse = "_")})
+  # Q <- pullQtlGeno(pop, simParam = SP, trait=2); Q <- Q/2
+  # Qb <- pullQtlGeno(best, simParam = SP, trait=2); Qb <- Qb/2
+  # colnames(Q) <- colnames(Qb) <- apply(data.frame(dt[,classifiers]),1,function(x){paste(x,collapse = "_")})
   indivPerformance <- do.call(rbind, indivPerformance)
   # transform the Pop 
   popEvolaMod <- as(pop,"evolaMod")
-  popEvolaMod@Q <- Q
+  # popEvolaMod@Q <- Q
   popEvolaMod@score <- averagePerformance[1:j,]
   popEvolaMod@pointMut <- nrow(pointMut)
   popEvolaMod@indivPerformance <- indivPerformance
@@ -271,7 +276,7 @@ evolafit <- function(formula, dt,
   popEvolaMod@traits <- traits
   # transform the Pop
   bestEvolaMod <- as(best,"evolaMod")
-  bestEvolaMod@Q <- Qb
+  # bestEvolaMod@Q <- Qb
   bestEvolaMod@pedTrack <- pedBest
   
   res <- list(pop=popEvolaMod, simParam=SP, popBest=bestEvolaMod, call=mc)

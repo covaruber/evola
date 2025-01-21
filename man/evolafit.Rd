@@ -154,8 +154,6 @@ During the run the columns printed in the console mean the following:
 
 \item{indivPerformance}{the matrix of q'a (score), deltaC, q'Dq, generation, nQTNs per solution per generation. See details section above. }
 \item{pedBest}{if the argument keepBest=TRUE this contains the pedigree of the selected solutions across iterations.}
-\item{$Q}{the matrix of QTN genotypes for the solutions/individuals selected at the end of the run.}
-\item{$Qb}{the matrix of top (parents) QTN genotypes for the solutions/individuals at the end of the run.}
 \item{$score}{a matrix with scores for different metrics across n generations of evolution.}
 \item{$pheno}{the matrix of phenotypes of individuals/solutions present in the last generation.}
 \item{$phenoBest}{the matrix of phenotypes of top (parents) individuals/solutions present in the last generation.}
@@ -215,10 +213,10 @@ res00<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
                # constraints on traits: if greater than this ignore
                constraintsUB = c(10,Inf), nGenerations = 10
 )
-best = bestSol(res00$pop)[1]
-qa = res00@Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
-res00@Q[best,]
-res00@score[nrow(res00@score),]
+best = bestSol(res00$pop)["Value"]
+Q <- pullQtlGeno(res00$pop, simParam = res00$simParam, trait=1); Q <- Q/2
+qa = Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
+
 
 # more complete specification
 res0<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
@@ -239,10 +237,10 @@ res0<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
                nGenerations = 50
 ) 
 
-best = bestSol(res0$pop)[1]
-qa = res0@Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
-res0@Q[best,]
-res0@score[nrow(res0$score),]
+Q <- pullQtlGeno(res00$pop, simParam = res00$simParam, trait=2); Q <- Q/2
+best = bestSol(res0$pop)["Value"]
+qa = Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
+Q[best,]
 
 # $`Genes`
 # Red   Blue Purple Orange  Green   Pink  White  Black Yellow 

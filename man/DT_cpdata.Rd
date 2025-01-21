@@ -50,16 +50,17 @@ res<-evolafit(formula=cbind(Yield, occ)~id, dt= DT,
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
               nGenerations = 40, keepBest=FALSE) 
-
-best = bestSol(res$pop)[1];best
-qa = (res$pop@Q \%*\% DT$Yield)[best,]; qa 
-qDq = res$pop@Q[best,] \%*\% A \%*\% res$pop@Q[best,]; qDq 
-sum(res$pop@Q[best,]) # total # of inds selected
+              
+Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
+best = bestSol(res$pop)["Yield"];best
+qa = (Q \%*\% DT$Yield)[best,]; qa 
+qDq = Q[best,] \%*\% A \%*\% Q[best,]; qDq 
+sum(Q[best,]) # total # of inds selected
 
 pmonitor(res)
 
-plot(DT$Yield, col=as.factor(res$pop@Q[best,]), 
-     pch=(res$pop@Q[best,]*19)+1)
+plot(DT$Yield, col=as.factor(Q[best,]), 
+     pch=(Q[best,]*19)+1)
 
 pareto(res)
  

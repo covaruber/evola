@@ -57,14 +57,15 @@ M <- M_technow
                 propSelBetween = 0.5, propSelWithin =0.5, 
                 nGenerations = 20, keepBest=FALSE) 
   
-  best = bestSol(res$pop)[1]
-  qa = (res$pop@Q \%*\% DT$GY)[best,]; qa 
-  qAq = res$pop@Q[best,] \%*\% A \%*\% res$pop@Q[best,]; qAq 
-  sum(res$pop@Q[best,]) # total # of inds selected
+  Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
+  best = bestSol(res$pop)["GY"]
+  qa = (Q \%*\% DT$GY)[best,]; qa 
+  qAq = Q[best,] \%*\% A \%*\% Q[best,]; qAq 
+  sum(Q[best,]) # total # of inds selected
   
   pmonitor(res)
-  plot(DT$GY, col=as.factor(res$pop@Q[best,]), 
-       pch=(res$pop@Q[best,]*19)+1)
+  plot(DT$GY, col=as.factor(Q[best,]), 
+       pch=(Q[best,]*19)+1)
        
   pareto(res)
 

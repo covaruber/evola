@@ -13,8 +13,6 @@
   
   \item{indivPerformance}{the matrix of q'a (score), deltaC, q'Dq, generation, nQTNs per solution per generation. See details section above. All other slots are inherited from class \code{"\link[AlphaSimR:Pop-class]{Pop}"}. }
   \item{pedBest}{if the argument keepBest=TRUE this contains the pedigree of the selected solutions across iterations. All other slots are inherited from class \code{"\link[AlphaSimR:Pop-class]{Pop}"}. }
-  \item{$Q}{the matrix of QTN genotypes for the solutions/individuals selected at the end of the run. All other slots are inherited from class \code{"\link[AlphaSimR:Pop-class]{Pop}"}. }
-  \item{$Qb}{the matrix of top (parents) QTN genotypes for the solutions/individuals at the end of the run. All other slots are inherited from class \code{"\link[AlphaSimR:Pop-class]{Pop}"}. }
   \item{$score}{a matrix with scores for different metrics across n generations of evolution. All other slots are inherited from class \code{"\link[AlphaSimR:Pop-class]{Pop}"}. }
   \item{$pheno}{the matrix of phenotypes of individuals/solutions present in the last generation. All other slots are inherited from class \code{"\link[AlphaSimR:Pop-class]{Pop}"}. }
   \item{$phenoBest}{the matrix of phenotypes of top (parents) individuals/solutions present in the last generation. All other slots are inherited from class \code{"\link[AlphaSimR:Pop-class]{Pop}"}. }

@@ -79,11 +79,12 @@ When looking at the results of the evolution we can observe that the best soluti
 
 ```{r}
 # index for the best solution for trait Value
-best=bestSol(res0$pop)[1]; best 
+best=bestSol(res0$pop)["Value"]; best 
 # actual solution
-res0$pop@Q[best,] 
+Q <- pullQtlGeno(res00$pop, simParam = res00$simParam, trait=1); Q <- Q/2
+Q[best,] 
 # value and weight for the selected solution 
-qa = res0$pop@Q[best,] %*% as.matrix(Gems[,c("Weight","Value")]); qa
+qa = Q[best,] %*% as.matrix(Gems[,c("Weight","Value")]); qa
 ```
 
 The best selection of Gems was the one one found in the M element of the resulting object.
@@ -123,16 +124,17 @@ res<-evolafit(cbind(Yield, occ)~id, dt= DT,
 We then use the bestSol() function to extract the solution that maximized our fitness function and constraints.
 
 ```{r, fig.show='hold'}
-best = bestSol(res$pop)[1];
-sum(res$pop@Q[best,]) # total # of inds selected
+Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
+best = bestSol(res$pop)["Yield"];
+sum(Q[best,]) # total # of inds selected
 ```
 
 We can use the pmonitor() function to see if convergence was achieved between the best and the average solutions.
 
 ```{r, fig.show='hold'}
 pmonitor(res)
-plot(DT$Yield, col=as.factor(res$pop@Q[best,]), 
-     pch=(res$pop@Q[best,]*19)+1)
+plot(DT$Yield, col=as.factor(Q[best,]), 
+     pch=(Q[best,]*19)+1)
 
 ```
 
@@ -168,16 +170,18 @@ The way to specify this problem is exactly the same than with the optimization o
 #                 # selection parameters
 #                 propSelBetween = 0.5, propSelWithin =0.5, 
 #                 nGenerations = 15, verbose=FALSE) 
+# 
+# Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
 # best = bestSol(res$pop)[1]
-# sum(res$pop@Q[best,]) # total # of inds selected
+# sum(Q[best,]) # total # of inds selected
 ```
 
 You can use the pmonitor() or pareto() functions to see the evolution of the solution and see the performance of the solution selected.
 
 ```{r}
 # pmonitor(res)
-# plot(DT$GY, col=as.factor(res$pop@Q[best,]), 
-#        pch=(res$pop@Q[best,]*19)+1)
+# plot(DT$GY, col=as.factor(Q[best,]), 
+#        pch=(Q[best,]*19)+1)
 ```
 
 Notice that we have maximized te GY variable which is the pure phenotype, but alternatively you could use the GEBVs to get crosses with maximum GEBV or predict the TGV (total genetic value) to maximize the F1 performance (including the dominance). 
@@ -245,8 +249,9 @@ res<-evolafit(cbind(dummy, occ)~id, dt= DT2,
                 propSelBetween = 0.5, propSelWithin =0.5, 
                 nGenerations = 15, verbose = FALSE)
 
+Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
 best = bestSol(res$pop)[1]
-sum(res$pop@Q[best,]) # total # of inds selected
+sum(Q[best,]) # total # of inds selected
 ```
 
 You can see which individuals were selected.
@@ -254,7 +259,7 @@ You can see which individuals were selected.
 ```{r}
 cex <- rep(0.5,nrow(PCWheat))
 names(cex) <- rownames(PCWheat)
-cex[names(which(res$pop@Q[best,]==1))]=2
+cex[names(which(Q[best,]==1))]=2
 plot(PCWheat[,1], PCWheat[,2], col = TreeWheat, cex=cex,
      pch = TreeWheat, xlab = "pc1", ylab = "pc2")
 ```
@@ -285,8 +290,10 @@ res<-evolafit(cbind(cov, occ)~id, dt= DT2,
                 # selection parameters
                 propSelBetween = 0.5, propSelWithin =0.5, 
                 nGenerations = 15, verbose = FALSE)
+
+Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
 best = bestSol(res$pop)[1]
-sum(res$pop@Q[best,]) # total # of inds selected
+sum(Q[best,]) # total # of inds selected
 ```
 
 You can plot the final results and see which individuals were picked.
@@ -294,7 +301,7 @@ You can plot the final results and see which individuals were picked.
 ```{r}
 cex <- rep(0.5,nrow(PCWheat))
 names(cex) <- rownames(PCWheat)
-cex[names(which(res$pop@Q[best,]==1))]=2
+cex[names(which(Q[best,]==1))]=2
 plot(PCWheat[,1], PCWheat[,2], col = TreeWheat, cex=cex,
      pch = TreeWheat, xlab = "pc1", ylab = "pc2")
 ```
@@ -363,21 +370,22 @@ Notice that we have added a matrix product Q%*%Z to see how may times each paren
 #               propSelBetween = 0.5, propSelWithin =0.5, 
 #               nGenerations = 15, verbose=FALSE) 
 # 
+# Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
 # best = bestSol(res$pop)[1]
-# qa = (res$pop@Q %*% DT$GY)[best,]; qa 
-# qDq = res$pop@Q[best,] %*% D %*% res$pop@Q[best,]; qDq 
-# sum(res$pop@Q[best,]) # total # of inds selected
+# qa = (Q %*% DT$GY)[best,]; qa 
+# qDq = Q[best,] %*% D %*% Q[best,]; qDq 
+# sum(Q[best,]) # total # of inds selected
 ```
 
 Now, last but not least we check how many times each parent was used:
 
 ```{r}
 # # check how many times an individual was used in the final crosses
-# crosses <- data.frame(cross=names(which( res$pop@Q[best,] == 1)))
+# crosses <- data.frame(cross=names(which( Q[best,] == 1)))
 # table(unlist(strsplit(crosses$cross,":")))
 # # check performance of crosses selected
-# plot(DT$GY, col=as.factor(res$pop@Q[best,]), 
-#        pch=(res$pop@Q[best,]*19)+1)
+# plot(DT$GY, col=as.factor(Q[best,]), 
+#        pch=(Q[best,]*19)+1)
 ```
 
 ### 6) Customizing a fitness function (linear regression example)
@@ -430,12 +438,12 @@ res0<-evolafit(formula=cbind(inter,alpha1)~qtl, dt= dt,
 ) 
 
 # develop a joint fitness function that uses all traits
-
+Q <- pullQtlGeno(res0$pop, simParam = res0$simParam, trait=1); Q <- Q/2
 pmonitor(res0)
 # this time the best solution is the one that minimizes the error
-error = ( stan(y) - apply( X*res0$pop@pheno,1,sum ) )^2
+error = ( stan(y) - apply( X*pheno,1,sum ) )^2
 best=which(error == min(error))[1]
-qa=res0$pop@Q[best,] %*% as.matrix(dt[,c("inter","alpha1")]); qa
+qa=Q[best,] %*% as.matrix(dt[,c("inter","alpha1")]); qa
 
 plot( as.matrix(mtcars[,c("inter","hp")]) %*% t(qa)  , mtcars$mpg,
       main="Correlation between GA-prediction and observed") # GA
