@@ -413,7 +413,8 @@ mod <- lm(mpg~cyl+disp+hp+drat, data=mtcarsT);mod
 ##############################
 # fit the genetic algorithm
 # 1) create initial QTL effects to evolve
-dt <- data.frame(rnorm(400),rnorm(400),rnorm(400),rnorm(400) )
+nqtls=100
+dt <- data.frame(rnorm(nqtls),rnorm(nqtls),rnorm(nqtls),rnorm(nqtls) )
 colnames(dt) <- paste0("alpha",1:ncol(dt))
 dt$qtl=paste0("Q",1:nrow(dt))
 head(dt); nrow(dt)
@@ -439,17 +440,26 @@ res0<-evolafit(formula=cbind(alpha1,alpha2,alpha3,alpha4)~qtl, dt= dt,
                D=NULL, lambda=0, nQTLperInd = 1, 
                # least MSE function (y - Xb)^2; Y are betas; X*Y is X*beta; 
                # Y and X are fixed, we just evolve the betas
-               fitnessf=function(Y,b,d,Q,X,y){  sum( (y) - apply(X*Y,1,sum) )^2 },
+               fitnessf=function(Y,b,d,Q,X,y){  
+                 # version where each solution (b.i) needs to be evaluated against y - Xb.i
+                 v <- 1:nrow(Y)
+                 mse = apply( apply(y[v]%*%Jc(nrow(Y)),2,stan) - apply(as.matrix(X[v,])%*% t(Y),2,stan),
+                              2, function(x){sum(x^2)} )
+                 return(mse)
+               },
                # selection parameters
                propSelBetween = 0.65, propSelWithin =0.65, selectTop=FALSE,
-               nGenerations = 45, y=y, X=X, verbose = FALSE
+               nGenerations = 20, y=y, X=X, verbose = FALSE
 ) 
 
 # check how the fitness function changed across generations
 pmonitor(res0)
 # this time the best solution is the one that minimizes the error
-error = ( stan(y) - apply( X*res0$pop@pheno,1,sum ) )^2;
-best=which(error == min(error))[1];best
+Xb_sols=apply(as.matrix(X)%*% t(as.matrix(res0$pop@gv)),2,stan)
+y_sols=apply(y%*%Jc(nrow(res0$pop@gv)),2,stan)
+e_sols=y_sols - Xb_sols
+mse = apply(e_sols,2,function(x){sum(x^2)})
+best=which(mse == min(mse))[1];best
 
 # extract solutions if desired
 Q <- pullQtlGeno(res0$pop, simParam = res0$simParam, trait=2); Q <- Q/2

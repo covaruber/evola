@@ -185,7 +185,7 @@ evolafit <- function(formula, dt,
     
     ################################
     ################################
-    ## FOR EACH TRAIT
+    ## FOR EACH TRAIT WE APPLY CONSTRAINTS
     for(iTrait in 1:length(traits)){ # iTrait=1
       
       Q <- pullQtlGeno(pop, simParam = SP, trait = iTrait)  
@@ -261,22 +261,17 @@ evolafit <- function(formula, dt,
   ################################
   ################################
   # 7) retrieve output of best combinations
-  # Q <- pullQtlGeno(pop, simParam = SP, trait=2); Q <- Q/2
-  # Qb <- pullQtlGeno(best, simParam = SP, trait=2); Qb <- Qb/2
-  # colnames(Q) <- colnames(Qb) <- apply(data.frame(dt[,classifiers]),1,function(x){paste(x,collapse = "_")})
   indivPerformance <- do.call(rbind, indivPerformance)
   # transform the Pop 
   popEvolaMod <- as(pop,"evolaMod")
-  # popEvolaMod@Q <- Q
-  popEvolaMod@score <- averagePerformance[1:j,]
+  popEvolaMod@score <- averagePerformance[1:j,,drop=FALSE]
   popEvolaMod@pointMut <- nrow(pointMut)
-  popEvolaMod@indivPerformance <- indivPerformance
+  popEvolaMod@indivPerformance <- if(is.null(indivPerformance)){data.frame()}else{indivPerformance} # ifelse(is.null(indivPerformance), data.frame(), ifelse(is.list(indivPerformance), data.frame(), indivPerformance))
   popEvolaMod@constCheckUB <- constCheckUB
   popEvolaMod@constCheckLB <- constCheckLB
   popEvolaMod@traits <- traits
   # transform the Pop
   bestEvolaMod <- as(best,"evolaMod")
-  # bestEvolaMod@Q <- Qb
   bestEvolaMod@pedTrack <- pedBest
   
   res <- list(pop=popEvolaMod, simParam=SP, popBest=bestEvolaMod, call=mc)
