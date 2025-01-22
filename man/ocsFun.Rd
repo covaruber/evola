@@ -8,7 +8,7 @@ Fitness function from contribution theory
 Simple function for fitness where an index of traits is weighted by the group relationship. 
 }
 \usage{
-ocsFun(Y,b,d,Q)
+ocsFun(Y,b,d,Q,a)
 }
 
 \arguments{
@@ -23,6 +23,9 @@ A vector of group relationships. See details.
 }
   \item{Q}{
 A QTL matrix. See details.
+}
+  \item{a}{
+A vector of average allelic effects. See details.
 }
 
 }

@@ -90,7 +90,6 @@ evolafit <- function(formula, dt,
     variances = diag(varG(pop))
   }
   
-  
   # ***) creating the frame for the plot
   indivPerformance <- list() # store results by generation
   averagePerformance <- matrix(NA, nrow=nGenerations,ncol=5) # to store results
@@ -100,7 +99,7 @@ evolafit <- function(formula, dt,
   ################################
   ################################
   ################################
-  ## FOR GENERATION
+  ## FOR EACH GENERATION
   spacing9=paste(rep(" ",10), collapse = "");spacing99=paste(rep(" ",9), collapse = "");spacing999=paste(rep(" ",8), collapse = "")
   j =0 # in 1:nGenerations
   nonStop=TRUE
@@ -126,15 +125,18 @@ evolafit <- function(formula, dt,
       structure = table(paste(pop@mother, pop@father))
       nc = length(structure)
       np = floor(median(structure))
-      if( propSelBetween < 1){
+      # Although multiple traits are enabled it is assumed that same QTLs are behind all the traits, differing only in their average allelic effects.
+      if( propSelBetween < 1){ 
         suppressWarnings( popF <- selectFam(pop=pop,nFam = round(nc*propSelBetween), trait = fitnessf, 
-                                            b=b,d=qtDq.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,
+                                            b=b,d=qtDq.lam[pop@id],  Q=Q[pop@id,], 
+                                            use = "pheno", simParam = SP, a=a,
                                             selectTop=selectTop,...
         ), classes = "warning")
       }else{popF = pop}
       if( propSelWithin < 1 ){
         suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = round(np*propSelWithin), 
-                                                  trait = fitnessf,  b=b,d=qtDq.lam[pop@id],  Q=Q[pop@id,], use = "pheno", simParam = SP,
+                                                  trait = fitnessf,  b=b,d=qtDq.lam[pop@id],  Q=Q[pop@id,], 
+                                                  use = "pheno", simParam = SP, a=a,
                                                   selectTop=selectTop, ...
         ), classes = "warning")
       }else{popW=pop}
@@ -186,13 +188,15 @@ evolafit <- function(formula, dt,
     ################################
     ################################
     ## FOR EACH TRAIT WE APPLY CONSTRAINTS
+    a <- vector(mode="list", length = length(traits))
     for(iTrait in 1:length(traits)){ # iTrait=1
       
       Q <- pullQtlGeno(pop, simParam = SP, trait = iTrait)  
       Q <- as(Q, Class = "dgCMatrix")
       rownames(Q) <- pop@id
       
-      qaOr <- Q %*% SP$traits[[iTrait]]@addEff # solutions * alpha for the iTrait
+      a[[iTrait]] <- SP$traits[[iTrait]]@addEff
+      qaOr <- Q %*% a[[iTrait]] # solutions * alpha for the iTrait
       qaFinal[[iTrait]] <- qaOr
       if((max(qaOr)-min(qaOr)) > 0){ # if there is variation
         qa = (qaOr-min(qaOr))/(max(qaOr)-min(qaOr)) # standardized qa

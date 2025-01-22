@@ -5,7 +5,9 @@
 Fits a genetic algorithm for a set of traits and constraints.
 }
 \description{
-Using the AlphaSimR machinery it recreates the evolutionary forces applied to a problem where possible solutions replace individuals and combinations of variables to optimize in the problem replace the genes or QTLs. Then evolutionary forces (mutation, selection and drift) are applied to find a close-to-optimal solution. 
+Using the AlphaSimR machinery it recreates the evolutionary forces applied to a problem where possible solutions replace individuals and combinations of variables to optimize in the problem replace the genes or QTLs. 
+Then evolutionary forces (mutation, selection and drift) are applied to find a close-to-optimal solution. 
+Although multiple traits are enabled it is assumed that same QTLs are behind all the traits, differing only in their average allelic effects.
 }
 \usage{
 
@@ -79,19 +81,21 @@ An alternative fitness function to be applied at the level of individuals or sol
 
 \strong{b}: vector of trait weights, specified in the 'b' argument. Of dimensions t x 1, t traits by 1
 
-\strong{Q}: matrix of QTLs for the individuals/solutions. Of dimensions s x p, s solutions and p QTL columns.
+\strong{Q}: Matrix with QTLs for the individuals/solutions. Of dimensions s x p, s solutions and p QTL columns. Although multiple traits are enabled it is assumed that same QTLs are behind all the traits, differing only in their average allelic effects.
 
 \strong{D}: matrix of relationship between the QTLs, specified in the 'D' argument. Of dimensions p x p, for p QTL columns
 
 \strong{d}: vector of inbreeding contribution for each individual/solution calculated as diag(Q'DQ). Of dimensions s x 1, s solutions by 1
 
+\strong{a}: list of vectors with average allelic effects for a given trait. Of dimensions s x 1, s solutions by 1 column
+
 If \code{fitnessf=NULL}, the default function will be the \code{\link{ocsFun}} function:
 
-\code{ function(Y,b,d,Q,D)\{(Y\%*\%b) - d\} }
+\code{ function(Y,b,d,Q,D,a)\{(Y\%*\%b) - d\} }
 
 where \code{(Y\%*\%b)} is equivalent to [(Q'a)b] in genetic contribution theory, and \code{d} is equal to the diagonal values from Q'DQ from contribution theory, 
 
-\strong{\emph{If you provide your own fitness function please keep in mind that the variables Y, b, Q, D, and d are already reserved and these variables should always be added to your function (even if you do not use them) in addition to your new variables.}}
+\strong{\emph{If you provide your own fitness function please keep in mind that the variables Y, b, Q, D, a, and d are already reserved and these variables should always be added to your function (even if you do not use them) in addition to your new variables so the machinery runs.}}
 
 }
   \item{verbose}{
