@@ -103,7 +103,7 @@ evolafit <- function(formula, dt,
   spacing9=paste(rep(" ",10), collapse = "");spacing99=paste(rep(" ",9), collapse = "");spacing999=paste(rep(" ",8), collapse = "")
   j =0 # in 1:nGenerations
   nonStop=TRUE
-  pedBest <- list(); fitnessVal <- numeric()
+  pedBest <- list(); 
   best <- pop[0]; pedBest <- data.frame(matrix(NA,nrow=0, ncol=4)); colnames(pedBest) <- c("id","mother","father","gen")
   while(nonStop) { # for each generation we breed # j=1
     j=j+1
@@ -259,11 +259,12 @@ evolafit <- function(formula, dt,
     }
     #store the performance of the jth generation for plot functions
     score <- do.call(cbind, qaFinal) %*% b
+    if(j==1){mfvp=NA}else{mfvp=mean(fitnessValuePop[which(!is.infinite(fitnessValuePop))])}
     if(j > 1){
       if(length(as.vector(score)) == length(as.vector(deltaC))){
         indivPerformance[[j]] <- data.frame(fitness=fitnessValuePop[names(deltaC)], score=as.vector(score),deltaC= as.vector(deltaC) , qtDq= as.vector(qtDq), generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
       }
-      averagePerformance[j,] <- c( mean(fitnessValuePop[which(!is.infinite(fitnessValuePop))]) , mean(score,na.rm=TRUE), max(score,na.rm=TRUE) , mean(qtDq,na.rm=TRUE),  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
+      averagePerformance[j,] <- c( mfvp , mean(score,na.rm=TRUE), max(score,na.rm=TRUE) , mean(qtDq,na.rm=TRUE),  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
     }
     if(j == nGenerations){nonStop = FALSE}
     
@@ -282,7 +283,7 @@ evolafit <- function(formula, dt,
       message(paste("   ", j, ifelse(j <10,spacing9, spacing99), nup, ifelse(nup <10,spacing9, ifelse(nup <100,spacing99, spacing999)), 
                     nlb, ifelse(nlb <10,spacing9, ifelse(nlb <100,spacing99, spacing999)), 
                     nin, ifelse(nin <10,spacing9, ifelse(nin <100,spacing99, spacing999)), 
-                    round(totalVarG,3), "  ", round( mean(fitnessValuePop[which(!is.infinite(fitnessValuePop))]), 3)
+                    round(totalVarG,3), "  ", round( mfvp, 3)
       ))
     }
   }# end of for each generation
