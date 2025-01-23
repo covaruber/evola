@@ -24,27 +24,27 @@ evolafit <- function(formula, dt,
   if(is.null(fitnessf)){
     fitnessf <- ocsFun
   };
-  
+  # get the name of the traits
   elements <- strsplit(as.character(formula), split = "[+]")#[[1]]
   elements <- lapply(elements[-c(1)], function(x){all.vars(as.formula(paste("~",x)))})
   traits <- elements[[1]]
   if(!all(traits%in%colnames(dt))){stop("Specified traits are not traits in the dataset. Please correct.", call. = FALSE)}
   classifiers <- elements[[2]]
+  checkNQtls <- table(dt[,classifiers])
+  if(length(which(checkNQtls > 1)) > 0){stop("You cannot provide more than one alpha value per QTL. Make sure that your x variable has only one value.", call. = FALSE)}
+  if(missing(constraintsUB)){constraintsUB <- rep(Inf,length(traits))}
+  if(length(constraintsUB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
+  if(missing(constraintsLB)){constraintsLB <- rep(-Inf,length(traits))}
+  if(length(constraintsLB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
+  if(missing(b)){b <- rep(1,length(traits))}
+  if(length(b) != length(traits)){stop(paste0("Weights need to have the same length than traits (",length(traits),")"), call. = FALSE)}
+  if(is.null(lambda)){lambda <- 0}
+  if(is.null(D)){D <- Matrix::Diagonal(nrow(dt))}
+  if(is.null(nQTLperInd)){nQTLperInd <- nrow(dt)/5}
+  # check that the user has provided a single value for each QTL
+  nMutations = round(mutRate * nrow(dt)) # number of mutations per individual per generation
   
   if(is.null(initPop)){
-    # check that the user has provided a single value for each QTL
-    checkNQtls <- table(dt[,classifiers])
-    if(length(which(checkNQtls > 1)) > 0){stop("You cannot provide more than one alpha value per QTL. Make sure that your x variable has only one value.", call. = FALSE)}
-    if(missing(constraintsUB)){constraintsUB <- rep(Inf,length(traits))}
-    if(length(constraintsUB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
-    if(missing(constraintsLB)){constraintsLB <- rep(-Inf,length(traits))}
-    if(length(constraintsLB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
-    if(missing(b)){b <- rep(1,length(traits))}
-    if(length(b) != length(traits)){stop(paste0("Weights need to have the same length than traits (",length(traits),")"), call. = FALSE)}
-    if(is.null(lambda)){lambda <- 0}
-    if(is.null(D)){D <- Matrix::Diagonal(nrow(dt))}
-    if(is.null(nQTLperInd)){nQTLperInd <- nrow(dt)/5}
-    nMutations = round(mutRate * nrow(dt)) # number of mutations per individual per generation
     # 1) initialize the population with customized haplotypes to ensure a single QTL per individual
     haplo = matrix(0, nrow=nrow(dt)*2, ncol = nrow(dt)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )
     for (i in 1:nrow(haplo)) {
@@ -72,7 +72,6 @@ evolafit <- function(formula, dt,
     for(iTrait in 1:length(traits)){
       SP$importTrait(markerNames =unlist(lapply(SP$genMap,names)), addEff = dt[,traits[iTrait]]/2) # over 2 because QTL data is diplodized
     }
-    alpha = do.call(cbind,lapply(SP$traits, function(x){x@addEff}))
     # 3) set the population
     pop = newPop(founderPop, simParam = SP)
     if(nCrosses > 0){
@@ -293,16 +292,16 @@ evolafit <- function(formula, dt,
   # 7) retrieve output of best combinations
   indivPerformance <- do.call(rbind, indivPerformance)
   # transform the Pop 
-  popEvolaMod <- as(pop,"evolaMod")
-  popEvolaMod@score <- averagePerformance[1:j,,drop=FALSE]
-  popEvolaMod@pointMut <- nrow(pointMut)
-  popEvolaMod@indivPerformance <- if(is.null(indivPerformance)){data.frame()}else{indivPerformance} # ifelse(is.null(indivPerformance), data.frame(), ifelse(is.list(indivPerformance), data.frame(), indivPerformance))
-  popEvolaMod@constCheckUB <- constCheckUB
-  popEvolaMod@constCheckLB <- constCheckLB
-  popEvolaMod@traits <- traits
+  popEvola <- as(pop,"evolaPop")
+  popEvola@score <- averagePerformance[1:j,,drop=FALSE]
+  popEvola@pointMut <- nrow(pointMut)
+  popEvola@indivPerformance <- if(is.null(indivPerformance)){data.frame()}else{indivPerformance} # ifelse(is.null(indivPerformance), data.frame(), ifelse(is.list(indivPerformance), data.frame(), indivPerformance))
+  popEvola@constCheckUB <- constCheckUB
+  popEvola@constCheckLB <- constCheckLB
+  popEvola@traits <- traits
   # transform the Pop
-  bestEvolaMod <- as(best,"evolaMod")
-  bestEvolaMod@pedTrack <- pedBest
+  bestPopEvola <- as(best,"evolaPop")
+  bestPopEvola@pedTrack <- pedBest
   
   ###################
   # calculate fitness for the last generation
@@ -319,7 +318,8 @@ evolafit <- function(formula, dt,
   fitnessValuePop<- do.call("fitnessf", args=list(Y=pop@gv, b=b, d=qtDq.lam[pop@id],  Q=Q[pop@id,], a=a, ... ), quote = TRUE)
   names(fitnessValuePop) <- pop@id
   
-  res <- list(pop=popEvolaMod, simParam=SP, popBest=bestEvolaMod, call=mc, fitness=fitnessValuePop)
+  res <- list(pop=popEvola, simParam=SP, popBest=bestPopEvola, call=mc, fitness=fitnessValuePop)
+  class(res) <- "evolaFitMod"
   return(res)
 }
 

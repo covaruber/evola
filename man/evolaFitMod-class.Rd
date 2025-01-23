@@ -1,9 +1,9 @@
-\name{evolaMod-class}
+\name{evolaFitMod-class}
 \docType{class}
-\alias{evolaMod-class}
-\alias{update,evolaMod-method}
+\alias{evolaFitMod-class}
+\alias{update,evolaFitMod-method}
 \title{Genetic algorithm for a set of traits and constraints}
-\description{A genetic algorithm fit by \code{\link{evolaMod}}.
+\description{A genetic algorithm fit by \code{\link{evolaFitMod}}.
   This class extends class \code{"\link[AlphaSimR:Pop-class]{Pop}"} class and includes some
   additional slots.}
 \section{Objects from the Class}{Objects are created by calls to the
@@ -27,13 +27,13 @@ Class \code{"\link[AlphaSimR:Pop-class]{Pop}"}, directly.
 }
 \section{Methods}{
   \describe{
-    \item{update}{\code{signature(object = "evolaMod")}: also a
+    \item{update}{\code{signature(object = "evolaFitMod")}: also a
       non-method for the same reason as \code{update}}
   }
 }
-\seealso{\code{\link{evolaMod}}
+\seealso{\code{\link{evolaFitMod}}
 }
 \examples{
-showClass("evolaMod")
+showClass("evolaFitMod")
 }
 \keyword{classes}
