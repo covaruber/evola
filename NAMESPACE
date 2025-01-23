@@ -15,7 +15,7 @@ export( "evolafit", "pmonitor", "pareto", "varQ", "bestSol", "A.mat", "stan", "J
         "overlay", "ocsFun", "regFun", "nQtl")
 
 exportMethods(
-              "update"
+              "update.evolaFitMod"
               )
 
 
