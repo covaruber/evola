@@ -19,7 +19,7 @@ evolafit(formula, dt,
      propSelBetween=1,propSelWithin=0.5,
      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
      selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE,
-     initPop=NULL, simParam=NULL,
+     fixQTLperInd=FALSE, initPop=NULL, simParam=NULL,
      ...)
 
 }
@@ -97,6 +97,8 @@ where \code{(Y\%*\%b)} is equivalent to [(Q'a)b] in genetic contribution theory,
 
 \strong{\emph{If you provide your own fitness function please keep in mind that the variables Y, b, Q, D, a, and d are already reserved and these variables should always be added to your function (even if you do not use them) in addition to your new variables so the machinery runs.}}
 
+And additional fitness function available for regression problems is \code{\link{regFun}} but is not the default since it would require additional arguments not available in a regular genetic algorithm problem (e.g., y and X to compute y-Xb).
+
 }
   \item{verbose}{
 A logical value indicating if we should print logs.
@@ -112,6 +114,9 @@ A stopping criteria (tolerance for genetic variance) when the variance across tr
 }
   \item{keepBest}{
 A \code{TRUE/FALSE} value to indicate if we should store the QTL matrix and pedigree of the solutions selected across generations. This can be useful if we want to recreate the path to the best solution (e.g., best crossing path to a product).
+}
+  \item{fixQTLperInd}{
+A \code{TRUE/FALSE} value to indicate if we should fix the argument nQTLperInd across all generations. This should be used with care since this is not how usually genetic algorithms work and in my experience only using GA for regression problems is a special case where this argument should be set to TRUE. The behavior assumes that if set to TRUE and a particular solution has more QTLs active than nQTLperInd some QTLs will be set to 0 and if a solution has less QTLs active than nQTLperInd some QTLs will be activated. All activations or deactivations are done at random.
 }
   \item{initPop}{
 an object of Pop-class.

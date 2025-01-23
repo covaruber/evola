@@ -25,6 +25,8 @@
 
       * [r5] Now the returning object from the evolafit function is an extended class of the 'Pop-class' object from AlphaSimR, an S4 object.
       * [r5] We changed the name of the argument to make the use of fitness functions more straightforward.
+      * [r5] We added the fixQTLperInd argument to allow users to fix the number of activated QTLs for regression optimization problems
+      * [r5] A fitness function named regFun has been added for regression problems.
 
 
 ## TO DO

@@ -6,7 +6,7 @@ evolafit <- function(formula, dt,
                      propSelBetween=1,propSelWithin=0.5,
                      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
                      selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE, 
-                     initPop=NULL, simParam = NULL, ...){
+                     initPop=NULL, simParam = NULL, fixQTLperInd=FALSE, ...){
   
   my.date <- "2025-04-01"
   your.date <- Sys.Date()
@@ -92,8 +92,8 @@ evolafit <- function(formula, dt,
   
   # ***) creating the frame for the plot
   indivPerformance <- list() # store results by generation
-  averagePerformance <- matrix(NA, nrow=nGenerations,ncol=5) # to store results
-  colnames(averagePerformance) <- c("Average.qa","Best.qa","Average.qDq","nQTL.mu", "deltaC.mu")
+  averagePerformance <- matrix(NA, nrow=nGenerations,ncol=6) # to store results
+  colnames(averagePerformance) <- c("Average.fitness","Average.qa","Best.qa","Average.qDq","nQTL.mu", "deltaC.mu")
   rownames(averagePerformance) <- paste("Generation",seq(nrow(averagePerformance)))
   # 4) Starting the Generational process
   ################################
@@ -103,7 +103,7 @@ evolafit <- function(formula, dt,
   spacing9=paste(rep(" ",10), collapse = "");spacing99=paste(rep(" ",9), collapse = "");spacing999=paste(rep(" ",8), collapse = "")
   j =0 # in 1:nGenerations
   nonStop=TRUE
-  pedBest <- list()
+  pedBest <- list(); fitnessVal <- numeric()
   best <- pop[0]; pedBest <- data.frame(matrix(NA,nrow=0, ncol=4)); colnames(pedBest) <- c("id","mother","father","gen")
   while(nonStop) { # for each generation we breed # j=1
     j=j+1
@@ -126,16 +126,19 @@ evolafit <- function(formula, dt,
       nc = length(structure)
       np = floor(median(structure))
       # Although multiple traits are enabled it is assumed that same QTLs are behind all the traits, differing only in their average allelic effects.
+      fitnessValuePop<- do.call("fitnessf", args=list(Y=pop@gv, b=b, d=qtDq.lam[pop@id],  Q=Q[pop@id,], a=a, ... ), quote = TRUE)
+      names(fitnessValuePop) <- pop@id
+      #
       if( propSelBetween < 1){ 
         suppressWarnings( popF <- selectFam(pop=pop,nFam = round(nc*propSelBetween), trait = fitnessf, 
-                                            b=b,d=qtDq.lam[pop@id],  Q=Q[pop@id,], 
+                                            b=b, d=qtDq.lam[pop@id],  Q=Q[pop@id,], 
                                             use = "pheno", simParam = SP, a=a,
                                             selectTop=selectTop,...
         ), classes = "warning")
       }else{popF = pop}
       if( propSelWithin < 1 ){
         suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = round(np*propSelWithin), 
-                                                  trait = fitnessf,  b=b,d=qtDq.lam[pop@id],  Q=Q[pop@id,], 
+                                                  trait = fitnessf,  b=b, d=qtDq.lam[pop@id],  Q=Q[pop@id,], 
                                                   use = "pheno", simParam = SP, a=a,
                                                   selectTop=selectTop, ...
         ), classes = "warning")
@@ -154,6 +157,30 @@ evolafit <- function(formula, dt,
         }
       }
       pop <- makeDH(pop=pop, nDH = 1, simParam = SP)
+      #############################################
+      ## if user wants to fix the number of QTLs activated apply the following rules
+      # 1) if more than nQTLperInd we silence some
+      # 2) if less than nQTLperInd we activate some
+      if(fixQTLperInd){
+        Qfq <- pullQtlGeno(pop, simParam = SP, trait = 1); Qfq <- Qfq/2
+        for(iInd in 1:nInd(pop)){ # for each individual
+          iQfq <- Qfq[iInd,]; areZeros <- which(iQfq == 0); areOnes <- setdiff(1:ncol(Qfq),areZeros)
+          howMany <- sum(iQfq) # how many QTLs are activated, we're assuming is a 0/1 matrix
+          toAddOrRem <- abs(howMany - nQTLperInd) # deviation from expectation
+          if( howMany > nQTLperInd ){ # if exceeded silence some
+            toRem <- sample(areOnes, toAddOrRem) # pick which ones will be silenced
+            for(iChange in 1:toAddOrRem){
+              pop = editGenome(pop, ind=iInd,chr=1, segSites=toRem[iChange], simParam=SP, allele = 0)
+            }
+          }else if( howMany < nQTLperInd){ # if lacked activate some
+            toAdd <- sample(areZeros, toAddOrRem) # pick which ones will be activated
+            for(iChange in 1:toAddOrRem){
+              pop = editGenome(pop, ind=iInd,chr=1, segSites=toAdd[iChange], simParam=SP, allele = 1)
+            }
+          } # else do nothing
+        }
+      }
+      #############################################
       ## compute constrained traits
       if(all(SP$varG>0)){
         pop = setPheno(pop,h2=rep(.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0) )
@@ -178,10 +205,7 @@ evolafit <- function(formula, dt,
         pop = editGenome(pop, ind=modif,chr=1, segSites=iQtl, simParam=SP, allele = allele)
       }
     }else{pointMut=as.data.frame(matrix(NA, nrow=0, ncol=1))}
-    # extract solutions for the trait 1 because all traits have the same QTLs
-    # Q <- pullQtlGeno(pop, simParam = SP, trait = 1)  
-    # Q <- as(Q, Class = "dgCMatrix")
-    # rownames(Q) <- pop@id
+    # 
     constCheckUB <- constCheckLB <- matrix(1, nrow=nrow( pullQtlGeno(pop, simParam = SP, trait = 1)  ), ncol=length(traits))
     qaFinal <- list()
     
@@ -189,6 +213,7 @@ evolafit <- function(formula, dt,
     ################################
     ## FOR EACH TRAIT WE APPLY CONSTRAINTS
     a <- vector(mode="list", length = length(traits))
+    names(a) <- traits
     for(iTrait in 1:length(traits)){ # iTrait=1
       
       Q <- pullQtlGeno(pop, simParam = SP, trait = iTrait)  
@@ -202,7 +227,7 @@ evolafit <- function(formula, dt,
         qa = (qaOr-min(qaOr))/(max(qaOr)-min(qaOr)) # standardized qa
       }
       # calculate the genetic value of solutions using the objective functions
-      pop@pheno[,iTrait] <- qa[,1] # as.vector( do.call(fitnessf[[iTrait]], list(dt=dt, qa=qa, qtDq.lam=qtDq.lam, pop=pop, Q=Q, alpha=alpha,...)) ) # qa - (lambda[iTrait] * qtDq ) # breeding value + coancestry
+      pop@pheno[,iTrait] <- qa[,1] 
       
       # check the contraints and trace them back
       constCheckUB[,iTrait] <- ifelse( (qaOr[,1] > constraintsUB[iTrait])  , 0 , 1) # ifelse(c1+c2 < 2, 0, 1)
@@ -236,9 +261,9 @@ evolafit <- function(formula, dt,
     score <- do.call(cbind, qaFinal) %*% b
     if(j > 1){
       if(length(as.vector(score)) == length(as.vector(deltaC))){
-        indivPerformance[[j]] <- data.frame(score=as.vector(score),deltaC= as.vector(deltaC) , qtDq= as.vector(qtDq), generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
+        indivPerformance[[j]] <- data.frame(fitness=fitnessValuePop[names(deltaC)], score=as.vector(score),deltaC= as.vector(deltaC) , qtDq= as.vector(qtDq), generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
       }
-      averagePerformance[j,] <- c( mean(score,na.rm=TRUE), max(score,na.rm=TRUE) , mean(qtDq,na.rm=TRUE),  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
+      averagePerformance[j,] <- c( mean(fitnessValuePop[which(!is.infinite(fitnessValuePop))]) , mean(score,na.rm=TRUE), max(score,na.rm=TRUE) , mean(qtDq,na.rm=TRUE),  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
     }
     if(j == nGenerations){nonStop = FALSE}
     
@@ -250,14 +275,14 @@ evolafit <- function(formula, dt,
       nonStop = FALSE; message("All individuals discarded. Consider changing some parameter values (e.g., mutRate).")
     }
     if(verbose){
-      if(j==1){message("generation  constrainedUB  constrainedLB  total          varG")}
+      if(j==1){message("generation  constrainedUB  constrainedLB  total          varG    fitness")}
       nup=length(didntMetConst)
       nlb=length(didntMetConstL)
       nin=nInd(pop)
       message(paste("   ", j, ifelse(j <10,spacing9, spacing99), nup, ifelse(nup <10,spacing9, ifelse(nup <100,spacing99, spacing999)), 
                     nlb, ifelse(nlb <10,spacing9, ifelse(nlb <100,spacing99, spacing999)), 
                     nin, ifelse(nin <10,spacing9, ifelse(nin <100,spacing99, spacing999)), 
-                    round(totalVarG,3)
+                    round(totalVarG,3), "  ", round( mean(fitnessValuePop[which(!is.infinite(fitnessValuePop))]), 3)
       ))
     }
   }# end of for each generation

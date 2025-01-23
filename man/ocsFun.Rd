@@ -25,7 +25,7 @@ A vector of group relationships. See details.
 A QTL matrix. See details.
 }
   \item{a}{
-A vector of average allelic effects. See details.
+A named list with vectors of average allelic effects per trait. See details.
 }
 
 }
@@ -42,6 +42,8 @@ The Y matrix is the matrix of trait-GEBVs and b is the user-specified trait weig
 d = qtDq * lambda; where qtDq is equal to Matrix::diag(Q\%*\%Matrix::tcrossprod(A,Q)) of dimensions n x n
 
 Notice that Q represents the marker of QTLs (columns) for all solutions (rows) and A the LD between QTLs. The user can modify this function as needed and provide it to the evolafit function along with other arguments.
+
+Notice that a is a list with elements named as the traits specified in your formula.
 
 }
 \value{

@@ -35,6 +35,23 @@ ocsFun <-function (Y, b, d, Q, D, a) {
   return(Y %*% b - d)
 }
 
+regFun <- function(Y, b, d, Q, a, X, y){
+  n <- ncol(X)
+  p <- apply(Q,1,function(z){which(z > 0)}) # is a list where each element has a vector of indices where QTLs are activated
+  if(is.matrix(p)){ # if turned to be all same dimensions
+    p <- lapply(seq_len(ncol(p)), function(i) p[,i])
+  }
+  nq <- unlist(lapply(p,length)) # tell me how many QTLs are activated
+  v <- 1:nrow(Y) # the number of solutions in the present run
+  mse=vector("numeric",length(v)) # store mse
+  for(j in v){ # for each possible solution calculate the mse which(nq==10)
+    if(nq[j] == n){ # if expected number of QTLs are activated only extract those alphas
+      mse[j] = sum( (y[v] - (as.matrix(X[ v, ]) %*% a[[1]][ p[[j]] ]) )^2 )
+    }else{mse[j]=Inf}
+  } #; print(min(mse))
+  return(mse)
+}
+
 varQ <- function(object){
   nTraits <- length(object$pop@traits)
   n <- numeric()
