@@ -441,7 +441,7 @@ res0<-evolafit(alpha~qtl, dt= dt,
                fitnessf=regFun,
                # selection parameters
                propSelBetween = 0.65, propSelWithin =0.65, selectTop=FALSE,
-               nGenerations = 20, y=y, X=X, verbose = TRUE
+               nGenerations = 10, y=y, X=X, verbose = FALSE
 ) 
 
 # check how the fitness function changed across generations
