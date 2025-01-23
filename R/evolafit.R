@@ -262,7 +262,7 @@ evolafit <- function(formula, dt,
     if(j==1){mfvp=NA}else{mfvp=mean(fitnessValuePop[which(!is.infinite(fitnessValuePop))])}
     if(j > 1){
       if(length(as.vector(score)) == length(as.vector(deltaC))){
-        indivPerformance[[j]] <- data.frame(fitness=fitnessValuePop[names(deltaC)], score=as.vector(score),deltaC= as.vector(deltaC) , qtDq= as.vector(qtDq), generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
+        indivPerformance[[j]] <- data.frame(id=names(deltaC), fitness=fitnessValuePop[names(deltaC)], score=as.vector(score),deltaC= as.vector(deltaC) , qtDq= as.vector(qtDq), generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
       }
       averagePerformance[j,] <- c( mfvp , mean(score,na.rm=TRUE), max(score,na.rm=TRUE) , mean(qtDq,na.rm=TRUE),  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
     }
@@ -304,7 +304,22 @@ evolafit <- function(formula, dt,
   bestEvolaMod <- as(best,"evolaMod")
   bestEvolaMod@pedTrack <- pedBest
   
-  res <- list(pop=popEvolaMod, simParam=SP, popBest=bestEvolaMod, call=mc)
+  ###################
+  # calculate fitness for the last generation
+  Q <- pullQtlGeno(pop,simParam = SP, trait=1)
+  qtDq <- Matrix::diag(Q%*%Matrix::tcrossprod(D,Q))
+  # if there is variation in min and max values in qtDq standardize
+  if((max(qtDq)-min(qtDq)) > 0){ 
+    qtDq = (qtDq-min(qtDq))/(max(qtDq)-min(qtDq)) # standardized xAx
+  }
+  ## apply selection between and within
+  qtDq.lam = qtDq * lambda
+  names(qtDq.lam) <- pop@id
+  # Although multiple traits are enabled it is assumed that same QTLs are behind all the traits, differing only in their average allelic effects.
+  fitnessValuePop<- do.call("fitnessf", args=list(Y=pop@gv, b=b, d=qtDq.lam[pop@id],  Q=Q[pop@id,], a=a, ... ), quote = TRUE)
+  names(fitnessValuePop) <- pop@id
+  
+  res <- list(pop=popEvolaMod, simParam=SP, popBest=bestEvolaMod, call=mc, fitness=fitnessValuePop)
   return(res)
 }
 

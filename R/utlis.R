@@ -46,7 +46,7 @@ regFun <- function(Y, b, d, Q, a, X, y){
   mse=vector("numeric",length(v)) # store mse
   for(j in v){ # for each possible solution calculate the mse which(nq==10)
     if(nq[j] == n){ # if expected number of QTLs are activated only extract those alphas
-      mse[j] = sum( (y[v] - (as.matrix(X[ v, ]) %*% a[[1]][ p[[j]] ]) )^2 )
+      mse[j] = sum( ((y[v]) - (as.matrix(X[ v,,drop=FALSE ]) %*% a[[1]][ p[[j]] ]) )^2 )
     }else{mse[j]=Inf}
   } #; print(min(mse))
   return(mse)

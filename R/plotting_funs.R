@@ -1,7 +1,7 @@
 pmonitor <- function(object, kind=1, ...){
   x <- object$pop@score#[,"Best.qa"]
  
-  if(kind==1){i=1;j=2}else if(kind==2){i=3;j=5}else{i=4; j=4}
+  if(kind==1){i=1;j=2}else if(kind==2){i=4;j=6}else{i=5; j=5}
   
   x2 <- x[which(x[,i] < Inf & x[,i] > -Inf),i]
   x3 <- x[which(x[,j] < Inf & x[,j] > -Inf),j]
