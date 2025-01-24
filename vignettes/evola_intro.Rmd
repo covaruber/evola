@@ -25,6 +25,7 @@ The vignettes aim to provide several examples in how to use the evola package un
   4b) number of times a parent should be used in breeding
 5) How to optimize the number of progeny to produce per cross
 6) Customizing a fitness function (linear regression example)
+7) Travel salesman problem
 
 Because of CRAN requirements I will only run few generations but please when you run your analysis let it run for many generations.
 
@@ -468,7 +469,157 @@ cor( as.matrix(mtcarsV[,c("inter","cyl","disp","hp","drat")]) %*% mod$coefficien
 
 ```
 
-### 7) How to optimize the number of progeny to produce per cross
+### 7) Travel salesman problem
+
+A popular problem to optimize is the one of a travel salesman person that needs to go to n cities while minimizing the distance incurred. The way to specify the problem in evola is the following:
+
+Let us start by defining some functions to simulate and plot n cities with their coordinates.
+
+```{r}
+# "not in" operator
+'%!in%' <- function(x,y)!('%in%'(x,y))
+
+# function to simulate cities
+simCities <- function(n_cities = 5) {
+  # extend "LETTERS" function to run from "A" to "ZZ"
+  MORELETTERS <- c(LETTERS, sapply(LETTERS, function(x) paste0(x, LETTERS)))
+  cities <- matrix(runif(2*n_cities,-1,1),ncol=2)
+  rownames(cities) <- MORELETTERS[1:n_cities]
+  colnames(cities) <- c("x","y")
+  return(cities)
+}
+
+# function to plot cities
+plotCities <- function(cities, route, dist=NULL, 
+                      main="", bg="white", 
+                      main_col = "black",
+                      point_col = "deepskyblue",
+                      start_col = "red",
+                      line_col = "black") {
+  # plot cities
+  city_colors <- c(start_col, rep(point_col,nrow(cities)))
+  
+  par(bg=bg)
+  plot(cities, 
+       pch=16, cex=3,
+       col=point_col, 
+       ylim=c(-1,1.1), xlim=c(-1,1),
+       # yaxt="n", xaxt="n",
+       # ylab="", xlab="",
+       bty="n",
+       main=main, col.main=main_col)
+  text(x=cities[,1], y=cities[,2], labels=rownames(cities))
+  # plot route
+  if(!missing(route)){
+    for(i in 1:length(route)) {
+      if(route[i]>0){
+        nodes0 <- strsplit(names(route)[i], "-")[[1]]
+        lines(x=cities[nodes0,"x"],
+              y=cities[nodes0,"y"],
+              col=line_col,
+              lwd=1.5)
+      }
+    }
+  }
+  # add distance in legend
+  if(!is.null(dist)) legend("topleft", 
+                            bty="n", # no box around legend
+                            legend=round(dist,4), 
+                            bg="transparent", 
+                            text.col="black")
+  
+}
+
+# function to compute adjacency matrix
+compAdjMat <- function(cities) return(as.matrix(dist(cities)))
+```
+
+with such functions defined let us start simulating the problem:
+
+```{r}
+nCities=5
+cities <- simCities(nCities)
+adjmat <- compAdjMat(cities)
+# make the distance matrix a data frame
+df2 <- as.data.frame(as.table(adjmat)) 
+df2 <- df2[-which(df2$Var1 == df2$Var2),]
+colnames(df2)[3] <- c("distances")
+df2$route <- paste(df2$Var1, df2$Var2, sep="-")
+df2
+
+```
+
+Since the QTLs will be the different routes and the average allelic effects the distances we need to keep track of the cities (nodes) implied in the different routes (edges), we will create an incidence matrix of cities implied in each possible route step.
+
+```{r}
+H <- with(df2, evola::overlay(Var1,Var2) )
+rownames(H) <- df2$route
+head(H)
+```
+
+Now we need to define what will be our objective function to score the different possible solutions or combinations of possible routes to take. If you are familiar with evola you know that certain internal variable names are taken such as Y, b, d, Q, D and a which represent different sources of information. We recommend you to read the evolafit documentation.  We will use the regular fitness function that gives value to solutions based on the crossproduct of QTLs by average allelic effects but we will add some constraints. These are to ensure that all cities are visited and that all cities are left so there's no open edges.
+
+```{r}
+salesf <- function(Y,b,d,Q,D,a ,H, nCities){
+                # simple fitness function
+                fitnessVal <-  (Y%*%b) 
+                ###############
+                # CONSTRAINTS
+                ###############
+                # calculate how many cities the solution has travelled to
+                QH <- Q %*% H
+                # ensure all cities have at least 2 edges
+                edgeCheck <- apply(QH,1,function(x){if(all(x>1)){return(1)}else{return(0)} })
+                #apply condition on arriving and leaving the city
+                fitnessVal <- ifelse(edgeCheck == 0, Inf, fitnessVal) # if not touching at least 2 cities give inf distance
+                # number of unique cities visited
+                nCityCheck <- apply(QH,1,function(x){length(which(x > 0))}) 
+                # apply condition on visiting all cities
+                fitnessVal <- ifelse(nCityCheck < nCities, Inf, fitnessVal) # if not in all cities give an infinite distance
+                return(fitnessVal)
+              }
+```
+
+With the fitness function defined now we can fit the genetic algorithm:
+
+```{r}
+res<-evolafit(formula=distances~route, dt= df2,
+              # constraints on traits: if greater than this ignore
+              constraintsUB = c(Inf), 
+              # constraints on traits: if smaller than this ignore
+              constraintsLB= c(-Inf), 
+              # weight the traits for the selection (fitness function)
+              b = c(1), 
+              # population parameters
+              nCrosses = 50, nProgeny = 10, 
+              # genome parameters
+              recombGens = 1, nChr=1, mutRate=0, 
+              # start with at least n QTLs equivalent to n cities
+              nQTLperInd = nCities*2, 
+              # coancestry parameters
+              D=NULL, lambda=0, 
+              fitnessf = salesf, 
+              selectTop = FALSE, 
+              # additional variables for the fitness function
+              H=H, nCities=nCities,
+              # selection parameters
+              propSelBetween = .8, propSelWithin =0.8, 
+              nGenerations = 50, verbose=FALSE
+) 
+
+pmonitor(res, kind=1) # fitness should decrease
+Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
+bestid = names(sort(res$fitness, decreasing = FALSE))[1]; bestid # lowest first
+best=which(rownames(Q)==bestid)[1]; best # best solution
+Q[best,] # routes taken
+Q[best,] %*% H # cities visited (should have a 2 so we arrived and left once)
+
+plotCities(cities, route=Q[best,])
+
+```
+
+
+### 8) How to optimize the number of progeny to produce per cross
 
 The advice here is to upload directly the phased genotypes (haplotypes) to the AlphaSimR machinery and simulate the possible crosses to explore how many individuals are required to sample a given trait (oligogenic or polygenic) with a given probablility. You can also use the inbreeding value of each cross to decide the number of progeny for a given cross since there is a negative relationship between inbreeding of a cross and the expected variance observed in the progeny of such cross. No need to use the evola package. 
 
