@@ -238,7 +238,7 @@ res0<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
                # population parameters
                nCrosses = 100, nProgeny = 20, 
                # genome parameters
-               recombGens = 1, nChr=1, mutRate=0, nQTLperInd = 1, 
+               recombGens = 1, nChr=1, mutRate=0, nQTLperInd = 2, 
                # coancestry parameters
                D=NULL, lambda=0, 
                # selection parameters

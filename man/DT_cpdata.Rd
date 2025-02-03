@@ -32,6 +32,7 @@ Chen GK, Marjoram P, Wall JD (2009). Fast and Flexible Simulation of DNA Sequenc
 
 data(DT_cpdata)
 DT <- DT_cpdata
+A <- A[DT$id,DT$id]
 
 \donttest{
 # get best 20 individuals weighting variance by ~0.5=(30*pi)/180

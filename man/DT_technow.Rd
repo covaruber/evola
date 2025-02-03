@@ -38,6 +38,7 @@ M <- M_technow
 
 \donttest{
   A <- A.mat(M)
+  A <- A[hy,DT$hy]
   # run the genetic algorithm
   # we assig a weight to x'Dx of (20*pi)/180=0.34
   res<-evolafit(formula = c(GY, occ)~hy,

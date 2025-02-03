@@ -277,7 +277,7 @@ evolafit <- function(formula, dt,
       nonStop = FALSE; message("All individuals discarded. Consider changing some parameter values (e.g., mutRate).")
     }
     if(verbose){
-      if(j==1){message("generation  constrainedUB  constrainedLB  total          varG    fitness")}
+      if(j==1){message("generation  constrainedUB  constrainedLB  totalSols      varG          fitness.mu")}
       nup=length(didntMetConst)
       nlb=length(didntMetConstL)
       nin=nInd(pop)
