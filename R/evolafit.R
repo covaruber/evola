@@ -125,7 +125,7 @@ evolafit <- function(formula, dt,
       nc = length(structure)
       np = floor(median(structure))
       # Although multiple traits are enabled it is assumed that same QTLs are behind all the traits, differing only in their average allelic effects.
-      fitnessValuePop<- do.call("fitnessf", args=list(Y=pop@gv, b=b, d=qtDq.lam[pop@id],  Q=Q[pop@id,], a=a, 
+      fitnessValuePop<- do.call("fitnessf", args=list(Y=pop@gv, b=b, d=qtDq.lam[pop@id],  Q=Q[pop@id,], a=a, D=D,
                                                       ... # H=H, nCities=nCities 
                                                       ), quote = TRUE)
       names(fitnessValuePop) <- pop@id
@@ -133,14 +133,14 @@ evolafit <- function(formula, dt,
       if( propSelBetween < 1){ 
         suppressWarnings( popF <- selectFam(pop=pop,nFam = round(nc*propSelBetween), trait = fitnessf, 
                                             b=b, d=qtDq.lam[pop@id],  Q=Q[pop@id,], 
-                                            use = "pheno", simParam = SP, a=a,
+                                            use = "pheno", simParam = SP, a=a, D=D,
                                             selectTop=selectTop,... #H=H,nCities=nCities
         ), classes = "warning")
       }else{popF = pop}
       if( propSelWithin < 1 ){
         suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = round(np*propSelWithin), 
                                                   trait = fitnessf,  b=b, d=qtDq.lam[pop@id],  Q=Q[pop@id,], 
-                                                  use = "pheno", simParam = SP, a=a,
+                                                  use = "pheno", simParam = SP, a=a, D=D,
                                                   selectTop=selectTop,...#H=H,nCities=nCities
         ), classes = "warning")
       }else{popW=pop}
@@ -317,7 +317,7 @@ evolafit <- function(formula, dt,
   qtDq.lam = qtDq * lambda
   names(qtDq.lam) <- pop@id
   # Although multiple traits are enabled it is assumed that same QTLs are behind all the traits, differing only in their average allelic effects.
-  fitnessValuePop<- do.call("fitnessf", args=list(Y=pop@gv, b=b, d=qtDq.lam[pop@id],  Q=Q[pop@id,], a=a, ... ), quote = TRUE)
+  fitnessValuePop<- do.call("fitnessf", args=list(Y=pop@gv, b=b, d=qtDq.lam[pop@id], Q=Q[pop@id,], a=a, D=D, ... ), quote = TRUE)
   fitnessValuePop <- as.vector(fitnessValuePop)
   names(fitnessValuePop) <- pop@id
   

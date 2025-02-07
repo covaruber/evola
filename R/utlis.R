@@ -35,7 +35,7 @@ ocsFun <-function (Y, b, d, Q, D, a) {
   return(Y %*% b - d)
 }
 
-regFun <- function(Y, b, d, Q, a, X, y){
+regFun <- function(Y, b, d, Q, D, a, X, y){
   n <- ncol(X)
   p <- apply(Q,1,function(z){which(z > 0)}) # is a list where each element has a vector of indices where QTLs are activated
   if(is.matrix(p)){ # if turned to be all same dimensions
@@ -50,6 +50,11 @@ regFun <- function(Y, b, d, Q, a, X, y){
     }else{mse[j]=Inf}
   } #; print(min(mse))
   return(mse)
+}
+
+inbFun <- function (Y, b, d, Q, D, a) {
+  g <- Matrix::diag(Q%*%Matrix::tcrossprod(D,Q)) 
+  return(g)
 }
 
 varQ <- function(object){

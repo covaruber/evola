@@ -13,25 +13,25 @@ regFun(Y,b,d,Q,a,X,y)
 
 \arguments{
   \item{Y}{
-A matrix of trait values. See details.
+A matrix of trait values (internal matrix). See details.
 }
   \item{b}{
-A vector of trait weights. See details.
+A vector of trait weights (provided by users). See details.
 }
   \item{d}{
-A vector of group relationships. See details.
+A vector of group relationships (internal matrix). See details.
 }
   \item{Q}{
-A QTL matrix. See details.
+A QTL matrix (internal matrix). See details.
 }
   \item{a}{
-A named list with vectors of average allelic effects per trait. See details.
+A named list with vectors of average allelic effects per trait (internal matrix). See details.
 }
   \item{X}{
-A matrix of covariates or explanatory variables. See details.
+A matrix of covariates or explanatory variables (to be provided by the user in the ... arguments). See details.
 }
   \item{y}{
-A vector of the response variable. See details.
+A vector of the response variable (to be provided by the user in the ... arguments). See details.
 }
 
 }
@@ -39,13 +39,19 @@ A vector of the response variable. See details.
 
 A simple apply function of a regular mean squared error.
 
-( y - X\%*\%b ) ^ 2
+\code{( y - X\%*\%b ) ^ 2}
 
 Internally, we use this function in the following way:
 
-The y vector and X matrix are provided by the user and are fixed values that do not change.
+The y vector and X matrix are provided by the user and are fixed values that do not change across iterations.
 The evolutionary algorithm optimizes the b values which are the QTLs and associated average
-allelic effects that are evolving.
+allelic effects that are evolving. The 'b' coefficients in the formula come from the GA and are computed as:
+
+\code{b[j] = a[[1]][p[[j]]]}
+
+where a[[1]] is the list of QTL average allelic effects per trait provided in the original dataset, whereas p is a list (with length
+equal to the number of solutions) that indicates which QTLs are activated in each solution and the j variable
+is just a counter so each solution is tested.
 
 }
 \value{
