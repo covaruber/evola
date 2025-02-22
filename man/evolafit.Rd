@@ -60,7 +60,7 @@ The number of chromosomes where features/genes should be allocated to. The defau
 A value between 0 and 1 to indicate the proportion of random QTLs that should mutate in each individual. For example, a value of 0.1 means that a random 10\% of the QTLs will mutate in each individual randomly taking values of 0 or 1. Is important to notice that this implies that the stopping criteria based in variance will never be reached because we keep introducing variance through random mutation. 
 }
   \item{nQTLperInd}{
-The number of QTLs/genes (classifier \code{x} in the formula) that should be fixed for the positive allele at the begginning of the simulation. If not specified it will be equal to the 20\% of the QTLs (calculated as the number of rows in the dt argument over 5). See details section.
+The number of QTLs/genes (classifier \code{x} in the formula) that should be fixed for the positive allele at the begginning of the simulation. If not specified it will be equal to the 20\% of the QTLs (calculated as the number of rows in the dt argument over 5). This is just an initial value and will change as the population evolve under the constraints specified by the user. See details section.
 }
   \item{D}{
 A relationship matrix between the QTLs (a kind of linkage disequilibrium) specified in the right side of the formula (levels of the \code{x} variable). This matrix can be used or ignored in the fitness function. By default the weight to the q'Dq component is 0 though the lambda argument, where x is an individual in the population of a solution.
@@ -97,7 +97,9 @@ where \code{(Y\%*\%b)} is equivalent to [(Q'a)b] in genetic contribution theory,
 
 \strong{\emph{If you provide your own fitness function please keep in mind that the variables Y, b, Q, D, a, and d are already reserved and these variables should always be added to your function (even if you do not use them) in addition to your new variables so the machinery runs.}}
 
-And additional fitness function available for regression problems is \code{\link{regFun}} but is not the default since it would require additional arguments not available in a regular genetic algorithm problem (e.g., y and X to compute y-Xb).
+An additional fitness function for accounting only for the group relationship is \code{\link{inbFun}} when the user wants to find solutions that maximize the representativeness of a sample and the \code{D} argument is not NULL.
+
+An additional fitness function available for regression problems is \code{\link{regFun}} but is not the default since it would require additional arguments not available in a regular genetic algorithm problem (e.g., y and X to compute y-Xb).
 
 }
   \item{verbose}{

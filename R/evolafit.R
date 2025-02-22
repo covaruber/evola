@@ -218,7 +218,7 @@ evolafit <- function(formula, dt,
     for(iTrait in 1:length(traits)){ # iTrait=1
       
       Q <- pullQtlGeno(pop, simParam = SP, trait = iTrait)/2 #?/2
-      Q <- as(Q, Class = "dgCMatrix")
+      Q <- as(as(as( Q,  "dMatrix"), "generalMatrix"), "CsparseMatrix") # as(Q, Class = "dgCMatrix")
       rownames(Q) <- pop@id
       
       a[[iTrait]] <- SP$traits[[iTrait]]@addEff
