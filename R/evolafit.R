@@ -263,7 +263,7 @@ evolafit <- function(formula, dt,
     if(j==1){mfvp=NA}else{mfvp=mean(fitnessValuePop[which(!is.infinite(fitnessValuePop))])}
     if(j > 1){
       if(length(as.vector(score)) == length(as.vector(deltaC))){
-        indivPerformance[[j]] <- data.frame(id=names(deltaC), fitness=fitnessValuePop[names(deltaC)], score=as.vector(score),deltaC= as.vector(deltaC) , qtDq= as.vector(qtDq), generation=j, nQTL=apply(Q/2,1,sum)) # save individual solution performance
+        indivPerformance[[j]] <- data.frame(id=names(deltaC), fitness=as.vector(fitnessValuePop[names(deltaC)]), score=as.vector(score),deltaC= as.vector(deltaC) , qtDq= as.vector(qtDq), generation=j, nQTL=as.vector(apply(Q/2,1,sum))) # save individual solution performance
       }
       averagePerformance[j,] <- c( mfvp , mean(score,na.rm=TRUE), max(score,na.rm=TRUE) , mean(qtDq,na.rm=TRUE),  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
     }
