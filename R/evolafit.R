@@ -226,7 +226,7 @@ evolafit <- function(formula, dt,
       qaFinal[[iTrait]] <- qaOr
       if((max(qaOr)-min(qaOr)) > 0){ # if there is variation
         qa = (qaOr-min(qaOr))/(max(qaOr)-min(qaOr)) # standardized qa
-      }
+      }else{qa=qaOr}
       # calculate the genetic value of solutions using the objective functions
       pop@pheno[,iTrait] <- qa[,1] 
       
