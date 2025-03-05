@@ -28,6 +28,8 @@
       * [r5] We added the fixQTLperInd argument to allow users to fix the number of activated QTLs for regression optimization problems
       * [r5] A fitness function named regFun has been added for regression problems.
       * [r5] A fitness function named inbFun has been added for problems where only the group relationship will be used as selection criteria.
+      * [r5] The function to import haplotypes now accepts sparse matrices, especially useful for problems with many QTLs
+      * [r5] Now we have added the Ne argument for the user to decide how many initial solutions are used as founder population
 
 
 ## TO DO
