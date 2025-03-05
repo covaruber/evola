@@ -6,7 +6,8 @@ evolafit <- function(formula, dt,
                      propSelBetween=1,propSelWithin=0.5,
                      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
                      selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE, 
-                     initPop=NULL, simParam = NULL, fixQTLperInd=FALSE, ...){
+                     Ne=50, initPop=NULL, simParam = NULL, 
+                     fixQTLperInd=FALSE, ...){
   
   my.date <- "2025-04-01"
   your.date <- Sys.Date()
@@ -45,7 +46,7 @@ evolafit <- function(formula, dt,
   
   if(is.null(initPop)){
     # 1) initialize the population with customized haplotypes to ensure a single QTL per individual
-    haplo = Matrix::Matrix(0, nrow= nCrosses*nProgeny*2, ncol = nrow(dt)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )
+    haplo = Matrix::Matrix(0, nrow= Ne*2, ncol = nrow(dt)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )
     for (i in seq(1,nrow(haplo),2)) {
       haplo[i,] <- ifelse(runif(ncol(haplo))< (nQTLperInd/ncol(haplo)) ,1,0)
       haplo[(i+1),] <- haplo[i,]

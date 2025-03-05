@@ -19,7 +19,7 @@ evolafit(formula, dt,
      propSelBetween=1,propSelWithin=0.5,
      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
      selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE,
-     fixQTLperInd=FALSE, initPop=NULL, simParam=NULL,
+     fixQTLperInd=FALSE, Ne=50, initPop=NULL, simParam=NULL,
      ...)
 
 }
@@ -128,6 +128,9 @@ A \code{TRUE/FALSE} value to indicate if we should store the QTL matrix and pedi
 }
   \item{fixQTLperInd}{
 A \code{TRUE/FALSE} value to indicate if we should fix the argument nQTLperInd across all generations. This should be used with care since this is not how usually genetic algorithms work and in my experience only using GA for regression problems is a special case where this argument should be set to TRUE. The behavior assumes that if set to TRUE and a particular solution has more QTLs active than nQTLperInd some QTLs will be set to 0 and if a solution has less QTLs active than nQTLperInd some QTLs will be activated. All activations or deactivations are done at random.
+}
+  \item{Ne}{
+initial number of founders in the population (will be important for long term sustainability of genetic variance).
 }
   \item{initPop}{
 an object of \code{Pop-class}.
