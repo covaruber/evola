@@ -2,7 +2,7 @@ evolafit <- function(formula, dt,
                      constraintsUB, constraintsLB, b,
                      nCrosses=50, nProgeny=20,nGenerations=20, 
                      recombGens=1, nChr=1, mutRate=0,
-                     nQTLperInd=NULL, D=NULL, lambda=NULL,
+                     nQTLperInd=NULL, D=NULL, lambda=0,
                      propSelBetween=1,propSelWithin=0.5,
                      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
                      selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE, 
@@ -38,7 +38,6 @@ evolafit <- function(formula, dt,
   if(length(constraintsLB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
   if(missing(b)){b <- rep(1,length(traits))}
   if(length(b) != length(traits)){stop(paste0("Weights need to have the same length than traits (",length(traits),")"), call. = FALSE)}
-  if(is.null(lambda)){lambda <- 0}
   if(is.null(D)){D <- Matrix::Diagonal(nrow(dt))}
   if(is.null(nQTLperInd)){nQTLperInd <- nrow(dt)/5}
   # check that the user has provided a single value for each QTL
@@ -46,9 +45,10 @@ evolafit <- function(formula, dt,
   
   if(is.null(initPop)){
     # 1) initialize the population with customized haplotypes to ensure a single QTL per individual
-    haplo = matrix(0, nrow=nrow(dt)*2, ncol = nrow(dt)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )
-    for (i in 1:nrow(haplo)) {
-      haplo[i,sample(1:ncol(haplo), nQTLperInd )] <- 1
+    haplo = Matrix::Matrix(0, nrow= nCrosses*nProgeny*2, ncol = nrow(dt)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )
+    for (i in seq(1,nrow(haplo),2)) {
+      haplo[i,] <- ifelse(runif(ncol(haplo))< (nQTLperInd/ncol(haplo)) ,1,0)
+      haplo[(i+1),] <- haplo[i,]
     }
     colnames(haplo) = dt[,classifiers]
     
@@ -62,10 +62,9 @@ evolafit <- function(formula, dt,
                         position=position)
     ped = data.frame(id=paste0("I", 1:nrow(dt)),
                      mother=0, father=0)
-    founderPop = importHaplo(haplo=haplo, 
+    founderPop = importHaploSparse(haplo=haplo, 
                              genMap=genMap,
-                             ploidy=2L,
-                             ped=ped)
+                             ploidy=2L)
     # founderPop = quickHaplo(nInd=Ne,nChr=1,segSites=nrow(dt), inbred = TRUE)
     SP = SimParam$new(founderPop)
     # 2) add the traits (columns from user) to take the values (rows) as marker effects

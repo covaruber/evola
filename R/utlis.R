@@ -233,3 +233,46 @@ overlay<- function (..., rlist = NULL, prefix = NULL, sparse=FALSE){
   return(S3)
 }
 
+importHaploSparse <- function (haplo, genMap, ploidy = 2L, ped = NULL) 
+{
+  if (!is.null(ped)) {
+    if (is.vector(ped)) {
+      id = as.character(ped)
+      stopifnot(length(id) == (nrow(haplo)/ploidy), !any(duplicated(id)))
+      mother = father = rep("0", length(id))
+    }
+    else {
+      id = as.character(ped[, 1])
+      stopifnot(length(id) == (nrow(haplo)/ploidy), !any(duplicated(id)))
+      mother = as.character(ped[, 2])
+      father = as.character(ped[, 3])
+    }
+  }
+  genMap = importGenMap(genMap)
+  if (is.data.frame(haplo)) {
+    haplo = as.matrix(haplo)
+  }
+  markerName = colnames(haplo)
+  # haplo = matrix(as.raw(haplo), ncol = ncol(haplo))
+  # stopifnot(haplo == as.raw(0) | haplo == as.raw(1))
+  haplotypes = vector("list", length = length(genMap))
+  for (i in seq_len(length(genMap))) {
+    mapMarkers = names(genMap[[i]])
+    take = match(mapMarkers, markerName)
+    if (any(is.na(take))) {
+      genMap[[i]] = genMap[[i]][is.na(take)]
+      stopifnot(length(genMap[[i]]) >= 1L)
+      genMap[[i]] = genMap[[i]] - genMap[[i]] - genMap[[i]][1]
+      take = na.omit(take)
+    }
+    haplotypes[[i]] = haplo[, take, drop = FALSE]
+  }
+  founderPop = newMapPop(genMap = genMap, haplotypes = haplotypes, 
+                         ploidy = ploidy)
+  if (!is.null(ped)) {
+    founderPop = new("NamedMapPop", id = id, mother = mother, 
+                     father = father, founderPop)
+  }
+  return(founderPop)
+}
+

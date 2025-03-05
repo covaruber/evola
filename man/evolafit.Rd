@@ -15,7 +15,7 @@ evolafit(formula, dt,
      constraintsUB, constraintsLB, b,
      nCrosses=50, nProgeny=20,nGenerations=20, 
      recombGens=1, nChr=1, mutRate=0,
-     nQTLperInd=NULL, D=NULL, lambda=NULL,
+     nQTLperInd=NULL, D=NULL, lambda=0,
      propSelBetween=1,propSelWithin=0.5,
      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
      selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE,
@@ -93,13 +93,22 @@ If \code{fitnessf=NULL}, the default function will be the \code{\link{ocsFun}} f
 
 \code{ function(Y,b,d,Q,D,a)\{(Y\%*\%b) - d\} }
 
-where \code{(Y\%*\%b)} is equivalent to [(Q'a)b] in genetic contribution theory, and \code{d} is equal to the diagonal values from Q'DQ from contribution theory, 
+where \code{(Y\%*\%b)} is equivalent to [(Q'a)b] in genetic contribution theory, 
+and \code{d} is equal to the diagonal values from Q'DQ from contribution theory, 
 
 \strong{\emph{If you provide your own fitness function please keep in mind that the variables Y, b, Q, D, a, and d are already reserved and these variables should always be added to your function (even if you do not use them) in addition to your new variables so the machinery runs.}}
 
-An additional fitness function for accounting only for the group relationship is \code{\link{inbFun}} when the user wants to find solutions that maximize the representativeness of a sample and the \code{D} argument is not NULL.
+An additional fitness function for accounting only for the group relationship is
+\code{\link{inbFun}} when the user wants to find solutions that maximize the 
+representativeness of a sample and the \code{D} argument is not NULL. 
+You will need to select the solutions with lower values ( \code{selectTop=TRUE} ) 
+which indicate solutions with more representativeness and you may need to indicate
+lower bound constraints ( \code{constraintsLB} ).
 
-An additional fitness function available for regression problems is \code{\link{regFun}} but is not the default since it would require additional arguments not available in a regular genetic algorithm problem (e.g., y and X to compute y-Xb).
+An additional fitness function available for regression problems is \code{\link{regFun}}
+but is not the default since it would require additional arguments not available 
+in a regular genetic algorithm problem (e.g., \code{y} and \code{X} to compute 
+\code{y-Xb} ).
 
 }
   \item{verbose}{
@@ -121,10 +130,10 @@ A \code{TRUE/FALSE} value to indicate if we should store the QTL matrix and pedi
 A \code{TRUE/FALSE} value to indicate if we should fix the argument nQTLperInd across all generations. This should be used with care since this is not how usually genetic algorithms work and in my experience only using GA for regression problems is a special case where this argument should be set to TRUE. The behavior assumes that if set to TRUE and a particular solution has more QTLs active than nQTLperInd some QTLs will be set to 0 and if a solution has less QTLs active than nQTLperInd some QTLs will be activated. All activations or deactivations are done at random.
 }
   \item{initPop}{
-an object of Pop-class.
+an object of \code{Pop-class}.
 }
   \item{simParam}{
-  an object of SimParam.
+  an object of \code{SimParam}.
 }
 \item{\dots}{Further arguments to be passed to the fitness function if required.}
 
