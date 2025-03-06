@@ -9,7 +9,7 @@ evolafit <- function(formula, dt,
                      Ne=50, initPop=NULL, simParam = NULL, 
                      fixQTLperInd=FALSE, ...){
   
-  my.date <- "2025-04-01"
+  my.date <- "2025-06-01"
   your.date <- Sys.Date()
   ## if your month is greater than my month you are outdated
   if(dateWarning & verbose){
@@ -39,7 +39,7 @@ evolafit <- function(formula, dt,
   if(length(constraintsLB) != length(traits)){stop(paste0("Constraints need to have the same length than traits (",length(traits),")"), call. = FALSE)}
   if(missing(b)){b <- rep(1,length(traits))}
   if(length(b) != length(traits)){stop(paste0("Weights need to have the same length than traits (",length(traits),")"), call. = FALSE)}
-  if(is.null(D)){D <- Matrix::Diagonal(nrow(dt))}
+  if(is.null(D)){D <- Matrix::Diagonal(nrow(dt)); useD=FALSE}else{useD=TRUE}
   if(is.null(nQTLperInd)){nQTLperInd <- nrow(dt)/5}
   # check that the user has provided a single value for each QTL
   nMutations = round(mutRate * nrow(dt)) # number of mutations per individual per generation
@@ -108,10 +108,18 @@ evolafit <- function(formula, dt,
     j=j+1
     if(j > 1){
       # group relationship
-      qtDq <- Matrix::diag(Q%*%Matrix::tcrossprod(D,Q))
+      if(useD){
+        qtDq <- Matrix::diag(Q%*%Matrix::tcrossprod(D,Q))
+      }else{
+        qtDq <- Matrix::diag(Matrix::tcrossprod(Q))
+      }
       # calculate base coancestry Ct
       m <- Matrix::Matrix(1,nrow=1,ncol=ncol(D))
-      mtDm <- as.vector((m%*%Matrix::tcrossprod(D,m))/(4*(ncol(D)^2)))
+      if(useD){
+        mtDm <- as.vector((m%*%Matrix::tcrossprod(D,m))/(4*(ncol(D)^2)))
+      }else{
+        mtDm <- as.vector((Matrix::tcrossprod(m))/(4*(ncol(D)^2)))
+      }
       # rate of coancestry qtDq/4p^2 - mtAm/4n^2
       deltaC <- ( (qtDq/(4*(apply(Q/2,1,sum)^2))) - mtDm)/(1-mtDm)
       # if there is variation in min and max values in qtDq standardize
@@ -308,7 +316,11 @@ evolafit <- function(formula, dt,
   ###################
   # calculate fitness for the last generation
   Q <- pullQtlGeno(pop,simParam = SP, trait=1)
-  qtDq <- Matrix::diag(Q%*%Matrix::tcrossprod(D,Q))
+  if(useD){
+    qtDq <- Matrix::diag(Q%*%Matrix::tcrossprod(D,Q))
+  }else{
+    qtDq <- Matrix::diag(Matrix::tcrossprod(Q))
+  }
   # if there is variation in min and max values in qtDq standardize
   if((max(qtDq)-min(qtDq)) > 0){ 
     qtDq = (qtDq-min(qtDq))/(max(qtDq)-min(qtDq)) # standardized xAx
