@@ -8,7 +8,7 @@ Extract the index of the best solution
 Extracts the index of the best solution for all traits under the constraints specified. 
 }
 \usage{
-bestSol(object, selectTop=TRUE)
+bestSol(object, selectTop=TRUE, n=1)
 }
 
 \arguments{
@@ -17,6 +17,9 @@ A resulting object from the function evolafit.
 }
   \item{selectTop}{
 Selects highest values for the fitness value if TRUE. Selects lowest values if FALSE.
+}
+  \item{n}{
+An integer indicating how many solutions should be returned.
 }
 
 }
@@ -72,7 +75,7 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                nGenerations = 50
 ) 
 
-bestSol(res0$pop)
+bestSol(res0$pop, n=2)
 }
 
 }

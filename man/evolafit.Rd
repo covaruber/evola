@@ -236,7 +236,7 @@ res00<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
                # constraints on traits: if greater than this ignore
                constraintsUB = c(10,Inf), nGenerations = 10
 )
-best = bestSol(res00$pop)["Value"]
+best = bestSol(res00$pop)[,"Value"]
 Q <- pullQtlGeno(res00$pop, simParam = res00$simParam, trait=1); Q <- Q/2
 qa = Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
 
@@ -261,7 +261,7 @@ res0<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
 ) 
 
 Q <- pullQtlGeno(res0$pop, simParam = res0$simParam, trait=2); Q <- Q/2
-best = bestSol(res0$pop)["Value"]
+best = bestSol(res0$pop)[,"Value"]
 qa = Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
 Q[best,]
 

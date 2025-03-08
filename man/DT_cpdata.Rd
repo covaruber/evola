@@ -47,13 +47,13 @@ res<-evolafit(formula=cbind(Yield, occ)~id, dt= DT,
               nCrosses = 100, nProgeny = 10, 
               recombGens=1, nChr=1, mutRate=0,
               # coancestry parameters
-              D=A, lambda= (30*pi)/180 , nQTLperInd = 2, 
+              D=A, lambda= (30*pi)/180 , nQTLperInd = 20, 
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
               nGenerations = 40, keepBest=FALSE) 
               
 Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
-best = bestSol(res$pop)["Yield"];best
+best = bestSol(res$pop)[,"Yield"];best
 qa = (Q \%*\% DT$Yield)[best,]; qa 
 qDq = Q[best,] \%*\% A \%*\% Q[best,]; qDq 
 sum(Q[best,]) # total # of inds selected

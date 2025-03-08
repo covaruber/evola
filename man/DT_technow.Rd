@@ -53,13 +53,13 @@ M <- M_technow
                 nCrosses = 100, nProgeny = 10, 
                 recombGens=1, nChr=1, mutRate=0,
                 # coancestry parameters
-                D=A, lambda= (20*pi)/180 , nQTLperInd = 70, 
+                D=A, lambda= (20*pi)/180 , nQTLperInd = 90, 
                 # selection parameters
                 propSelBetween = 0.5, propSelWithin =0.5, 
                 nGenerations = 20, keepBest=FALSE) 
   
   Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
-  best = bestSol(res$pop)["GY"]
+  best = bestSol(res$pop)[,"GY"]
   qa = (Q \%*\% DT$GY)[best,]; qa 
   qAq = Q[best,] \%*\% A \%*\% Q[best,]; qAq 
   sum(Q[best,]) # total # of inds selected

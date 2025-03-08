@@ -80,7 +80,7 @@ When looking at the results of the evolution we can observe that the best soluti
 
 ```{r}
 # index for the best solution for trait Value
-best=bestSol(res0$pop)["Value"]; best 
+best=bestSol(res0$pop)[,"Value"]; best 
 # actual solution
 Q <- pullQtlGeno(res0$pop, simParam = res0$simParam, trait=1); Q <- Q/2
 Q[best,] 
@@ -126,7 +126,7 @@ We then use the bestSol() function to extract the solution that maximized our fi
 
 ```{r, fig.show='hold'}
 Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
-best = bestSol(res$pop)["Yield"];
+best = bestSol(res$pop)[,"Yield"];
 sum(Q[best,]) # total # of inds selected
 ```
 
@@ -173,7 +173,7 @@ The way to specify this problem is exactly the same than with the optimization o
 #                 nGenerations = 15, verbose=FALSE) 
 # 
 # Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
-# best = bestSol(res$pop)[1]
+# best = bestSol(res$pop)[1,1]
 # sum(Q[best,]) # total # of inds selected
 ```
 
@@ -251,7 +251,7 @@ res<-evolafit(cbind(dummy, occ)~id, dt= DT2,
                 nGenerations = 15, verbose = FALSE)
 
 Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
-best = bestSol(res$pop)[1]
+best = bestSol(res$pop)[,1]
 sum(Q[best,]) # total # of inds selected
 ```
 
@@ -293,7 +293,7 @@ res<-evolafit(cbind(cov, occ)~id, dt= DT2,
                 nGenerations = 15, verbose = FALSE)
 
 Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
-best = bestSol(res$pop)[1]
+best = bestSol(res$pop)[,1]
 sum(Q[best,]) # total # of inds selected
 ```
 
@@ -372,7 +372,7 @@ Notice that we have added a matrix product Q%*%Z to see how may times each paren
 #               nGenerations = 15, verbose=FALSE) 
 # 
 # Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
-# best = bestSol(res$pop)[1]
+# best = bestSol(res$pop)[,1]
 # qa = (Q %*% DT$GY)[best,]; qa 
 # qDq = Q[best,] %*% D %*% Q[best,]; qDq 
 # sum(Q[best,]) # total # of inds selected

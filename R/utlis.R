@@ -92,43 +92,32 @@ Jr <- function(nr){
   matrix(1,nrow=nr,ncol=1)
 }
 
-bestSol <- function(object, selectTop=TRUE){
+bestSol <- function(object, selectTop=TRUE, n=1){
   if(!inherits(object, c("Pop","evolaMod"))){stop("Object of type Pop or evolaMod expected", call. = FALSE)}
   if(nInd(object) > 0){
-  res1 <- apply(object@gv,2,function(y){
-    yg <- y[which( y < Inf)]
-    yg <- yg[which( yg > -Inf)]
+    
+    dd=as.data.frame(object@gv)
+    rownames(dd) <- object@id
+    picked <- list()
     if(selectTop){
-      best = which(y==max(yg,na.rm=TRUE))[1]
+      for(i in 1:ncol(dd)){
+        dd = dd[ order(-dd[,i]), ,drop=FALSE]
+        selected = rownames(dd)[1:n]
+        picked[[i]] <- which(object@id %in% selected)
+      }
     }else{
-      best = which(y==min(yg,na.rm=TRUE))[1]
+      for(i in 1:ncol(dd)){
+        dd = dd[ order(dd[,i]),,drop=FALSE ] # sign changed
+        selected = rownames(dd)[1:n]
+        picked[[i]] <- which(object@id %in% selected)
+      }
     }
-    return(best)
-  })
+    res1 <- do.call(cbind,picked)
+    colnames(res1) <- object@traits
+    return(res1)
   }else{
     stop("No individuals in the object provided")
   }
-  # if(nInd(object$best) > 0){
-  #   res2 <- apply(object$phenoBest,2,function(y){
-  #     yg <- y[which( y < Inf)]
-  #     yg <- yg[which( yg > -Inf)]
-  #     if(selectTop){
-  #       best = which(y==max(yg,na.rm=TRUE))[1]
-  #     }else{
-  #       best = which(y==min(yg,na.rm=TRUE))[1]
-  #     }
-  #     return(best)
-  #   })
-  #   res <- rbind(res1,res2)
-  #   rownames(res) <- c("pop","best")
-  # }else{
-  #   res <- t(as.matrix(res1))
-  #   rownames(res) <- c("pop")
-  # # }
-  # 
-  # 
-  names(res1) <- object@traits
-  return(res1)
 } 
 
 A.mat <- function (X, min.MAF = NULL) 
