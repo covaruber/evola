@@ -76,6 +76,7 @@ evolafit <- function(formula, dt,
     pop = newPop(founderPop, simParam = SP)
     if(nCrosses > 0){
       pop = randCross(pop, nCrosses = nCrosses, nProgeny = nProgeny, simParam = SP)
+      pop = makeDH(pop=pop, simParam = SP)
     }
     variances = diag(varG(pop))
     if(all(SP$varG>0)){
@@ -195,6 +196,26 @@ evolafit <- function(formula, dt,
         pop = setPheno(pop,h2=rep(.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0) )
       }else{
         pop@pheno <- apply(pop@pheno,2,function(xx){rnorm(length(xx))}) # rnorm(length(pop@pheno))
+      }
+    }else{
+      if(fixQTLperInd){
+        Qfq <- pullQtlGeno(pop, simParam = SP, trait = 1); Qfq <- Qfq/2
+        for(iInd in 1:nInd(pop)){ # for each individual
+          iQfq <- Qfq[iInd,]; areZeros <- which(iQfq == 0); areOnes <- setdiff(1:ncol(Qfq),areZeros)
+          howMany <- sum(iQfq) # how many QTLs are activated, we're assuming is a 0/1 matrix
+          toAddOrRem <- abs(howMany - nQTLperInd) # deviation from expectation
+          if( howMany > nQTLperInd ){ # if exceeded silence some
+            toRem <- sample(areOnes, toAddOrRem) # pick which ones will be silenced
+            for(iChange in 1:toAddOrRem){
+              pop = editGenome(pop, ind=iInd,chr=1, segSites=toRem[iChange], simParam=SP, allele = 0)
+            }
+          }else if( howMany < nQTLperInd){ # if lacked activate some
+            toAdd <- sample(areZeros, toAddOrRem) # pick which ones will be activated
+            for(iChange in 1:toAddOrRem){
+              pop = editGenome(pop, ind=iInd,chr=1, segSites=toAdd[iChange], simParam=SP, allele = 1)
+            }
+          } # else do nothing
+        }
       }
     }
     if(mutRate > 0){

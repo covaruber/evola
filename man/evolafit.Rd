@@ -127,7 +127,14 @@ A stopping criteria (tolerance for genetic variance) when the variance across tr
 A \code{TRUE/FALSE} value to indicate if we should store the QTL matrix and pedigree of the solutions selected across generations. This can be useful if we want to recreate the path to the best solution (e.g., best crossing path to a product).
 }
   \item{fixQTLperInd}{
-A \code{TRUE/FALSE} value to indicate if we should fix the argument nQTLperInd across all generations. This should be used with care since this is not how usually genetic algorithms work and in my experience only using GA for regression problems is a special case where this argument should be set to TRUE. The behavior assumes that if set to TRUE and a particular solution has more QTLs active than nQTLperInd some QTLs will be set to 0 and if a solution has less QTLs active than nQTLperInd some QTLs will be activated. All activations or deactivations are done at random.
+A \code{TRUE/FALSE} value to indicate if we should fix the argument nQTLperInd 
+across all generations. This should be used with care since this is not how 
+usually genetic algorithms work and in my experience only using GA for regression 
+problems is a special case where this argument should be set to TRUE. The behavior 
+assumes that if set to TRUE and a particular solution has more QTLs active than 
+nQTLperInd some QTLs will be set to 0 and if a solution has less QTLs active than 
+nQTLperInd some QTLs will be activated. All activations or deactivations are done 
+at random. This only takes place after generation 1.
 }
   \item{Ne}{
 initial number of founders in the population (will be important for long term sustainability of genetic variance).
