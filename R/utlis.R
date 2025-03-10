@@ -96,7 +96,7 @@ bestSol <- function(object, selectTop=TRUE, n=1){
   if(!inherits(object, c("Pop","evolaMod"))){stop("Object of type Pop or evolaMod expected", call. = FALSE)}
   if(nInd(object) > 0){
     
-    dd=as.data.frame(object@gv)
+    dd=as.data.frame(cbind(object@gv, object@fitness))
     rownames(dd) <- object@id
     picked <- list()
     if(selectTop){
@@ -113,7 +113,7 @@ bestSol <- function(object, selectTop=TRUE, n=1){
       }
     }
     res1 <- do.call(cbind,picked)
-    colnames(res1) <- object@traits
+    colnames(res1) <- c( object@traits, "fitness")
     return(res1)
   }else{
     stop("No individuals in the object provided")
