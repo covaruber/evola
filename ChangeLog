@@ -30,6 +30,7 @@
       * [r5] A fitness function named inbFun has been added for problems where only the group relationship will be used as selection criteria.
       * [r5] The function to import haplotypes now accepts sparse matrices, especially useful for problems with many QTLs
       * [r5] Now we have added the Ne argument for the user to decide how many initial solutions are used as founder population
+      * [r5] Now the bestSol() function returns n solutions.
 
 
 ## TO DO

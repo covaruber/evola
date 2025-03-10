@@ -332,6 +332,7 @@ evolafit <- function(formula, dt,
   fitnessValuePop<- do.call("fitnessf", args=list(Y=pop@gv, b=b, d=qtDq.lam[pop@id], Q=Q[pop@id,], a=a, D=D, ... ), quote = TRUE)
   fitnessValuePop <- as.vector(fitnessValuePop)
   names(fitnessValuePop) <- pop@id
+  popEvola@fitness <- fitnessValuePop
   
   res <- list(pop=popEvola, simParam=SP, popBest=bestPopEvola, call=mc, fitness=fitnessValuePop)
   class(res) <- "evolaFitMod"
