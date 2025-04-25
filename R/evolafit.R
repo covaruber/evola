@@ -208,7 +208,7 @@ evolafit <- function(formula, dt,
     if(length(selected) == 0){
       selected <- intersect(popCL,popCU )
     }
-    if(length(selected) == 0){
+    if(length(selected) < 2){
       message("Too many constraints. No legal solutions found. Random selection applied.")
       selected <- pop@id[sample(1:nInd(pop), ceiling(nInd(pop)*propSelBetween*propSelWithin) )]
     }
@@ -237,7 +237,7 @@ evolafit <- function(formula, dt,
     
     mfvp =  mean(as.vector(fitnessValuePop[best[[j]]@id,]))
     indivPerformance[[j]] <- data.frame(id=best[[j]]@id, fitness=as.vector(fitnessValuePop[best[[j]]@id,]), 
-                                        generation=j, nQTL=as.vector(apply(Q[best[[j]]@id,]/2,1,sum)),
+                                        generation=j, nQTL=as.vector(apply(Q[best[[j]]@id,,drop=FALSE]/2,1,sum)),
                                         deltaC= as.vector(deltaC[best[[j]]@id]) ) # save individual solution performance
     
     averagePerformance[j,] <- c( mfvp , max(fitnessValuePop,na.rm=TRUE) ,  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
