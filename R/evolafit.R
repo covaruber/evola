@@ -154,13 +154,13 @@ evolafit <- function(formula, dt,
       suppressWarnings( popF <- selectFam(pop=pop,nFam = round(nc*propSelBetween[j]), trait = 1, 
                                           use = "pheno", simParam = SP, 
                                           selectTop=selectTop,... #H=H,nCities=nCities
-      ), classes = "warning")
+      )@id, classes = "warning")
     }else{popF = pop}
     if( propSelWithin[j] < 1 ){
       suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = round(np*propSelWithin[j]), 
                                                 trait = 1, use = "pheno", simParam = SP, 
                                                 selectTop=selectTop,...#H=H,nCities=nCities
-      ), classes = "warning")
+      )@id, classes = "warning")
     }else{popW=pop}
     # print(head(pop2gv))
     ################################
@@ -182,9 +182,9 @@ evolafit <- function(formula, dt,
     # remove individuals that break the constraints UB
     if(length(didntMetConst)>0){ # 
       # for(iTrait in 1:length(traits)){
-        popCU <- pop[setdiff(1:nInd(pop),didntMetConst)]
+        popCU <- pop@id[setdiff(1:nInd(pop),didntMetConst)]
       # }
-    }else{popCU<-pop}
+    }else{popCU<-pop@id}
     #  remove individuals that break the constraints LB
     # print(constCheckLB)
     metConstCheckL <- apply(constCheckLB,1,sum) 
@@ -194,14 +194,15 @@ evolafit <- function(formula, dt,
     if(length(didntMetConstL)>0){
       # message(paste(length(didntMetConst),"individuals discarded for breaking the lower bounds.", nInd(pop)-length(didntMetConst), "left." ))
       # for(iTrait in 1:length(traits)){
-        popCL <- pop[setdiff(1:nInd(pop),didntMetConstL)]
+        popCL <- pop@id[setdiff(1:nInd(pop),didntMetConstL)]
       # }
-    }else{popCL<-pop}
+    }else{popCL<-pop@id}
     ## END OF FOR EACH TRAIT WE APPLY CONSTRAINTS
     ################################
     ################################
     # selected <- intersect(popF@id,popW@id)
-    selected <- Reduce(intersect, list(popF@id,popW@id,popCL@id, popCU@id) )
+    # print(str(list(popF,popW,popCL, popCU)))
+    selected <- Reduce(intersect, list(popF,popW,popCL, popCU) )
     # print(list(popF@id,popW@id,popCL@id, popCU@id))
     pop <- pop[which(pop@id %in% selected)]
     
@@ -216,15 +217,7 @@ evolafit <- function(formula, dt,
       deltaC <- ( (qtDq/(4*(apply(Q/2,1,sum)^2))) - mtDm)/(1-mtDm) # numerator is equivalent to mtDm 
     }else{deltaC=NA}
     
-    mfvp =  mean(fitnessValuePop[which(!is.infinite(fitnessValuePop))])
     
-    indivPerformance[[j]] <- data.frame(id=pop@id, fitness=as.vector(fitnessValuePop[pop@id,]), 
-                                        generation=j, nQTL=as.vector(apply(Q[pop@id,]/2,1,sum)),
-                                        deltaC= as.vector(deltaC[pop@id]) ) # save individual solution performance
-    
-    averagePerformance[j,] <- c( mfvp , max(fitnessValuePop,na.rm=TRUE) ,  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
-    
-
     
     #################################
     # solutions selected for tracing
@@ -233,6 +226,13 @@ evolafit <- function(formula, dt,
                            selectTop=selectTop,... #H=H,nCities=nCities
     )
     pedBest = rbind(pedBest, data.frame(id=best[[j]]@id, mother=best[[j]]@mother, father=best[[j]]@father, gen=j) )
+    
+    mfvp =  mean(as.vector(fitnessValuePop[best[[j]]@id,]))
+    indivPerformance[[j]] <- data.frame(id=best[[j]]@id, fitness=as.vector(fitnessValuePop[best[[j]]@id,]), 
+                                        generation=j, nQTL=as.vector(apply(Q[best[[j]]@id,]/2,1,sum)),
+                                        deltaC= as.vector(deltaC[best[[j]]@id]) ) # save individual solution performance
+    
+    averagePerformance[j,] <- c( mfvp , max(fitnessValuePop,na.rm=TRUE) ,  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
     ## create new progeny
     for(k in 1:recombGens){
       if(nCrosses > 0){
@@ -349,7 +349,7 @@ evolafit <- function(formula, dt,
     fitnessValuePop <- Matrix::Matrix(fitnessValuePop,ncol=1)
   };  rownames(fitnessValuePop) <- popEvola@id
   popEvola@fitness <- as.vector(fitnessValuePop)
-  
+  indivPerformance[,"fitness"] <- popEvola@fitness
   # rownames(indivPerformance) <- indivPerformance$id
   # popEvola@fitness <- as.vector(indivPerformance[best@id,"fitness"])
   
