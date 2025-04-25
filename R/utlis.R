@@ -33,7 +33,7 @@
 
 ocsFun <- function (Y, b, Q, D, a, lambda, scaled=TRUE) {
   # (q'a)b - l(q'Dq)
-  if(scale){
+  if(scaled){
     return( stan( apply(Y,2,scale) %*% b) -  lambda*stan( Matrix::diag(Q %*% Matrix::tcrossprod(D, Q)) ) )
   }else{
     return( stan( Y %*% b) -  lambda*stan( Matrix::diag(Q %*% Matrix::tcrossprod(D, Q)) ) )
