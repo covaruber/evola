@@ -8,12 +8,20 @@ Standardize a vector of values in range 0 to 1
 Simple function to map a vector of values to the range of 0 and 1 values to have a better behavior of the algorithm.
 }
 \usage{
-stan(x)
+stan(x, lb=0, ub=1)
 }
 
 \arguments{
   \item{x}{
 A vector of numeric values.
+}
+
+  \item{lb}{
+Lower bound value to map the x values.
+}
+
+  \item{ub}{
+Upper bound value to map the x values.
 }
 
 }

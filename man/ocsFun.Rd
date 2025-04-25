@@ -8,7 +8,7 @@ Fitness function from contribution theory
 Simple function for fitness where an index of traits is weighted by the group relationship. 
 }
 \usage{
-ocsFun(Y,b,d,Q,D,a)
+ocsFun(Y,b,d,Q,D,a,lambda,scaled)
 }
 
 \arguments{
@@ -29,6 +29,12 @@ An LD matrix. See details.
 }
   \item{a}{
 A named list with vectors of average allelic effects per trait. See details.
+}
+  \item{lambda}{
+A numeric value to weight the Q'DQ portion of the objective function (to be provided by the user with the lambda argument). See details.
+}
+  \item{scaled}{
+A logical value to indicate if traits should be scaled prior to multiply by the weights.
 }
 
 }

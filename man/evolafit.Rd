@@ -18,8 +18,9 @@ evolafit(formula, dt,
      nQTLperInd=NULL, D=NULL, lambda=0,
      propSelBetween=1,propSelWithin=0.5,
      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
-     selectTop=TRUE, tolVarG=1e-6, keepBest=FALSE,
+     selectTop=TRUE, tolVarG=1e-6, 
      fixQTLperInd=FALSE, Ne=50, initPop=NULL, simParam=NULL,
+     traceDelta=TRUE, topN=10,
      ...)
 
 }
@@ -144,6 +145,12 @@ an object of \code{Pop-class}.
 }
   \item{simParam}{
   an object of \code{SimParam}.
+}
+  \item{traceDelta}{
+  a logical value indicating if we should compute the rate of coancestry Q'DQ.
+}
+  \item{topN}{
+  an integer value indicating the maximum number of solutions to keep in each generation.
 }
 \item{\dots}{Further arguments to be passed to the fitness function if required.}
 

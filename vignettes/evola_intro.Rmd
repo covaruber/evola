@@ -339,14 +339,20 @@ fitnessf <-function (Y, b, d, Q, Z) {
   return(fit)
 }
 # new fitness function with constraint
-fitnessf <-function (Y, b, d, Q, Z) {
+fitnessf <-function (Y, b, Q, D, a, lambda, scale=TRUE, Z) {
   X=Q%*%Z[colnames(Q),]
-  bad <- as.vector( apply(X,1, function(x){length(which(x > 5))}) ) 
+  bad <- as.vector( apply(X,1, function(x){length(which(x > 5))}) )
   bad <- which(bad > 0)
-  fit <- Y %*% b - d
+  # (q'a)b - l(q'Dq)
+  if(scale){
+    fit <- stan( apply(Y,2,scale) %*% b) -  lambda*stan( Matrix::diag(Q %*% Matrix::tcrossprod(D, Q)) )
+  }else{
+    fit <- stan( Y %*% b) -  lambda*stan( Matrix::diag(Q %*% Matrix::tcrossprod(D, Q)) )
+  }
   if(length(bad) > 0){fit[bad,1]=min(fit[,1])}
   return(fit)
 }
+
 ```
 
 Notice that we have added a matrix product Q%*%Z to see how may times each parent is used in the proposed solution of crosses. The next step would be to provide the new fitness function to the evolafit() function and the additional argument Z which is the overlay matrix formed in the first chunck of code:
@@ -449,9 +455,9 @@ res0<-evolafit(alpha~qtl, dt= dt,
 pmonitor(res0, kind = 1)
 # this time the best solution is the one that minimizes the error
 Q <- pullQtlGeno(res0$pop, simParam = res0$simParam, trait=1); Q <- Q/2
-bestid = names(sort(res0$fitness))[6]
-best=which(rownames(Q)== bestid);best
-betas <- res0$simParam$traits[[1]]@addEff[which(Q[best,] > 0)]
+bestid <- bestSol(res0$pop, selectTop = FALSE)[,"fitness"]
+bestid
+betas <- res0$simParam$traits[[1]]@addEff[which(Q[bestid,] > 0)]
 betas
 
 # plot predicted versus real values

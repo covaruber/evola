@@ -31,30 +31,41 @@
 ##################################################################################################
 ##################################################################################################
 
-ocsFun <-function (Y, b, d, Q, D, a) {
-  return(Y %*% b - d)
+ocsFun <- function (Y, b, Q, D, a, lambda, scaled=TRUE) {
+  # (q'a)b - l(q'Dq)
+  if(scale){
+    return( stan( apply(Y,2,scale) %*% b) -  lambda*stan( Matrix::diag(Q %*% Matrix::tcrossprod(D, Q)) ) )
+  }else{
+    return( stan( Y %*% b) -  lambda*stan( Matrix::diag(Q %*% Matrix::tcrossprod(D, Q)) ) )
+    # return( stan( (Q%*%a) %*% b) -  lambda*stan( Matrix::diag(Q %*% Matrix::tcrossprod(D, Q)) ) )
+  }
 }
 
-regFun <- function(Y, b, d, Q, D, a, X, y){
+regFun <- function (Y, b, Q, D, a, lambda, X, y) {
   n <- ncol(X)
-  p <- apply(Q,1,function(z){which(z > 0)}) # is a list where each element has a vector of indices where QTLs are activated
-  if(is.matrix(p)){ # if turned to be all same dimensions
-    p <- lapply(seq_len(ncol(p)), function(i) p[,i])
+  p <- apply(Q, 1, function(z) {
+    which(z > 0)
+  })
+  if (is.matrix(p)) {
+    p <- lapply(seq_len(ncol(p)), function(i) p[, i])
   }
-  nq <- unlist(lapply(p,length)) # tell me how many QTLs are activated
-  v <- 1:nrow(Y) # the number of solutions in the present run
-  mse=vector("numeric",length(v)) # store mse
-  for(j in v){ # for each possible solution calculate the mse which(nq==10)
-    if(nq[j] == n){ # if expected number of QTLs are activated only extract those alphas
-      mse[j] = sum( ((y[v]) - (as.matrix(X[ v,,drop=FALSE ]) %*% a[[1]][ p[[j]] ]) )^2 )
-    }else{mse[j]=Inf}
-  } #; print(min(mse))
+  nq <- unlist(lapply(p, length))
+  v <- 1:nrow(Y)
+  mse = vector("numeric", length(v))
+  for (j in v) {
+    if (nq[j] == n) {
+      mse[j] = sum(((y[v]) - (as.matrix(X[v, , drop = FALSE]) %*% 
+                                a[ p[[j]], 1 ] ))^2)
+    }
+    else {
+      mse[j] = Inf
+    }
+  }
   return(mse)
 }
 
-inbFun <- function (Y, b, d, Q, D, a) {
-  g <- Matrix::diag(Q%*%Matrix::tcrossprod(D,Q)) 
-  return(g)
+inbFun <- function (Y, b, Q, D, a, lambda) {
+  return( Matrix::diag(Q %*% Matrix::tcrossprod(D, Q))  )
 }
 
 varQ <- function(object){
@@ -80,8 +91,31 @@ nQtl <- function(object){
   return(n)
 }
 
-stan <- function(x){
-  (x-min(x))/(max(x)-min(x))
+stan <-function (x, lb=0, ub=1) {
+  B=max(x) # current range
+  A=min(x) # current range 
+  D=ub # new range
+  C=lb # new range
+  
+  scale = (D-C)/(B-A)
+  offset = -A*(D-C)/(B-A) + C
+  return(x*scale + offset)
+}
+
+logspace <- function (x, p=2) {
+  
+  D=max(x) # new range
+  C=min(x) # new range
+  mysigns <- sign(x)
+  y = abs(x)^(1/p)
+  y <- y*mysigns
+  B=max(y) # current range
+  A=min(y) # current range 
+  
+  scale = (D-C)/(B-A)
+  offset = -A*(D-C)/(B-A) + C
+  return(y*scale + offset)
+  
 }
 
 Jc <- function(nc){
@@ -92,33 +126,37 @@ Jr <- function(nr){
   matrix(1,nrow=nr,ncol=1)
 }
 
-bestSol <- function(object, selectTop=TRUE, n=1){
-  if(!inherits(object, c("Pop","evolaMod"))){stop("Object of type Pop or evolaMod expected", call. = FALSE)}
-  if(nInd(object) > 0){
-    
-    dd=as.data.frame(cbind(object@gv, object@fitness))
+bestSol <- function (object, selectTop = TRUE, n = 1) 
+{
+  if (!inherits(object, c("Pop", "evolaMod"))) {
+    stop("Object of type Pop or evolaMod expected", call. = FALSE)
+  }
+  if (nInd(object) > 0) {
+    dd = as.data.frame(cbind(object@gv, object@fitness))
     rownames(dd) <- object@id
     picked <- list()
-    if(selectTop){
-      for(i in 1:ncol(dd)){
-        dd = dd[ order(-dd[,i]), ,drop=FALSE]
-        selected = rownames(dd)[1:n]
-        picked[[i]] <- which(object@id %in% selected)
-      }
-    }else{
-      for(i in 1:ncol(dd)){
-        dd = dd[ order(dd[,i]),,drop=FALSE ] # sign changed
+    if (selectTop) {
+      for (i in 1:ncol(dd)) {
+        dd = dd[order(-dd[, i]), , drop = FALSE]
         selected = rownames(dd)[1:n]
         picked[[i]] <- which(object@id %in% selected)
       }
     }
-    res1 <- do.call(cbind,picked)
-    colnames(res1) <- c( object@traits, "fitness")
+    else {
+      for (i in 1:ncol(dd)) {
+        dd = dd[order(dd[, i]), , drop = FALSE]
+        selected = rownames(dd)[1:n]
+        picked[[i]] <- which(object@id %in% selected)
+      }
+    }
+    res1 <- do.call(cbind, picked)
+    colnames(res1) <- c(object@traits, "fitness")
     return(res1)
-  }else{
+  }
+  else {
     stop("No individuals in the object provided")
   }
-} 
+}
 
 A.mat <- function (X, min.MAF = NULL) 
 {

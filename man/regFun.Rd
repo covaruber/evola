@@ -8,7 +8,7 @@ Fitness function from linear regressions based on mean squared error.
 Simple function for fitness where the mean squared error is computed when the user provides y and X and b are the average allelic effects of the population in the genetic algorithm. 
 }
 \usage{
-regFun(Y,b,d,Q,a,X,y)
+regFun(Y,b,d,Q,a,lambda,X,y)
 }
 
 \arguments{
@@ -26,6 +26,9 @@ A QTL matrix (internal matrix). See details.
 }
   \item{a}{
 A named list with vectors of average allelic effects per trait (internal matrix). See details.
+}
+  \item{lambda}{
+A numeric value to weight the Q'DQ portion of the objective function (to be provided by the user with the lambda argument). See details.
 }
   \item{X}{
 A matrix of covariates or explanatory variables (to be provided by the user in the ... arguments). See details.
