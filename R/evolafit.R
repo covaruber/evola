@@ -127,6 +127,10 @@ evolafit <- function(formula, dt,
     }
   }
   best <- list()
+  console <-  data.frame(matrix(NA,nrow=nGenerations, ncol=8))
+  nin <- nCrosses*nProgeny
+  initVarG = round(sum(diag(varG(pop = pop))),3)
+  initpropSelBetween <- round(propSelBetween, 2)
   while(nonStop) { # for each generation we breed # j=1
     j=j+1
     
@@ -144,7 +148,7 @@ evolafit <- function(formula, dt,
     }
     rownames(fitnessValuePop) <- pop@id
     pop@pheno[,1] <- fitnessValuePop[,1]
-
+    
     ## apply selection between and within
     structure = table(paste(pop@mother, pop@father))
     nc = length(structure)
@@ -181,7 +185,7 @@ evolafit <- function(formula, dt,
     
     # remove individuals that break the constraints UB
     if(length(didntMetConst)>0){ # 
-        popCU <- pop@id[setdiff(1:nInd(pop),didntMetConst)]
+      popCU <- pop@id[setdiff(1:nInd(pop),didntMetConst)]
     }else{popCU<-pop@id}
     #  remove individuals that break the constraints LB
     metConstCheckL <- apply(constCheckLB,1,sum) 
@@ -189,7 +193,7 @@ evolafit <- function(formula, dt,
     
     # impute with mean value the ones that do not met the constraints
     if(length(didntMetConstL)>0){
-        popCL <- pop@id[setdiff(1:nInd(pop),didntMetConstL)]
+      popCL <- pop@id[setdiff(1:nInd(pop),didntMetConstL)]
     }else{popCL<-pop@id}
     ## END OF FOR EACH TRAIT WE APPLY CONSTRAINTS
     ################################
@@ -303,15 +307,29 @@ evolafit <- function(formula, dt,
       totalVarG = 0
     }
     if(verbose){
-      if(j==1){message(cat("generation  constrainedUB  constrainedLB  totalSols      varG     fitness.mu"))}
-      nup=length(didntMetConst)
-      nlb=length(didntMetConstL)
-      nin=nInd(pop)
-      message(cat(paste("   ", j, ifelse(j <10,spacing9, spacing99), nup, ifelse(nup <10,spacing9, ifelse(nup <100,spacing99, spacing999)), 
-                        nlb, ifelse(nlb <10,spacing9, ifelse(nlb <100,spacing99, spacing999)), 
-                        nin, ifelse(nin <10,spacing9, ifelse(nin <100,spacing99, spacing999)), 
-                        round(totalVarG,3), "  ", round( mfvp, 3)
+      if(j==1){
+        message(paste0("Pop with ", nCrosses, " crosses and ", nProgeny, " progeny (",nCrosses*nProgeny,") solutions"))
+        message(
+          cat("gener   constUB  constLB   varG   propB   propW          time")
+        )
+      }
+      
+      console[j,] <- c(j, length(didntMetConst), length(didntMetConstL), 
+                       round(totalVarG, 3), round(mfvp, 3), round(propSelBetween[j], 2),
+                       round(propSelWithin[j], 2), 
+                       Sys.time()
+                       )
+      sp <- paste(rep(" ", 2), collapse = "")
+      message(cat(paste(
+        sp, addZeros(1:nGenerations, nr=0)[j], 
+        sp, addZeros(c(length(didntMetConst),nin), nr=0)[1],
+        sp, addZeros(c(length(didntMetConstL),nin), nr=0)[1],
+        sp, addZeros(c(round(totalVarG, 3),initVarG))[1],
+        sp, addZeros(c( round(propSelBetween[j], 2) , round(propSelBetween, 2) ))[1], 
+        sp, addZeros(c( round(propSelWithin[j], 2) , round(propSelWithin, 2) ))[1], 
+        sp, Sys.time()
       )))
+
     }
     if(j == nGenerations){nonStop = FALSE}
     if(nrow(pop@gv) > 0){
@@ -344,7 +362,7 @@ evolafit <- function(formula, dt,
   rownames(Q) <- popEvola@id
   a <- do.call(cbind, lapply(SP$traits, function(x){x@addEff}))
   popEvola@gv <- as.matrix(Q%*% a)
-
+  
   fitnessValuePop<- do.call("fitnessf", args=list(Y=popEvola@gv, b=b,  Q=Q,
                                                   a=a, D=D, lambda=lambda,
                                                   ... ), quote = TRUE)
@@ -359,7 +377,7 @@ evolafit <- function(formula, dt,
   # rownames(indivPerformance) <- indivPerformance$id
   # popEvola@fitness <- as.vector(indivPerformance[best@id,"fitness"])
   
-  res <- list(pop=popEvola, simParam=SP, call=mc, fitness=fitnessValuePop)
+  res <- list(pop=popEvola, simParam=SP, call=mc, fitness=fitnessValuePop, console=console)
   class(res) <- "evolaFitMod"
   return(res)
 }

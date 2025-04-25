@@ -11,7 +11,8 @@ importFrom("graphics", "axis", "grid", "layout", "lines", "points",
 importFrom("stats", "na.omit", "quantile", "var", "as.formula","model.matrix",
            "median","rnorm")
 
-export( "evolafit", "pmonitor", "pareto", "varQ", "bestSol", "A.mat", "stan", "logspace", "Jc", "Jr",
+export( "evolafit", "pmonitor", "pareto", "varQ", "bestSol", "A.mat", 
+        "stan", "logspace", "addZeros", "Jc", "Jr",
         "overlay", "ocsFun", "regFun", "inbFun", "nQtl", "importHaploSparse")
 
 export(

@@ -31,6 +31,25 @@
 ##################################################################################################
 ##################################################################################################
 
+addZeros<- function (x, nr=2) {
+  ## left
+  nz <- nchar(round(max(x)))
+  add <- abs(nchar(round(x)) - nz)
+  toAdd <- gsub("1", "", ifelse(add > 0, 10^(add), ""))
+  newX <- paste0(toAdd, as.character(x))
+  newX <- gsub("\\..*","",newX)
+  ## right
+  if(nr > 0){
+    toAdd <- format( round(x-floor(x), nr) , nsmall=nr) 
+    badCalls <- grep("1[.]",toAdd)
+    if(length(badCalls) > 0){toAdd[badCalls] <- paste0("0.",paste(rep("9",nr), collapse="") )}
+    newX2 <- paste(newX, gsub("0[.]","",toAdd) , sep="." )
+  }else{
+    newX2 <- newX
+  }
+  return(newX2)
+}
+
 ocsFun <- function (Y, b, Q, D, a, lambda, scaled=TRUE) {
   # (q'a)b - l(q'Dq)
   if(scaled){
