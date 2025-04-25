@@ -566,7 +566,7 @@ head(H)
 Now we need to define what will be our objective function to score the different possible solutions or combinations of possible routes to take. If you are familiar with evola you know that certain internal variable names are taken such as Y, b, d, Q, D and a which represent different sources of information. We recommend you to read the evolafit documentation.  We will use the regular fitness function that gives value to solutions based on the crossproduct of QTLs by average allelic effects but we will add some constraints. These are to ensure that all cities are visited and that all cities are left so there's no open edges.
 
 ```{r}
-salesf <- function(Y,b,d,Q,D,a ,H, nCities){
+salesf <- function(Y,b,Q,D,a,lambda ,H, nCities){
                 # simple fitness function
                 fitnessVal <-  (Y%*%b) 
                 ###############
@@ -609,14 +609,13 @@ res<-evolafit(formula=distances~route, dt= df2,
               # additional variables for the fitness function
               H=H, nCities=nCities,
               # selection parameters
-              propSelBetween = .8, propSelWithin =0.8, 
+              # propSelBetween = .8, propSelWithin =0.8, 
               nGenerations = 50, verbose=FALSE
 ) 
 
 pmonitor(res, kind=1) # fitness should decrease
 Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
-bestid = names(sort(res$fitness, decreasing = FALSE))[1]; bestid # lowest first
-best=which(rownames(Q)==bestid)[1]; best # best solution
+best <- bestSol(res$pop, selectTop = FALSE)[,"fitness"]
 Q[best,] # routes taken
 Q[best,] %*% H # cities visited (should have a 2 so we arrived and left once)
 
