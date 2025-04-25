@@ -1,9 +1,9 @@
 \name{evolaPop-class}
 \docType{class}
 \alias{evolaPop-class}
-\alias{update,evolaPop-method}
-\title{Genetic algorithm for a set of traits and constraints}
-\description{A genetic algorithm fit by \code{\link{evolaPop}}.
+\alias{evolaPop}
+\title{Genetic algorithm pop}
+\description{A genetic algorithm pop fit by \code{\link{evolafit}}.
   This class extends class \code{"\link[AlphaSimR:Pop-class]{Pop}"} class and includes some
   additional slots.}
 \section{Objects from the Class}{Objects are created by calls to the
@@ -31,7 +31,7 @@ Class \code{"\link[AlphaSimR:Pop-class]{Pop}"}, directly.
       non-method for the same reason as \code{update}}
   }
 }
-\seealso{\code{\link{evolaPop}}
+\seealso{\code{evolafit}
 }
 \examples{
 showClass("evolaPop")

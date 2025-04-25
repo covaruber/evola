@@ -1,6 +1,6 @@
 ##' @importFrom stats update
 ##' @S3method update evolaMod
-update.evolaFitMod <- function(object, formula., ..., evaluate = TRUE) {
+update.evolaFitMod <- function(object, formula., evaluate = TRUE, ...) {
   if (is.null(call <- getCall(object))){stop("object should contain a 'call' component")}
   # call <- getCall(object)
   

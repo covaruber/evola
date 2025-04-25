@@ -8,7 +8,7 @@ Fitness function from contribution theory using only the group relationship
 Simple function for fitness where we only use the group relationship. 
 }
 \usage{
-inbFun(Y,b,d,Q,D,a, lambda)
+inbFun(Y,b,Q,D,a, lambda)
 }
 
 \arguments{
@@ -17,9 +17,6 @@ A matrix of trait values. See details.
 }
   \item{b}{
 A vector of trait weights. See details.
-}
-  \item{d}{
-A vector of group relationships. See details.
 }
   \item{Q}{
 A QTL matrix. See details.

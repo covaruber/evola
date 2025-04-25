@@ -58,9 +58,11 @@ evolafit <- function(formula, dt,
   
   if(is.null(initPop)){
     # 1) initialize the population with customized haplotypes to ensure a single QTL per individual
+    av <- 1:nrow(dt)
     haplo = Matrix::Matrix(0, nrow= Ne*2, ncol = nrow(dt)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )
     for (i in seq(1,nrow(haplo),2)) {
-      haplo[i,] <- ifelse(runif(ncol(haplo))< (nQTLperInd/ncol(haplo)) ,1,0)
+      haplo[i,sample(av,nQTLperInd)] <- 1
+      # haplo[i,] <- ifelse(runif(ncol(haplo))< (nQTLperInd/ncol(haplo)) ,1,0)
       haplo[(i+1),] <- haplo[i,]
     }
     colnames(haplo) = dt[,classifiers]
@@ -147,6 +149,14 @@ evolafit <- function(formula, dt,
       fitnessValuePop <- Matrix::Matrix(fitnessValuePop,ncol=1) 
     }
     rownames(fitnessValuePop) <- pop@id
+    nanFound <- which(is.nan( fitnessValuePop[,1] )) # check if there are nans
+    if(length(nanFound) > 0){ # if so assign the worst values to those individuals/solutions
+      if(selectTop){
+        fitnessValuePop[nanFound,1]= -Inf
+      }else{
+        fitnessValuePop[nanFound,1]= Inf
+      }
+    }
     pop@pheno[,1] <- fitnessValuePop[,1]
     
     ## apply selection between and within
@@ -310,7 +320,7 @@ evolafit <- function(formula, dt,
       if(j==1){
         message(paste0("Pop with ", nCrosses, " crosses and ", nProgeny, " progeny (",nCrosses*nProgeny,") solutions"))
         message(
-          cat("gener   constUB  constLB   varG   propB   propW          time")
+          cat("gener  constUB  constLB   varG   propB   propW          time")
         )
       }
       

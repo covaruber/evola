@@ -9,7 +9,8 @@ importFrom("grDevices", "as.raster", "col2rgb", "colorRampPalette",
 importFrom("graphics", "axis", "grid", "layout", "lines", "points",
              "rasterImage", "text", "legend", "par")
 importFrom("stats", "na.omit", "quantile", "var", "as.formula","model.matrix",
-           "median","rnorm")
+           "median","rnorm", "aggregate","runif","getCall","update.formula",
+           "formula")
 
 export( "evolafit", "pmonitor", "pareto", "varQ", "bestSol", "A.mat", 
         "stan", "logspace", "addZeros", "Jc", "Jr",

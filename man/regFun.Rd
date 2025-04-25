@@ -8,7 +8,7 @@ Fitness function from linear regressions based on mean squared error.
 Simple function for fitness where the mean squared error is computed when the user provides y and X and b are the average allelic effects of the population in the genetic algorithm. 
 }
 \usage{
-regFun(Y,b,d,Q,a,lambda,X,y)
+regFun(Y,b,Q,D,a,lambda,X,y)
 }
 
 \arguments{
@@ -18,11 +18,11 @@ A matrix of trait values (internal matrix). See details.
   \item{b}{
 A vector of trait weights (provided by users). See details.
 }
-  \item{d}{
-A vector of group relationships (internal matrix). See details.
-}
   \item{Q}{
 A QTL matrix (internal matrix). See details.
+}
+  \item{D}{
+An LD matrix. See details.
 }
   \item{a}{
 A named list with vectors of average allelic effects per trait (internal matrix). See details.
@@ -75,11 +75,11 @@ y <- rnorm(40) # 4 responses
 X=matrix(rnorm(120),40,3) # covariates
 Q=matrix(0,40,30) # QTL matrix with 30 QTLs
 for(i in 1:nrow(Q)){Q[i,sample(1:ncol(Q),3)]=1}
-a <- list(trait1=rnorm(30)) # 30 average allelic effects in trait 1
+a <- matrix(rnorm(30),ncol=1) # 30 average allelic effects in trait 1
 
 mse = regFun(y=y, X=X, Q=Q, a=a, # used
              # ignored, Y is normally available in the evolafit routine
-             Y=X, b=NA, d=NA) 
+             Y=X) 
 
 }
 \seealso{\code{\link{evolafit}} -- the core function of the package }

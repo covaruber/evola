@@ -8,7 +8,7 @@ Fitness function from contribution theory
 Simple function for fitness where an index of traits is weighted by the group relationship. 
 }
 \usage{
-ocsFun(Y,b,d,Q,D,a,lambda,scaled)
+ocsFun(Y,b,Q,D,a,lambda,scaled=TRUE)
 }
 
 \arguments{
@@ -17,9 +17,6 @@ A matrix of trait values. See details.
 }
   \item{b}{
 A vector of trait weights. See details.
-}
-  \item{d}{
-A vector of group relationships. See details.
 }
   \item{Q}{
 A QTL matrix. See details.
@@ -71,9 +68,17 @@ Giovanny Covarrubias-Pazaran (2024).  evola: a simple evolutionary algorithm for
 
 
 Y=matrix(1:12,4,3) # 4 solutions with 3 traits
-b=c(1,2,3) # weights for each trait
-d=c(1,1,1,1) # coancestry for each solution
-ocsFun(Y,b,d) # Yb - d where d is QAQ' and A is the LD between QTNs
+
+Q=matrix(sample(0:1,32,replace = TRUE),nrow=4,ncol=8) # coancestry for each solution
+
+D=diag(8)
+
+b=rep(1,3)
+
+lambda=0.5
+
+ocsFun(Y=Y,Q=Q,D=D,b=b, lambda=lambda) # Yb - d where d is QAQ' and A is the LD between QTNs
+
 
 }
 \seealso{\code{\link{evolafit}} -- the core function of the package }

@@ -66,10 +66,10 @@ res0<-evolafit(cbind(Weight,Value)~Color, dt= Gems,
                D=NULL, lambda=c(0,0), nQTLperInd = 1, 
                # selection parameters
                propSelBetween = .9, propSelWithin =0.9, 
-               nGenerations = 50
+               nGenerations = 5
 ) 
 
-varQ(res0$pop)
+varQ(res0)
 }
 
 }

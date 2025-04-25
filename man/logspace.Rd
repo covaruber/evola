@@ -5,7 +5,7 @@
   logspace creates a vector with decreasing logaritmic trend.
 }
 \usage{
-  logspace(x, p=1)
+  logspace(x, p=2)
 }
 
 \arguments{
@@ -28,8 +28,8 @@
 
 \examples{
 
-plot(logspace(1:100,f=1))
-plot(logspace(1:100,f=2))
-plot(logspace(1:100,f=3))
+plot(logspace(1:100,p=1))
+plot(logspace(1:100,p=2))
+plot(logspace(1:100,p=3))
 
 }
