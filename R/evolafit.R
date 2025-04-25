@@ -204,6 +204,10 @@ evolafit <- function(formula, dt,
     if(length(selected) == 0){
       selected <- intersect(popCL,popCU )
     }
+    if(length(selected) == 0){
+      message("Too many constraints. No legal solutions found. Random selection applied.")
+      selected <- pop@id[sample(1:nInd(pop), ceiling(nInd(pop)*propSelBetween*propSelWithin) )]
+    }
     pop <- pop[which(pop@id %in% selected)]
     
     ## calculate trace metrics
