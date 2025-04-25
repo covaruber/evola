@@ -50,7 +50,7 @@ res<-evolafit(formula=cbind(Yield, occ)~id, dt= DT,
               D=A, lambda= (30*pi)/180 , nQTLperInd = 20, 
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
-              nGenerations = 40, keepBest=FALSE) 
+              nGenerations = 40) 
               
 Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
 best = bestSol(res$pop)[,"Yield"];best

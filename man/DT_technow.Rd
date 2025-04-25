@@ -56,7 +56,7 @@ M <- M_technow
                 D=A, lambda= (20*pi)/180 , nQTLperInd = 90, 
                 # selection parameters
                 propSelBetween = 0.5, propSelWithin =0.5, 
-                nGenerations = 20, keepBest=FALSE) 
+                nGenerations = 20) 
   
   Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
   best = bestSol(res$pop)[,"GY"]

@@ -20,12 +20,12 @@ evolafit <- function(formula, dt,
   # if(propSelBetween==0 | propSelWithin==0){stop("Please ensure that parameters propSelWithin and propSelBetween are different than zero.", call. = FALSE)}
   if(missing(formula)){stop("Please provide the formula to know traits and classifiers.", call. = FALSE)}
   if(is.null(propSelBetween)){
-    propSelBetween <- stan(logspace(seq(1,-1, -2/nGenerations), p=3), ub=0.5, lb=0.1)
+    propSelBetween <- stan(logspace(seq(1,-1, -2/nGenerations), p=3), ub=0.5, lb=0.2)
   }else{
     propSelBetween <- rep(propSelBetween, nGenerations)
   }
   if(is.null(propSelWithin)){
-    propSelWithin <- stan(logspace(seq(1,-1, -2/nGenerations), p=3), ub=0.5, lb=0.1)
+    propSelWithin <- stan(logspace(seq(1,-1, -2/nGenerations), p=3), ub=0.2, lb=0.5)
   }else{
     propSelWithin <- rep(propSelWithin, nGenerations)
   }
@@ -151,18 +151,17 @@ evolafit <- function(formula, dt,
     np = floor(median(structure))
     # Although multiple traits are enabled it is assumed that same QTLs are behind all the traits, differing only in their average allelic effects.
     if( propSelBetween[j] < 1){ 
-      suppressWarnings( popF <- selectFam(pop=pop,nFam = round(nc*propSelBetween[j]), trait = 1, 
+      suppressWarnings( popF <- selectFam(pop=pop,nFam = ceiling(nc*propSelBetween[j]), trait = 1, 
                                           use = "pheno", simParam = SP, 
                                           selectTop=selectTop,... #H=H,nCities=nCities
       )@id, classes = "warning")
-    }else{popF = pop}
+    }else{popF = pop@id}
     if( propSelWithin[j] < 1 ){
-      suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = round(np*propSelWithin[j]), 
+      suppressWarnings( popW <- selectWithinFam(pop = pop, nInd = ceiling(np*propSelWithin[j]), 
                                                 trait = 1, use = "pheno", simParam = SP, 
                                                 selectTop=selectTop,...#H=H,nCities=nCities
       )@id, classes = "warning")
-    }else{popW=pop}
-    # print(head(pop2gv))
+    }else{popW=pop@id}
     ################################
     ################################
     ## FOR EACH TRAIT WE APPLY CONSTRAINTS
@@ -176,34 +175,35 @@ evolafit <- function(formula, dt,
       if(length(nan0) > 0){ constCheckUB[nan0,iTrait] = 0; constCheckLB[nan0,iTrait] = 0 }
     } # end of for each trait
     # sum of how many trait constraints are met
+    
     metConstCheck <- apply(constCheckUB,1,sum) # sum how many traits we're good to go
     didntMetConst <- which(metConstCheck < length(traits))
     
     # remove individuals that break the constraints UB
     if(length(didntMetConst)>0){ # 
-      # for(iTrait in 1:length(traits)){
         popCU <- pop@id[setdiff(1:nInd(pop),didntMetConst)]
-      # }
     }else{popCU<-pop@id}
     #  remove individuals that break the constraints LB
-    # print(constCheckLB)
     metConstCheckL <- apply(constCheckLB,1,sum) 
     didntMetConstL <- which(metConstCheckL < length(traits))
-    # print(didntMetConstL)
+    
     # impute with mean value the ones that do not met the constraints
     if(length(didntMetConstL)>0){
-      # message(paste(length(didntMetConst),"individuals discarded for breaking the lower bounds.", nInd(pop)-length(didntMetConst), "left." ))
-      # for(iTrait in 1:length(traits)){
         popCL <- pop@id[setdiff(1:nInd(pop),didntMetConstL)]
-      # }
     }else{popCL<-pop@id}
     ## END OF FOR EACH TRAIT WE APPLY CONSTRAINTS
     ################################
     ################################
+    # print(intersect(popCL, popCU))
     # selected <- intersect(popF@id,popW@id)
     # print(str(list(popF,popW,popCL, popCU)))
-    selected <- Reduce(intersect, list(popF,popW,popCL, popCU) )
-    # print(list(popF@id,popW@id,popCL@id, popCU@id))
+    # print(propSelBetween[j])
+    # print(propSelWithin[j])
+    parentsForSelection <- list(popF,popW,popCL, popCU)
+    selected <- Reduce(intersect, parentsForSelection )
+    if(length(selected) == 0){
+      selected <- intersect(popCL,popCU )
+    }
     pop <- pop[which(pop@id %in% selected)]
     
     ## calculate trace metrics
@@ -328,7 +328,6 @@ evolafit <- function(formula, dt,
   popEvola <- as(best,"evolaPop")
   popEvola@score <- averagePerformance[1:j,,drop=FALSE]
   popEvola@pointMut <- nrow(pointMut)
-  popEvola@indivPerformance <- if(is.null(indivPerformance)){data.frame()}else{indivPerformance} # ifelse(is.null(indivPerformance), data.frame(), ifelse(is.list(indivPerformance), data.frame(), indivPerformance))
   popEvola@constCheckUB <- constCheckUB
   popEvola@constCheckLB <- constCheckLB
   popEvola@traits <- traits
@@ -349,7 +348,10 @@ evolafit <- function(formula, dt,
     fitnessValuePop <- Matrix::Matrix(fitnessValuePop,ncol=1)
   };  rownames(fitnessValuePop) <- popEvola@id
   popEvola@fitness <- as.vector(fitnessValuePop)
-  indivPerformance[,"fitness"] <- popEvola@fitness
+  indivPerformance[,"fitness"] <-  as.vector(fitnessValuePop)
+  popEvola@indivPerformance <- if(is.null(indivPerformance)){data.frame()}else{indivPerformance} # ifelse(is.null(indivPerformance), data.frame(), ifelse(is.list(indivPerformance), data.frame(), indivPerformance))
+  
+  
   # rownames(indivPerformance) <- indivPerformance$id
   # popEvola@fitness <- as.vector(indivPerformance[best@id,"fitness"])
   

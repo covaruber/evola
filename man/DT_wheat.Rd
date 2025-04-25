@@ -106,7 +106,7 @@ res<-evolafit(formula=cbind(cov, occ)~id, dt= DT2,
               D=As, lambda= (60*pi)/180 , nQTLperInd = 90, 
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
-              nGenerations = 30, verbose = TRUE, keepBest=FALSE) 
+              nGenerations = 30, verbose = TRUE) 
 
 Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
 best <- bestSol(res$pop)[,"cov"]
