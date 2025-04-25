@@ -144,7 +144,7 @@ evolafit <- function(formula, dt,
     }
     rownames(fitnessValuePop) <- pop@id
     pop@pheno[,1] <- fitnessValuePop[,1]
-    
+
     ## apply selection between and within
     structure = table(paste(pop@mother, pop@father))
     nc = length(structure)
@@ -163,7 +163,46 @@ evolafit <- function(formula, dt,
       ), classes = "warning")
     }else{popW=pop}
     # print(head(pop2gv))
-    selected <- intersect(popF@id,popW@id)
+    ################################
+    ################################
+    ## FOR EACH TRAIT WE APPLY CONSTRAINTS
+    constCheckUB <- constCheckLB <- matrix(1, nrow=nrow(Q), ncol=length(traits))
+    
+    for(iTrait in 1:length(traits)){ # iTrait=1
+      # check the contraints and trace them back
+      constCheckUB[,iTrait] <- ifelse( (pop@gv[,iTrait] > constraintsUB[iTrait])  , 0 , 1) # ifelse(c1+c2 < 2, 0, 1)
+      constCheckLB[,iTrait] <- ifelse( (pop@gv[,iTrait] < constraintsLB[iTrait]) , 0 , 1)
+      nan0 <- which(is.nan( pop@gv[,iTrait]))
+      if(length(nan0) > 0){ constCheckUB[nan0,iTrait] = 0; constCheckLB[nan0,iTrait] = 0 }
+    } # end of for each trait
+    # sum of how many trait constraints are met
+    metConstCheck <- apply(constCheckUB,1,sum) # sum how many traits we're good to go
+    didntMetConst <- which(metConstCheck < length(traits))
+    
+    # remove individuals that break the constraints UB
+    if(length(didntMetConst)>0){ # 
+      # for(iTrait in 1:length(traits)){
+        popCU <- pop[setdiff(1:nInd(pop),didntMetConst)]
+      # }
+    }else{popCU<-pop}
+    #  remove individuals that break the constraints LB
+    # print(constCheckLB)
+    metConstCheckL <- apply(constCheckLB,1,sum) 
+    didntMetConstL <- which(metConstCheckL < length(traits))
+    # print(didntMetConstL)
+    # impute with mean value the ones that do not met the constraints
+    if(length(didntMetConstL)>0){
+      # message(paste(length(didntMetConst),"individuals discarded for breaking the lower bounds.", nInd(pop)-length(didntMetConst), "left." ))
+      # for(iTrait in 1:length(traits)){
+        popCL <- pop[setdiff(1:nInd(pop),didntMetConstL)]
+      # }
+    }else{popCL<-pop}
+    ## END OF FOR EACH TRAIT WE APPLY CONSTRAINTS
+    ################################
+    ################################
+    # selected <- intersect(popF@id,popW@id)
+    selected <- Reduce(intersect, list(popF@id,popW@id,popCL@id, popCU@id) )
+    # print(list(popF@id,popW@id,popCL@id, popCU@id))
     pop <- pop[which(pop@id %in% selected)]
     
     ## calculate trace metrics
@@ -185,38 +224,9 @@ evolafit <- function(formula, dt,
     
     averagePerformance[j,] <- c( mfvp , max(fitnessValuePop,na.rm=TRUE) ,  mean(apply(Q/2,1,sum),na.rm=TRUE), mean(deltaC,na.rm=TRUE) ) # save summaries of performance
     
-    ################################
-    ################################
-    ## FOR EACH TRAIT WE APPLY CONSTRAINTS
-    constCheckUB <- constCheckLB <- matrix(1, nrow=nrow( pullQtlGeno(pop, simParam = SP, trait = 1)  ), ncol=length(traits))
+
     
-    for(iTrait in 1:length(traits)){ # iTrait=1
-      # check the contraints and trace them back
-      constCheckUB[,iTrait] <- ifelse( (pop@gv[,iTrait] > constraintsUB[iTrait])  , 0 , 1) # ifelse(c1+c2 < 2, 0, 1)
-      constCheckLB[,iTrait] <- ifelse( (pop@gv[,iTrait] < constraintsLB[iTrait]) , 0 , 1)
-      nan0 <- which(is.nan( pop@gv[,iTrait]))
-      if(length(nan0) > 0){ constCheckUB[nan0,iTrait] = 0; constCheckLB[nan0,iTrait] = 0 }
-    } # end of for each trait
-    # sum of how many trait constraints are met
-    metConstCheck <- apply(constCheckUB,1,sum) 
-    didntMetConst <- which(metConstCheck < length(traits))
-    # remove individuals that break the constraints UB
-    if(length(didntMetConst)>0){ # 
-      for(iTrait in 1:length(traits)){
-        pop <- pop[setdiff(1:nInd(pop),didntMetConst)]
-      }
-    }
-    #  remove individuals that break the constraints LB
-    metConstCheckL <- apply(constCheckLB,1,sum) 
-    didntMetConstL <- which(metConstCheckL < length(traits))
-    # impute with mean value the ones that do not met the constraints
-    if(length(didntMetConstL)>0){
-      # message(paste(length(didntMetConst),"individuals discarded for breaking the lower bounds.", nInd(pop)-length(didntMetConst), "left." ))
-      for(iTrait in 1:length(traits)){
-        pop <- pop[setdiff(1:nInd(pop),didntMetConstL)]
-      }
-    }
-    
+    #################################
     # solutions selected for tracing
     best[[j]] <- selectInd(pop=pop, nInd = min(c(nInd(pop),topN)), trait = 1, 
                            use = "pheno", simParam = SP, 
@@ -282,6 +292,7 @@ evolafit <- function(formula, dt,
     ##############################################################
     ##############################################################
     #store the performance of the jth generation for plot functions
+    
     if(nrow(pop@gv) > 0){
       totalVarG = sum(diag(varG(pop = pop)))
     }else{
@@ -324,20 +335,23 @@ evolafit <- function(formula, dt,
   
   ###################
   # Although multiple traits are enabled it is assumed that same QTLs are behind all the traits, differing only in their average allelic effects.
+  # we need to recalculate fitness because we have been scaling across generations
   Q <- pullQtlGeno(popEvola, simParam = SP, trait = iTrait)/2 #?/2
   Q <- as(as(as( Q,  "dMatrix"), "generalMatrix"), "CsparseMatrix") # as(Q, Class = "dgCMatrix")
   rownames(Q) <- popEvola@id
   a <- do.call(cbind, lapply(SP$traits, function(x){x@addEff}))
   popEvola@gv <- as.matrix(Q%*% a)
-  
+
   fitnessValuePop<- do.call("fitnessf", args=list(Y=popEvola@gv, b=b,  Q=Q,
                                                   a=a, D=D, lambda=lambda,
                                                   ... ), quote = TRUE)
   if(!is.matrix(fitnessValuePop)){
     fitnessValuePop <- Matrix::Matrix(fitnessValuePop,ncol=1)
   };  rownames(fitnessValuePop) <- popEvola@id
-  
   popEvola@fitness <- as.vector(fitnessValuePop)
+  
+  # rownames(indivPerformance) <- indivPerformance$id
+  # popEvola@fitness <- as.vector(indivPerformance[best@id,"fitness"])
   
   res <- list(pop=popEvola, simParam=SP, call=mc, fitness=fitnessValuePop)
   class(res) <- "evolaFitMod"
