@@ -144,7 +144,8 @@ problems is a special case where this argument should be set to TRUE. The behavi
 assumes that if set to TRUE and a particular solution has more QTLs active than 
 nQTLperInd some QTLs will be set to 0 and if a solution has less QTLs active than 
 nQTLperInd some QTLs will be activated. All activations or deactivations are done 
-at random. This only takes place after generation 1.
+at random. This could be an alternative to use a counting trait to restrain the number
+of QTLs active in a solution but is slower.
 }
   \item{traceDelta}{
   a logical value indicating if we should compute the rate of coancestry Q'DQ at each iteration. 

@@ -135,6 +135,51 @@ evolafit <- function(formula, dt,
     Q <- pullQtlGeno(pop, simParam = SP, trait = iTrait)/2 #?/2
     Q <- as(as(as( Q,  "dMatrix"), "generalMatrix"), "CsparseMatrix") # as(Q, Class = "dgCMatrix")
     rownames(Q) <- pop@id
+    
+    ## use mutatio rate
+    if(mutRate > 0){
+      if(nMutations == 1){
+        pointMut = t(as.matrix(apply(data.frame(1:nInd(pop)), 1, function(x){
+          sample(1:nrow(dt), nMutations, replace = FALSE)
+        }) ))
+      }else{
+        pointMut = as.matrix(apply(data.frame(1:nInd(pop)), 1, function(x){
+          sample(1:nrow(dt), nMutations, replace = FALSE)
+        }) )
+      }
+      # 
+      for(iQtl in unique(as.vector(pointMut))){
+        modif=which(pointMut == iQtl, arr.ind = TRUE)[,"col"]
+        allele = sample(0:1, 1)
+        pop = editGenome(pop, ind=modif,chr=1, segSites=iQtl, simParam=SP, allele = allele)
+      }
+    }else{pointMut=as.data.frame(matrix(NA, nrow=0, ncol=1))}
+    ## enf of use mutation rate
+    ###########################
+    ## if user wants to fix the number of QTLs activated apply the following rules
+    # 1) if more than nQTLperInd we silence some
+    # 2) if less than nQTLperInd we activate some
+    if(fixQTLperInd){
+      Qfq <- pullQtlGeno(pop, simParam = SP, trait = 1); Qfq <- Qfq/2
+      for(iInd in 1:nInd(pop)){ # for each individual
+        iQfq <- Qfq[iInd,]; areZeros <- which(iQfq == 0); areOnes <- setdiff(1:ncol(Qfq),areZeros)
+        howMany <- sum(iQfq) # how many QTLs are activated, we're assuming is a 0/1 matrix
+        toAddOrRem <- abs(howMany - nQTLperInd) # deviation from expectation
+        if( howMany > nQTLperInd ){ # if exceeded silence some
+          toRem <- sample(areOnes, toAddOrRem) # pick which ones will be silenced
+          for(iChange in 1:toAddOrRem){
+            pop = editGenome(pop, ind=iInd,chr=1, segSites=toRem[iChange], simParam=SP, allele = 0)
+          }
+        }else if( howMany < nQTLperInd){ # if lacked activate some
+          toAdd <- sample(areZeros, toAddOrRem) # pick which ones will be activated
+          for(iChange in 1:toAddOrRem){
+            pop = editGenome(pop, ind=iInd,chr=1, segSites=toAdd[iChange], simParam=SP, allele = 1)
+          }
+        } # else do nothing
+      }
+    }
+    ## enf of fixqtl
+    
     a <- do.call(cbind, lapply(SP$traits, function(x){x@addEff}))
     colnames(a) <- traits
     pop@gv <- as.matrix(Q%*% a)
@@ -226,16 +271,13 @@ evolafit <- function(formula, dt,
       deltaC <- ( (qtDq/(4*(apply(Q/2,1,sum)^2))) - mtDm)/(1-mtDm) # numerator is equivalent to mtDm 
     }else{deltaC=NA}
     
-    
-    
     #################################
     # solutions selected for tracing
     best[[j]] <- selectInd(pop=pop, nInd = min(c(nInd(pop),topN)), trait = 1, 
                            use = "pheno", simParam = SP, 
                            selectTop=selectTop,... #H=H,nCities=nCities
     )
-    # pedBest = rbind(pedBest, data.frame(id=best[[j]]@id, mother=best[[j]]@mother, father=best[[j]]@father, gen=j) )
-    
+   
     mfvp =  mean(as.vector(fitnessValuePop[best[[j]]@id,]))
     indivPerformance[[j]] <- data.frame(id=best[[j]]@id, fitness=as.vector(fitnessValuePop[best[[j]]@id,]), 
                                         generation=j, nQTL=as.vector(apply(Q[best[[j]]@id,,drop=FALSE]/2,1,sum)),
@@ -249,29 +291,7 @@ evolafit <- function(formula, dt,
       }
     }
     pop <- makeDH(pop=pop, nDH = 1, simParam = SP)
-    #############################################
-    ## if user wants to fix the number of QTLs activated apply the following rules
-    # 1) if more than nQTLperInd we silence some
-    # 2) if less than nQTLperInd we activate some
-    if(fixQTLperInd){
-      Qfq <- pullQtlGeno(pop, simParam = SP, trait = 1); Qfq <- Qfq/2
-      for(iInd in 1:nInd(pop)){ # for each individual
-        iQfq <- Qfq[iInd,]; areZeros <- which(iQfq == 0); areOnes <- setdiff(1:ncol(Qfq),areZeros)
-        howMany <- sum(iQfq) # how many QTLs are activated, we're assuming is a 0/1 matrix
-        toAddOrRem <- abs(howMany - nQTLperInd) # deviation from expectation
-        if( howMany > nQTLperInd ){ # if exceeded silence some
-          toRem <- sample(areOnes, toAddOrRem) # pick which ones will be silenced
-          for(iChange in 1:toAddOrRem){
-            pop = editGenome(pop, ind=iInd,chr=1, segSites=toRem[iChange], simParam=SP, allele = 0)
-          }
-        }else if( howMany < nQTLperInd){ # if lacked activate some
-          toAdd <- sample(areZeros, toAddOrRem) # pick which ones will be activated
-          for(iChange in 1:toAddOrRem){
-            pop = editGenome(pop, ind=iInd,chr=1, segSites=toAdd[iChange], simParam=SP, allele = 1)
-          }
-        } # else do nothing
-      }
-    }
+    
     #############################################
     ## compute constrained traits
     if(all(SP$varG>0)){
@@ -280,24 +300,7 @@ evolafit <- function(formula, dt,
       pop@pheno <- apply(pop@pheno,2,function(xx){rnorm(length(xx))}) # rnorm(length(pop@pheno))
     }
     
-    ## use mutatio rate
-    if(mutRate > 0){
-      if(nMutations == 1){
-        pointMut = t(as.matrix(apply(data.frame(1:nInd(pop)), 1, function(x){
-          sample(1:nrow(dt), nMutations, replace = FALSE)
-        }) ))
-      }else{
-        pointMut = as.matrix(apply(data.frame(1:nInd(pop)), 1, function(x){
-          sample(1:nrow(dt), nMutations, replace = FALSE)
-        }) )
-      }
-      # 
-      for(iQtl in unique(as.vector(pointMut))){
-        modif=which(pointMut == iQtl, arr.ind = TRUE)[,"col"]
-        allele = sample(0:1, 1)
-        pop = editGenome(pop, ind=modif,chr=1, segSites=iQtl, simParam=SP, allele = allele)
-      }
-    }else{pointMut=as.data.frame(matrix(NA, nrow=0, ncol=1))}
+    
     ##############################################################
     ##############################################################
     #store the performance of the jth generation for plot functions
