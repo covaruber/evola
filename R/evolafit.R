@@ -114,11 +114,8 @@ evolafit <- function(formula, dt,
   ################################
   ################################
   ## FOR EACH GENERATION
-  spacing9=paste(rep(" ",10), collapse = "");spacing99=paste(rep(" ",9), collapse = "");spacing999=paste(rep(" ",8), collapse = "")
   j =0 # in 1:nGenerations
   nonStop=TRUE
-  pedBest <- list(); 
-  best <- pop[0]; pedBest <- data.frame(matrix(NA,nrow=0, ncol=4)); colnames(pedBest) <- c("id","mother","father","gen")
   
   if(traceDelta){ # if user wants to trace inbreeding (default is TRUE but it can be a costly operation)
     m <- Matrix::Matrix(1,nrow=1,ncol=ncol(D))
@@ -132,7 +129,6 @@ evolafit <- function(formula, dt,
   console <-  data.frame(matrix(NA,nrow=nGenerations, ncol=8))
   nin <- nCrosses*nProgeny
   initVarG = round(sum(diag(varG(pop = pop))),3)
-  initpropSelBetween <- round(propSelBetween, 2)
   while(nonStop) { # for each generation we breed # j=1
     j=j+1
     
@@ -207,11 +203,6 @@ evolafit <- function(formula, dt,
     ## END OF FOR EACH TRAIT WE APPLY CONSTRAINTS
     ################################
     ################################
-    # print(intersect(popCL, popCU))
-    # selected <- intersect(popF@id,popW@id)
-    # print(str(list(popF,popW,popCL, popCU)))
-    # print(propSelBetween[j])
-    # print(propSelWithin[j])
     parentsForSelection <- list(popF,popW,popCL, popCU)
     selected <- Reduce(intersect, parentsForSelection )
     if(length(selected) == 0){
@@ -243,7 +234,7 @@ evolafit <- function(formula, dt,
                            use = "pheno", simParam = SP, 
                            selectTop=selectTop,... #H=H,nCities=nCities
     )
-    pedBest = rbind(pedBest, data.frame(id=best[[j]]@id, mother=best[[j]]@mother, father=best[[j]]@father, gen=j) )
+    # pedBest = rbind(pedBest, data.frame(id=best[[j]]@id, mother=best[[j]]@mother, father=best[[j]]@father, gen=j) )
     
     mfvp =  mean(as.vector(fitnessValuePop[best[[j]]@id,]))
     indivPerformance[[j]] <- data.frame(id=best[[j]]@id, fitness=as.vector(fitnessValuePop[best[[j]]@id,]), 
@@ -316,6 +307,9 @@ evolafit <- function(formula, dt,
     }else{
       totalVarG = 0
     }
+    console[j,] <- c(j, length(didntMetConst), length(didntMetConstL), 
+                     round(totalVarG, 3), round(mfvp, 3), round(propSelBetween[j], 2),
+                     round(propSelWithin[j], 2),  Sys.time() )
     if(verbose){
       if(j==1){
         message(paste0("Pop with ", nCrosses, " crosses and ", nProgeny, " progeny (",nCrosses*nProgeny,") solutions"))
@@ -323,12 +317,6 @@ evolafit <- function(formula, dt,
           cat("gener  constUB  constLB   varG   propB   propW          time")
         )
       }
-      
-      console[j,] <- c(j, length(didntMetConst), length(didntMetConstL), 
-                       round(totalVarG, 3), round(mfvp, 3), round(propSelBetween[j], 2),
-                       round(propSelWithin[j], 2), 
-                       Sys.time()
-                       )
       sp <- paste(rep(" ", 2), collapse = "")
       message(cat(paste(
         sp, addZeros(1:nGenerations, nr=0)[j], 
@@ -339,7 +327,6 @@ evolafit <- function(formula, dt,
         sp, addZeros(c( round(propSelWithin[j], 2) , round(propSelWithin, 2) ))[1], 
         sp, Sys.time()
       )))
-
     }
     if(j == nGenerations){nonStop = FALSE}
     if(nrow(pop@gv) > 0){
@@ -375,17 +362,13 @@ evolafit <- function(formula, dt,
   fitnessValuePop<- do.call("fitnessf", args=list(Y=popEvola@gv, b=b,  Q=Q,
                                                   a=a, D=D, lambda=lambda,
                                                   ... ), quote = TRUE)
-  # print(fitnessValuePop)
+
   if(!is.matrix(fitnessValuePop)){
     fitnessValuePop <- Matrix::Matrix(fitnessValuePop,ncol=1)
   };  rownames(fitnessValuePop) <- popEvola@id
   popEvola@fitness <- as.vector(fitnessValuePop)
   indivPerformance[,"fitness"] <-  as.vector(fitnessValuePop)
-  popEvola@indivPerformance <- if(is.null(indivPerformance)){data.frame()}else{indivPerformance} # ifelse(is.null(indivPerformance), data.frame(), ifelse(is.list(indivPerformance), data.frame(), indivPerformance))
-  
-  
-  # rownames(indivPerformance) <- indivPerformance$id
-  # popEvola@fitness <- as.vector(indivPerformance[best@id,"fitness"])
+  popEvola@indivPerformance <- if(is.null(indivPerformance)){data.frame()}else{indivPerformance} 
   
   res <- list(pop=popEvola, simParam=SP, call=mc, fitness=fitnessValuePop, console=console)
   class(res) <- "evolaFitMod"
