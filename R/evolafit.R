@@ -158,7 +158,6 @@ evolafit <- function(formula, dt,
       }
     }
     pop@pheno[,1] <- fitnessValuePop[,1]
-    
     ## apply selection between and within
     structure = table(paste(pop@mother, pop@father))
     nc = length(structure)
@@ -220,6 +219,7 @@ evolafit <- function(formula, dt,
     }
     if(length(selected) < 2){
       message("Too many constraints. No legal solutions found. Random selection applied.")
+      # print(nInd(pop))
       selected <- pop@id[sample(1:nInd(pop), ceiling(nInd(pop)*propSelBetween*propSelWithin) )]
     }
     pop <- pop[which(pop@id %in% selected)]
@@ -372,10 +372,10 @@ evolafit <- function(formula, dt,
   rownames(Q) <- popEvola@id
   a <- do.call(cbind, lapply(SP$traits, function(x){x@addEff}))
   popEvola@gv <- as.matrix(Q%*% a)
-  
   fitnessValuePop<- do.call("fitnessf", args=list(Y=popEvola@gv, b=b,  Q=Q,
                                                   a=a, D=D, lambda=lambda,
                                                   ... ), quote = TRUE)
+  # print(fitnessValuePop)
   if(!is.matrix(fitnessValuePop)){
     fitnessValuePop <- Matrix::Matrix(fitnessValuePop,ncol=1)
   };  rownames(fitnessValuePop) <- popEvola@id

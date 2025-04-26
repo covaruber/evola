@@ -53,11 +53,16 @@ addZeros<- function (x, nr=2) {
 ocsFun <- function (Y, b, Q, D, a, lambda, scaled=TRUE) {
   # (q'a)b - l(q'Dq)
   if(scaled){
-    return( stan( apply(Y,2,scale) %*% b) -  lambda*stan( Matrix::diag(Q %*% Matrix::tcrossprod(D, Q)) ) )
+    Yb <- apply(Y,2,function(x){
+      if(var(x)>0){return(scale(x))}else{return(x*0)}
+    }) %*% b
   }else{
-    return( stan( Y %*% b) -  lambda*stan( Matrix::diag(Q %*% Matrix::tcrossprod(D, Q)) ) )
-    # return( stan( (Q%*%a) %*% b) -  lambda*stan( Matrix::diag(Q %*% Matrix::tcrossprod(D, Q)) ) )
+    Yb <- Y %*% b
   }
+  QtDQ <- Matrix::diag(Q %*% Matrix::tcrossprod(D, Q))
+  if(var(Yb) > 0){Yb <- stan(Yb)}
+  if(var(QtDQ) > 0){QtDQ <- stan(QtDQ)}
+  return( Yb -  lambda*QtDQ )
 }
 
 regFun <- function (Y, b, Q, D, a, lambda, X, y) {
@@ -145,8 +150,7 @@ Jr <- function(nr){
   matrix(1,nrow=nr,ncol=1)
 }
 
-bestSol <- function (object, selectTop = TRUE, n = 1) 
-{
+bestSol <- function (object, selectTop = TRUE, n = 1){
   if (!inherits(object, c("Pop", "evolaMod"))) {
     stop("Object of type Pop or evolaMod expected", call. = FALSE)
   }
