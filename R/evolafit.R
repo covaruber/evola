@@ -317,7 +317,7 @@ evolafit <- function(formula, dt,
       if(j==1){
         message(paste0("Pop with ", nCrosses, " crosses and ", nProgeny, " progeny (",nCrosses*nProgeny,") solutions"))
         message(
-          cat("gener  constUB  constLB   varG   propB   propW  fit        time")
+          cat("gener  constUB  constLB  varG%   propB   propW   fit       time")
         )
       }
       sp <- paste(rep(" ", 2), collapse = "")
@@ -325,11 +325,11 @@ evolafit <- function(formula, dt,
         sp, addZeros(1:nGenerations, nr=0)[j], 
         sp, addZeros(c(length(didntMetConst),nin), nr=0)[1],
         sp, addZeros(c(length(didntMetConstL),nin), nr=0)[1],
-        sp, addZeros(c(round(totalVarG, 3),initVarG))[1],
+        sp, addZeros(c(round(totalVarG/initVarG, 3),1.000))[1],
         sp, addZeros(c( round(propSelBetween[j], 2) , round(propSelBetween, 2) ))[1], 
         sp, addZeros(c( round(propSelWithin[j], 2) , round(propSelWithin, 2) ))[1], 
         sp, addZeros(c(  round(mfvp, 3) , round(console[1:j,5], 3) ))[1], 
-        sp, Sys.time()
+        sp, strsplit(format(Sys.time(), "%a %b %d %X %Y"), " ")[[1]][4]
       )))
     }
     if(j == nGenerations){nonStop = FALSE}
