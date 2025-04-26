@@ -20,12 +20,12 @@ evolafit <- function(formula, dt,
   # if(propSelBetween==0 | propSelWithin==0){stop("Please ensure that parameters propSelWithin and propSelBetween are different than zero.", call. = FALSE)}
   if(missing(formula)){stop("Please provide the formula to know traits and classifiers.", call. = FALSE)}
   if(is.null(propSelBetween)){
-    propSelBetween <- stan(logspace(seq(1,-1, -2/nGenerations), p=3), ub=0.5, lb=0.2)
+    propSelBetween <- stan(logspace(seq(1,-1, -2/nGenerations), p=3), ub=0.8, lb=0.2)
   }else{
     propSelBetween <- rep(propSelBetween, nGenerations)
   }
   if(is.null(propSelWithin)){
-    propSelWithin <- stan(logspace(seq(1,-1, -2/nGenerations), p=3), ub=0.2, lb=0.5)
+    propSelWithin <- stan(logspace(seq(1,-1, -2/nGenerations), p=3), ub=0.2, lb=0.8)
   }else{
     propSelWithin <- rep(propSelWithin, nGenerations)
   }
@@ -254,9 +254,12 @@ evolafit <- function(formula, dt,
       selected <- intersect(popCL,popCU )
     }
     if(length(selected) < 2){
-      message("Too many constraints. No legal solutions found. Random selection applied.")
-      # print(nInd(pop))
-      selected <- pop@id[sample(1:nInd(pop), ceiling(nInd(pop)*propSelBetween*propSelWithin) )]
+      message("No legal solutions found. Selecting all individuals meeting constraints.")
+      selected <- Reduce(intersect, list(popCL, popCU))
+      if(length(selected) < 2){
+        message("Too many constraints. No legal solutions found. Random selection p=0.5 applied.")
+        selected <- pop@id[sample(1:nInd(pop), ceiling(nInd(pop)*.5) )]
+      }
     }
     pop <- pop[which(pop@id %in% selected)]
     
@@ -293,18 +296,15 @@ evolafit <- function(formula, dt,
     pop <- makeDH(pop=pop, nDH = 1, simParam = SP)
     
     #############################################
-    ## compute constrained traits
+    ## compute phenotypes
     if(all(SP$varG>0)){
       pop = setPheno(pop,h2=rep(.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0) )
     }else{
       pop@pheno <- apply(pop@pheno,2,function(xx){rnorm(length(xx))}) # rnorm(length(pop@pheno))
     }
-    
-    
     ##############################################################
     ##############################################################
     #store the performance of the jth generation for plot functions
-    
     if(nrow(pop@gv) > 0){
       totalVarG = sum(diag(varG(pop = pop)))
     }else{
@@ -317,7 +317,7 @@ evolafit <- function(formula, dt,
       if(j==1){
         message(paste0("Pop with ", nCrosses, " crosses and ", nProgeny, " progeny (",nCrosses*nProgeny,") solutions"))
         message(
-          cat("gener  constUB  constLB   varG   propB   propW          time")
+          cat("gener  constUB  constLB   varG   propB   propW  fit        time")
         )
       }
       sp <- paste(rep(" ", 2), collapse = "")
@@ -328,6 +328,7 @@ evolafit <- function(formula, dt,
         sp, addZeros(c(round(totalVarG, 3),initVarG))[1],
         sp, addZeros(c( round(propSelBetween[j], 2) , round(propSelBetween, 2) ))[1], 
         sp, addZeros(c( round(propSelWithin[j], 2) , round(propSelWithin, 2) ))[1], 
+        sp, addZeros(c(  round(mfvp, 3) , round(console[1:j,5], 3) ))[1], 
         sp, Sys.time()
       )))
     }
