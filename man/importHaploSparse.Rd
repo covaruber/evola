@@ -6,7 +6,7 @@ Import haplotypes
 }
 \description{
 Formats haplotype in a matrix format to an AlphaSimR population that can be used 
-to initialize a simulation. This function serves as wrapper for \code{\link{newMapPop}} that
+to initialize a simulation. This function serves as wrapper for newMapPop that
 utilizes a more user friendly input format.
 }
 \usage{
@@ -20,7 +20,7 @@ a sparse matrix of haplotypes
   \item{genMap}{
 genetic map as a data.frame. The first three columns must be: marker name, 
 chromosome, and map position (Morgans). Marker name and chromosome are coerced
-using as.character. See \code{\link{importGenMap}}.
+using as.character. See importGenMap.
 }
   \item{ploidy}{
 ploidy level of the organism.
