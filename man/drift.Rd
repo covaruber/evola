@@ -38,24 +38,20 @@ Giovanny Covarrubias-Pazaran (2024).  evola: a simple evolutionary algorithm for
 
 \examples{
 
-set.seed(1)
+#Create founder haplotypes
+founderPop = quickHaplo(nInd=10, nChr=1, segSites=10)
 
-# Data
-Gems <- data.frame(
-  Color = c("Red", "Blue", "Purple", "Orange",
-            "Green", "Pink", "White", "Black", 
-            "Yellow"),
-  Weight = round(runif(9,0.5,5),2),
-  Value = round(abs(rnorm(9,0,5))+0.5,2),
-  Times=c(rep(1,8),0)
-)
+#Set simulation parameters
+SP = SimParam$new(founderPop)
+SP$addTraitA(10)
 
-res00<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
-               # constraints on traits: if greater than this ignore
-               constraintsUB = c(10,Inf), nGenerations = 2
-)
+#Create population
+pop = newPop(founderPop, simParam=SP)
 
-drift(pop=res00$pop, simParam=res00$simParam )
+#Make 10 crosses
+pop2 = randCross(pop, 10, simParam=SP)
+
+drift(pop=pop, simParam=SP )
 
 }
 \seealso{\code{\link{evolafit}} -- the core function of the package }

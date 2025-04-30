@@ -348,7 +348,7 @@ drift <- function(pop, simParam){
     prov <- sapply(1:length(desiredAllele), function(x){freqsA[as.character(desiredAllele[x]) ,x]})
     chr <- as.numeric( unlist(lapply( as.list( colnames(Qtl) ), function(x){strsplit(x,"_")[[1]][1]} )) )
     ss <- sapply(unique(chr), function(x){
-      SS = pullSegSiteGeno(pop, chr = x)
+      SS = pullSegSiteGeno(pop, chr = x, simParam = simParam)
       return( which(colnames(SS) %in% colnames(Qtl)) )
     })
     out <- cbind(chr,as.vector(ss), desiredAllele,prov)
