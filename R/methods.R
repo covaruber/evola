@@ -47,3 +47,19 @@ update.evolaFitMod <- function(object, formula., evaluate = TRUE, ...) {
   ## )
   ## eval(call,combf, enclos=pf)
 }
+
+summary.Pop <- function(pop){
+  dd=data.frame(id=pop@id, mother=pop@mother, father= pop@father)
+  dd$cross <- paste(dd$mother, dd$father, sep="_")
+  dd$n <- 1
+  nCross <- length(table(dd$cross))
+  nMother <- length(table(dd$mother))
+  nFather <- length(table(dd$father))
+  nId <- length(table(dd$id))
+  nIdPerCross <- mean(table(dd$cross))
+  return( data.frame(nId=nId,nCross=nCross,
+                     nMother=nMother, nFather=nFather,
+                     nIdPerCross=nIdPerCross)
+  )
+}
+
