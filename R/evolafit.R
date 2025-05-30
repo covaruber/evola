@@ -320,7 +320,7 @@ evolafit <- function(formula, dt,
                      round(propSelWithin[j], 2),  Sys.time() )
     if(verbose){
       if(j==1){
-        message(paste0("Pop with ", nCrosses, " crosses and ", nProgeny, " progeny (",nCrosses*nProgeny,") solutions"))
+        message(paste0("Population with ", nCrosses, " crosses, ", nProgeny, " progeny, and ",ncol(Q)," QTLs"))
         message(
           cat("gener  constUB  constLB  varG%   propB   propW   fit       time")
         )

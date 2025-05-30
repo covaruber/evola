@@ -58,7 +58,8 @@ which is equivalent to reject/discard a solution based on the fitness function.
   \item{constraintsW}{
 A numeric vector of length equal to the number of generations to specify the weights 
 to be applied to the lower and upper bound constraint values to relax the constraints
-if needed. If NULL a vector of 1s is created.
+if needed. If values is NULL a vector of 1s with length equal to the number of
+generations is created.
 }
   \item{b}{
 A numeric vector specifying the weights that each trait has in the fitness function 
