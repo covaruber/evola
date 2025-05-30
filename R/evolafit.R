@@ -1,6 +1,6 @@
 evolafit <- function(formula, dt, 
-                     constraintsUB, constraintsLB, b,
-                     nCrosses=50, nProgeny=20,nGenerations=20, 
+                     constraintsUB, constraintsLB,constraintW=NULL, 
+                     b, nCrosses=50, nProgeny=20,nGenerations=20, 
                      recombGens=1, nChr=1, mutRate=0,
                      nQTLperInd=NULL, D=NULL, lambda=0,
                      propSelBetween=NULL,propSelWithin=NULL,
@@ -31,6 +31,9 @@ evolafit <- function(formula, dt,
   }
   if(propSelBetween[1]>0 & nCrosses==0){stop("If you apply selection between families you need to set nCrosses to a value > 0.", call. = FALSE)}
   if(nGenerations < 1){stop("nGenerations cannot be smaller than 1.")}
+  if(is.null(constraintW)){
+    constraintW <- rep(1, nGenerations)
+  } # different weight to constraints at each generation
   
   mc <- match.call() # create a call
   # add the fitness function (current options are qa=-1 to ln>=0 )
@@ -223,8 +226,10 @@ evolafit <- function(formula, dt,
     
     for(iTrait in 1:length(traits)){ # iTrait=1
       # check the contraints and trace them back
-      constCheckUB[,iTrait] <- ifelse( (pop@gv[,iTrait] > constraintsUB[iTrait])  , 0 , 1) # ifelse(c1+c2 < 2, 0, 1)
-      constCheckLB[,iTrait] <- ifelse( (pop@gv[,iTrait] < constraintsLB[iTrait]) , 0 , 1)
+      constCheckUB[,iTrait] <- ifelse( (pop@gv[,iTrait] > constraintsUB[iTrait]*(1+(1-constraintW[j])) )  , 0 , 1) # ifelse(c1+c2 < 2, 0, 1)
+      constCheckLB[,iTrait] <- ifelse( (pop@gv[,iTrait] < constraintsLB[iTrait]*constraintW[j] ) , 0 , 1)
+      # constCheckUB[,iTrait] <- ifelse( (pop@gv[,iTrait] > constraintsUB[iTrait])  , 0 , 1) # ifelse(c1+c2 < 2, 0, 1)
+      # constCheckLB[,iTrait] <- ifelse( (pop@gv[,iTrait] < constraintsLB[iTrait]) , 0 , 1)
       nan0 <- which(is.nan( pop@gv[,iTrait]))
       if(length(nan0) > 0){ constCheckUB[nan0,iTrait] = 0; constCheckLB[nan0,iTrait] = 0 }
     } # end of for each trait

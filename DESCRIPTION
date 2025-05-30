@@ -12,7 +12,6 @@ Depends: R(>= 3.5.0), AlphaSimR (>= 1.4.2), Matrix (>= 1.0), methods, crayon
 LazyLoad: yes
 LazyData: yes
 License: GPL (>= 2)
-NeedsCompilation: yes
 Author: Giovanny Covarrubias-Pazaran [aut, cre] (<https://orcid.org/0000-0002-7194-3837>)
 Repository: CRAN
 Suggests: 
