@@ -51,7 +51,7 @@ res<-evolafit(formula=cbind(cov, occ)~id, dt= DT,
               b = c(1,0), 
               # population parameters
               nCrosses = 100, nProgeny = 20, 
-              recombGens=1, nChr=1, mutRate=0,
+              recombGens=1, nChr=1, mutRateAllele=0,
               # coancestry parameters
               D=G, lambda= 0 , nQtlStart = nLocs, 
               # selection parameters

@@ -17,7 +17,7 @@ that same QTLs are behind all the traits, differing only in their average alleli
 evolafit(formula, dt, 
      constraintsUB, constraintsLB, constraintW=NULL, 
      b, nCrosses=50, nProgeny=20,nGenerations=20, 
-     recombGens=1, nChr=1, mutRate=0,
+     recombGens=1, nChr=1, mutRateAllele=0,  mutRateAlpha=0,
      nQtlStart=NULL, D=NULL, lambda=0,
      propSelBetween=NULL,propSelWithin=NULL,
      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
@@ -88,8 +88,16 @@ The number of chromosomes where features/genes should be allocated to. The defau
 value is 1 but this number can be increased to mimic more recombination events at 
 every generation and avoid linkage disequilibrium. 
 }
-  \item{mutRate}{
-A value between 0 and 1 to indicate the proportion of random QTLs that should 
+  \item{mutRateAllele}{
+A value between 0 and 1 to indicate the proportion of random QTL dosage that should 
+mutate in each individual. For example, a value of 0.1 means that a random 10\% 
+of the QTLs will mutate in each individual randomly taking values of 0 or 1. 
+Is important to notice that this implies that the stopping criteria based in 
+variance will never be reached because we keep introducing variance through 
+random mutation. 
+}
+  \item{mutRateAlpha}{
+A value between 0 and 1 to indicate the proportion of random QTL average allelic effects that should 
 mutate in each individual. For example, a value of 0.1 means that a random 10\% 
 of the QTLs will mutate in each individual randomly taking values of 0 or 1. 
 Is important to notice that this implies that the stopping criteria based in 
@@ -244,7 +252,7 @@ are controlled with the nCrosses and nProgeny parameters, whereas the number of
 initial QTLs activated in a solution is controlled by the nQtlStart parameter. 
 The number of activated QTLs of course will increase if has a positive effect in 
 the fitness of the solutions. The drift force can be controlled by the recombGens
-parameter. The mutation rate can be controlled with the mutRate parameter. The 
+parameter. The mutation rate can be controlled with the  mutRateAllele parameter. The 
 recombination rate can be controlled with the nChr argument.
 
 The \code{indivPerformance} output slot contains the columns id, fitness, 
@@ -372,7 +380,7 @@ res0<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
                # population parameters
                nCrosses = 100, nProgeny = 20, 
                # genome parameters
-               recombGens = 1, nChr=1, mutRate=0, nQtlStart = 2, 
+               recombGens = 1, nChr=1,  mutRateAllele=0, nQtlStart = 2, 
                # coancestry parameters
                D=NULL, lambda=0, 
                # selection parameters

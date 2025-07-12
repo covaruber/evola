@@ -32,9 +32,14 @@
       * [r5] Now we have added the Ne argument for the user to decide how many initial solutions are used as founder population
       * [r5] Now the bestSol() function returns n solutions.
 
+2025-08-01 Giovanny Covarrubias Pazaran <cova_ruber@live.com.mx>
+
+      * [r6] Now the drift function to monitor frequencies is available
+      * [r6] Now the include and exclude sets allow to force presence or absense of specific QTLs
+      * [r6] Some argument names have changed
+      * [r6] More examples have been added
+      * [r6] The mutations are now also available for the additive effects and not only for the QTLs
+      * [r6] The matrix multiplications are not more efficient
+
 
 ## TO DO
-+ Rename score by fitness in the score table
-+ Double check that mutation goes both directions, maybe an additional argument.
-+ Not only allow the posibility of mutation in the genome, but also in the addtive effects (mutRateTrait)
-+ code the ability to force QTLs to always be activated/deactivated as an inclusion or exclusion set

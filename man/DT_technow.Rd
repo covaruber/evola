@@ -51,7 +51,7 @@ M <- M_technow
                 b = c(1,0), 
                 # population parameters
                 nCrosses = 100, nProgeny = 10, 
-                recombGens=1, nChr=1, mutRate=0,
+                recombGens=1, nChr=1, mutRateAllele=0,
                 # coancestry parameters
                 D=A, lambda= (20*pi)/180 , nQtlStart = 90, 
                 # selection parameters

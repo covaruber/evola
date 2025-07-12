@@ -599,7 +599,7 @@ res<-evolafit(formula=distances~route, dt= df2,
               # population parameters
               nCrosses = 50, nProgeny = 10, 
               # genome parameters
-              recombGens = 1, nChr=1, mutRate=0, 
+              recombGens = 1, nChr=1, mutRateAllele=0, 
               # start with at least n QTLs equivalent to n cities
               nQtlStart = nCities*2, 
               # coancestry parameters

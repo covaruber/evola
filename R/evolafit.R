@@ -1,7 +1,7 @@
 evolafit <- function(formula, dt, 
                      constraintsUB, constraintsLB,constraintW=NULL, 
                      b, nCrosses=50, nProgeny=20,nGenerations=20, 
-                     recombGens=1, nChr=1, mutRate=0,
+                     recombGens=1, nChr=1, mutRateAllele=0, mutRateAlpha=0,
                      nQtlStart=NULL, D=NULL, lambda=0,
                      propSelBetween=NULL,propSelWithin=NULL,
                      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
@@ -59,7 +59,7 @@ evolafit <- function(formula, dt,
   if(is.null(D)){D <- Matrix::Diagonal(nrow(dt)); useD=FALSE}else{useD=TRUE}
   if(is.null(nQtlStart)){nQtlStart <- ceiling(nrow(dt)/5)}
   # check that the user has provided a single value for each QTL
-  nMutations = round(mutRate * nrow(dt)) # number of mutations per individual per generation
+  
   
   if(is.null(initPop)){
     # 1) initialize the population with customized haplotypes to ensure a single QTL per individual
@@ -141,8 +141,9 @@ evolafit <- function(formula, dt,
     Q <- as(as(as( Q,  "dMatrix"), "generalMatrix"), "CsparseMatrix") # as(Q, Class = "dgCMatrix")
     rownames(Q) <- pop@id
     
-    ## use mutatio rate
-    if(mutRate > 0){
+    ## use mutation rate in genome
+    if(mutRateAllele > 0){
+      nMutations = ceiling(mutRateAllele * nrow(dt)) # number of mutations per individual per generation
       if(nMutations == 1){
         pointMut = t(as.matrix(apply(data.frame(1:nInd(pop)), 1, function(x){
           sample(1:nrow(dt), nMutations, replace = FALSE)
@@ -153,12 +154,26 @@ evolafit <- function(formula, dt,
         }) )
       }
       # 
+      DRIFT = drift(pop, simParam=SP)$Trait1
       for(iQtl in unique(as.vector(pointMut))){
-        modif=which(pointMut == iQtl, arr.ind = TRUE)[,"col"]
+        indsToModif=which(pointMut == iQtl, arr.ind = TRUE)[,"col"]
         allele = sample(0:1, 1)
-        pop = editGenome(pop, ind=modif,chr=1, segSites=iQtl, simParam=SP, allele = allele)
+        pop = editGenome(pop, ind=indsToModif,chr=as.numeric(DRIFT[iQtl,"chr"]), segSites=DRIFT[iQtl,"ss"], simParam=SP, allele = allele)
       }
     }else{pointMut=as.data.frame(matrix(NA, nrow=0, ncol=1))}
+    ## use mutation rate in alphas
+    if(mutRateAlpha > 0){
+      nMutations = ceiling(mutRateAlpha * nrow(dt)) # define the number of mutations
+      nTraits <- simParam$nTraits
+      for(iTrait in 1:nTraits){ # iTrait=1
+        # extract the trait to mutate
+        traitToMutate <- simParam$traits[[iTrait]] 
+        # mutate the average allelic effects
+        traitToMutate@addEff[sample(1:nrow(dt), nMutations, replace = FALSE)] = rnorm(nMutations)
+        # replace the trait back
+        simParam$switchTrait(traitPos=iTrait, lociMap=traitToMutate, varE = NA_real_, force = TRUE)
+      }
+    }
     ## enf of use mutation rate
     ###########################
     ## if user wants to fix the number of QTLs activated apply the following rules
@@ -174,10 +189,10 @@ evolafit <- function(formula, dt,
         totalToAddOrRem <- abs(howMany - nQtlStart) # deviation from expectation
         if( howMany > nQtlStart ){ # if exceeded silence some
           toRem <- sample(areOnes, totalToAddOrRem) # pick which ones will be silenced
-          pop = editGenome(pop, ind=iInd,chr=DRIFT[toRem,"chr"], segSites=DRIFT[toRem,"ss"], simParam=SP, allele = 0)
+          pop = editGenome(pop, ind=iInd,chr=as.numeric(DRIFT[toRem,"chr"]), segSites=DRIFT[toRem,"ss"], simParam=SP, allele = 0)
         }else if( howMany < nQtlStart){ # if lacked activate some
           toAdd <- sample(areZeros, totalToAddOrRem) # pick which ones will be activated
-          pop = editGenome(pop, ind=iInd,chr=DRIFT[toAdd,"chr"], segSites=DRIFT[toAdd,"ss"], simParam=SP, allele = 1)
+          pop = editGenome(pop, ind=iInd,chr=as.numeric(DRIFT[toAdd,"chr"]), segSites=DRIFT[toAdd,"ss"], simParam=SP, allele = 1)
         } # else do nothing
       }
     }
@@ -185,13 +200,13 @@ evolafit <- function(formula, dt,
     if(!is.null(includeSet)){
       DRIFT = drift(pop, simParam=SP)$Trait1
       pop = editGenome(pop, ind=1:nInd(pop),
-                       chr=DRIFT[which(includeSet>0),"chr"], 
+                       chr=as.numeric(DRIFT[which(includeSet>0),"chr"]), 
                        segSites=DRIFT[which(includeSet>0),"ss"], simParam=SP, allele = 1)
     }
     if(!is.null(excludeSet)){
       DRIFT = drift(pop, simParam=SP)$Trait1
       pop = editGenome(pop, ind=1:nInd(pop),
-                       chr=DRIFT[which(excludeSet>0),"chr"], 
+                       chr=as.numeric(DRIFT[which(excludeSet>0),"chr"]), 
                        segSites=DRIFT[which(excludeSet>0),"ss"], simParam=SP, allele = 0)
     }
     ## enf of fixqtl
@@ -354,7 +369,7 @@ evolafit <- function(formula, dt,
     if(nrow(pop@gv) > 0){
       if(totalVarG < tolVarG){nonStop = FALSE; message("Variance across traits exhausted. Early stop.")}
     }else{
-      nonStop = FALSE; message("All individuals discarded. Consider changing some parameter values e.g., mutRate
+      nonStop = FALSE; message("All individuals discarded. Consider changing some parameter values e.g., mutRateAllele
                            or nQtlStart (initial number of QTLs) to avoid all 
                            solutions to go beyond the bounds.")
     }
