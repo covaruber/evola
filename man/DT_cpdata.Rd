@@ -53,7 +53,7 @@ res<-evolafit(formula=cbind(Yield, occ)~id, dt= DT,
               nGenerations = 40) 
               
 Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
-best = bestSol(res$pop)[,"Yield"];best
+best = bestSol(res$pop)[,"fitness"];best
 qa = (Q \%*\% DT$Yield)[best,]; qa 
 qDq = Q[best,] \%*\% A \%*\% Q[best,]; qDq 
 sum(Q[best,]) # total # of inds selected

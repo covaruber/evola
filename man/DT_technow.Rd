@@ -59,7 +59,7 @@ M <- M_technow
                 nGenerations = 20) 
   
   Q <- pullQtlGeno(res$pop, simParam = res$simParam, trait=1); Q <- Q/2
-  best = bestSol(res$pop)[,"GY"]
+  best = bestSol(res$pop)[,"fitness"]
   qa = (Q \%*\% DT$GY)[best,]; qa 
   qAq = Q[best,] \%*\% A \%*\% Q[best,]; qAq 
   sum(Q[best,]) # total # of inds selected
