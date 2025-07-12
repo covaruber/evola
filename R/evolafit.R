@@ -2,12 +2,14 @@ evolafit <- function(formula, dt,
                      constraintsUB, constraintsLB,constraintW=NULL, 
                      b, nCrosses=50, nProgeny=20,nGenerations=20, 
                      recombGens=1, nChr=1, mutRate=0,
-                     nQTLperInd=NULL, D=NULL, lambda=0,
+                     nQtlStart=NULL, D=NULL, lambda=0,
                      propSelBetween=NULL,propSelWithin=NULL,
                      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
                      selectTop=TRUE, tolVarG=1e-6, 
                      Ne=50, initPop=NULL, simParam = NULL, 
-                     fixQTLperInd=FALSE, traceDelta=TRUE, topN=10, ...){
+                     fixNumQtlPerInd=FALSE, traceDelta=TRUE, topN=10,
+                     includeSet=NULL, excludeSet=NULL,
+                     ...){
   
   my.date <- "2025-08-01"
   your.date <- Sys.Date()
@@ -55,7 +57,7 @@ evolafit <- function(formula, dt,
   if(missing(b)){b <- rep(1,length(traits))}
   if(length(b) != length(traits)){stop(paste0("Weights need to have the same length than traits (",length(traits),")"), call. = FALSE)}
   if(is.null(D)){D <- Matrix::Diagonal(nrow(dt)); useD=FALSE}else{useD=TRUE}
-  if(is.null(nQTLperInd)){nQTLperInd <- nrow(dt)/5}
+  if(is.null(nQtlStart)){nQtlStart <- ceiling(nrow(dt)/5)}
   # check that the user has provided a single value for each QTL
   nMutations = round(mutRate * nrow(dt)) # number of mutations per individual per generation
   
@@ -64,8 +66,8 @@ evolafit <- function(formula, dt,
     av <- 1:nrow(dt)
     haplo = Matrix::Matrix(0, nrow= Ne*2, ncol = nrow(dt)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )
     for (i in seq(1,nrow(haplo),2)) {
-      haplo[i,sample(av,nQTLperInd)] <- 1
-      # haplo[i,] <- ifelse(runif(ncol(haplo))< (nQTLperInd/ncol(haplo)) ,1,0)
+      haplo[i,sample(av,nQtlStart)] <- 1
+      # haplo[i,] <- ifelse(runif(ncol(haplo))< (nQtlStart/ncol(haplo)) ,1,0)
       haplo[(i+1),] <- haplo[i,]
     }
     colnames(haplo) = dt[,classifiers]
@@ -160,26 +162,37 @@ evolafit <- function(formula, dt,
     ## enf of use mutation rate
     ###########################
     ## if user wants to fix the number of QTLs activated apply the following rules
-    # 1) if more than nQTLperInd we silence some
-    # 2) if less than nQTLperInd we activate some
-    if(fixQTLperInd){
+    # 1) if more than nQtlStart we silence some
+    # 2) if less than nQtlStart we activate some
+    if(fixNumQtlPerInd){
       Qfq <- pullQtlGeno(pop, simParam = SP, trait = 1); Qfq <- Qfq/2
-      for(iInd in 1:nInd(pop)){ # for each individual
-        iQfq <- Qfq[iInd,]; areZeros <- which(iQfq == 0); areOnes <- setdiff(1:ncol(Qfq),areZeros)
+      DRIFT = drift(pop, simParam=SP)$Trait1
+      for(iInd in 1:nInd(pop)){ #  iInd=1 for each individual
+        iQfq <- Qfq[iInd,]; 
+        areZeros <- which(iQfq == 0); areOnes <- setdiff(1:ncol(Qfq),areZeros)
         howMany <- sum(iQfq) # how many QTLs are activated, we're assuming is a 0/1 matrix
-        toAddOrRem <- abs(howMany - nQTLperInd) # deviation from expectation
-        if( howMany > nQTLperInd ){ # if exceeded silence some
-          toRem <- sample(areOnes, toAddOrRem) # pick which ones will be silenced
-          for(iChange in 1:toAddOrRem){
-            pop = editGenome(pop, ind=iInd,chr=1, segSites=toRem[iChange], simParam=SP, allele = 0)
-          }
-        }else if( howMany < nQTLperInd){ # if lacked activate some
-          toAdd <- sample(areZeros, toAddOrRem) # pick which ones will be activated
-          for(iChange in 1:toAddOrRem){
-            pop = editGenome(pop, ind=iInd,chr=1, segSites=toAdd[iChange], simParam=SP, allele = 1)
-          }
+        totalToAddOrRem <- abs(howMany - nQtlStart) # deviation from expectation
+        if( howMany > nQtlStart ){ # if exceeded silence some
+          toRem <- sample(areOnes, totalToAddOrRem) # pick which ones will be silenced
+          pop = editGenome(pop, ind=iInd,chr=DRIFT[toRem,"chr"], segSites=DRIFT[toRem,"ss"], simParam=SP, allele = 0)
+        }else if( howMany < nQtlStart){ # if lacked activate some
+          toAdd <- sample(areZeros, totalToAddOrRem) # pick which ones will be activated
+          pop = editGenome(pop, ind=iInd,chr=DRIFT[toAdd,"chr"], segSites=DRIFT[toAdd,"ss"], simParam=SP, allele = 1)
         } # else do nothing
       }
+    }
+
+    if(!is.null(includeSet)){
+      DRIFT = drift(pop, simParam=SP)$Trait1
+      pop = editGenome(pop, ind=1:nInd(pop),
+                       chr=DRIFT[which(includeSet>0),"chr"], 
+                       segSites=DRIFT[which(includeSet>0),"ss"], simParam=SP, allele = 1)
+    }
+    if(!is.null(excludeSet)){
+      DRIFT = drift(pop, simParam=SP)$Trait1
+      pop = editGenome(pop, ind=1:nInd(pop),
+                       chr=DRIFT[which(excludeSet>0),"chr"], 
+                       segSites=DRIFT[which(excludeSet>0),"ss"], simParam=SP, allele = 0)
     }
     ## enf of fixqtl
     
@@ -342,7 +355,7 @@ evolafit <- function(formula, dt,
       if(totalVarG < tolVarG){nonStop = FALSE; message("Variance across traits exhausted. Early stop.")}
     }else{
       nonStop = FALSE; message("All individuals discarded. Consider changing some parameter values e.g., mutRate
-                           or nQTLperInd (initial number of QTLs) to avoid all 
+                           or nQtlStart (initial number of QTLs) to avoid all 
                            solutions to go beyond the bounds.")
     }
   }# end of for each generation

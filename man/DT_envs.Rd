@@ -53,10 +53,10 @@ res<-evolafit(formula=cbind(cov, occ)~id, dt= DT,
               nCrosses = 100, nProgeny = 20, 
               recombGens=1, nChr=1, mutRate=0,
               # coancestry parameters
-              D=G, lambda= 0 , nQTLperInd = nLocs, 
+              D=G, lambda= 0 , nQtlStart = nLocs, 
               # selection parameters
               fitnessf = inbFun, selectTop = FALSE,
-              # fixQTLperInd = TRUE,
+              # fixNumQtlPerInd = TRUE,
               # propSelBetween = 0.5, propSelWithin =0.5, 
               nGenerations = 50, verbose = TRUE) 
 

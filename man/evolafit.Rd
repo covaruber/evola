@@ -18,12 +18,13 @@ evolafit(formula, dt,
      constraintsUB, constraintsLB, constraintW=NULL, 
      b, nCrosses=50, nProgeny=20,nGenerations=20, 
      recombGens=1, nChr=1, mutRate=0,
-     nQTLperInd=NULL, D=NULL, lambda=0,
+     nQtlStart=NULL, D=NULL, lambda=0,
      propSelBetween=NULL,propSelWithin=NULL,
      fitnessf=NULL, verbose=TRUE, dateWarning=TRUE,
      selectTop=TRUE, tolVarG=1e-6, 
      Ne=50, initPop=NULL, simParam=NULL,
-     fixQTLperInd=FALSE, traceDelta=TRUE, topN=10,
+     fixNumQtlPerInd=FALSE, traceDelta=TRUE, topN=10,
+     includeSet=NULL, excludeSet=NULL,
      ...)
 
 }
@@ -95,7 +96,7 @@ Is important to notice that this implies that the stopping criteria based in
 variance will never be reached because we keep introducing variance through 
 random mutation. 
 }
-  \item{nQTLperInd}{
+  \item{nQtlStart}{
 The number of QTLs/genes (classifier \code{x} in the formula) that should be 
 fixed for the positive allele at the begginning of the simulation. If not specified
 it will be equal to the 20\% of the QTLs (calculated as the number of rows in the 
@@ -203,14 +204,14 @@ an object of \code{Pop-class}.
   \item{simParam}{
   an object of \code{SimParam}.
 }
-  \item{fixQTLperInd}{
-A \code{TRUE/FALSE} value to indicate if we should fix the argument nQTLperInd 
+  \item{fixNumQtlPerInd}{
+A \code{TRUE/FALSE} value to indicate if we should fix the argument nQtlStart 
 across all generations. This should be used with care since this is not how 
 usually genetic algorithms work and in my experience only using GA for regression 
 problems is a special case where this argument should be set to TRUE. The behavior 
 assumes that if set to TRUE and a particular solution has more QTLs active than 
-nQTLperInd some QTLs will be set to 0 and if a solution has less QTLs active than 
-nQTLperInd some QTLs will be activated. All activations or deactivations are done 
+nQtlStart some QTLs will be set to 0 and if a solution has less QTLs active than 
+nQtlStart some QTLs will be activated. All activations or deactivations are done 
 at random. This could be an alternative to use a counting trait to restrain the number
 of QTLs active in a solution but is slower.
 }
@@ -222,6 +223,14 @@ of QTLs active in a solution but is slower.
   \item{topN}{
   an integer value indicating the maximum number of solutions to keep in each generation.
 }
+  \item{includeSet}{
+  a numeric vector with 0s and 1s of length equal to the number of QTLs (number of rows in your 
+  dataset) to indicate which individuals (1s) should be forced to be activated.
+}
+  \item{excludeSet}{
+   a numeric vector with 0s and 1s of length equal to the number of QTLs (number of rows in your 
+  dataset) to indicate which individuals (1s) should be forced to be deactivated.
+}
 \item{\dots}{Further arguments to be passed to the fitness function if required.}
 
 }
@@ -232,7 +241,7 @@ forces applied to a problem where possible solutions replace individuals and
 combinations of variables in the problem replace the genes. Then evolutionary 
 forces are applied to find a close-to-optimal solution. The number of solutions
 are controlled with the nCrosses and nProgeny parameters, whereas the number of 
-initial QTLs activated in a solution is controlled by the nQTLperInd parameter. 
+initial QTLs activated in a solution is controlled by the nQtlStart parameter. 
 The number of activated QTLs of course will increase if has a positive effect in 
 the fitness of the solutions. The drift force can be controlled by the recombGens
 parameter. The mutation rate can be controlled with the mutRate parameter. The 
@@ -347,7 +356,7 @@ res00<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
                # constraints on traits: if greater than this ignore
                constraintsUB = c(10,Inf), nGenerations = 10
 )
-best = bestSol(res00$pop)[,"Value"]
+best = bestSol(res00$pop)[,"fitness"]
 Q <- pullQtlGeno(res00$pop, simParam = res00$simParam, trait=1); Q <- Q/2
 qa = Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
 
@@ -363,7 +372,7 @@ res0<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
                # population parameters
                nCrosses = 100, nProgeny = 20, 
                # genome parameters
-               recombGens = 1, nChr=1, mutRate=0, nQTLperInd = 2, 
+               recombGens = 1, nChr=1, mutRate=0, nQtlStart = 2, 
                # coancestry parameters
                D=NULL, lambda=0, 
                # selection parameters
@@ -372,7 +381,7 @@ res0<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
 ) 
 
 Q <- pullQtlGeno(res0$pop, simParam = res0$simParam, trait=2); Q <- Q/2
-best = bestSol(res0$pop)[,"Value"]
+best = bestSol(res0$pop)[,"fitness"]
 qa = Q[best,] \%*\% as.matrix(Gems[,c("Weight","Value")]); qa
 Q[best,]
 

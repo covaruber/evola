@@ -9,7 +9,7 @@
     stop("This package requires R 3.5.0 or later")
   if(interactive()) {
     packageStartupMessage(blue(paste("[]==================================================================[]")),appendLF=TRUE)
-    packageStartupMessage(blue(paste("[] Evolutionary Algorithm in R (evola) 1.0.5 (2025-04)              []",sep="")),appendLF=TRUE)
+    packageStartupMessage(blue(paste("[] Evolutionary Algorithm in R (evola) 1.0.6 (2025-08)              []",sep="")),appendLF=TRUE)
     packageStartupMessage(paste0(blue("[] Author: Giovanny Covarrubias-Pazaran",paste0(bgGreen(white(" ")), bgWhite(magenta("*")), bgRed(white(" "))),"                        []")),appendLF=TRUE)
     packageStartupMessage(blue("[] Dedicated to the University of Chapingo and UW-Madison           []"),appendLF=TRUE)
     packageStartupMessage(blue("[] Type 'vignette('evola.intro')' for a short tutorial              []"),appendLF=TRUE)
@@ -346,13 +346,13 @@ drift <- function(pop, simParam){
     rownames(freqsA) <- c(0,2)
     desiredAllele = ifelse( sign(alpha) > 0 , 2, 0 )
     prov <- sapply(1:length(desiredAllele), function(x){freqsA[as.character(desiredAllele[x]) ,x]})
-    chr <- as.numeric( unlist(lapply( as.list( colnames(Qtl) ), function(x){strsplit(x,"_")[[1]][1]} )) )
-    ss <- sapply(unique(chr), function(x){
-      SS = pullSegSiteGeno(pop, chr = x, simParam = simParam)
-      return( which(colnames(SS) %in% colnames(Qtl)) )
-    })
-    out <- cbind(chr,as.vector(ss), desiredAllele,prov)
-    rownames(out) <- colnames(Qtl) ; colnames(out) <- c("chr","ss","a+","freq")
+    # chr <- as.numeric( unlist(lapply( as.list( colnames(Qtl) ), function(x){strsplit(x,"_")[[1]][1]} )) )
+    # ss <- sapply(unique(chr), function(x){
+    #   SS = pullSegSiteGeno(pop, chr = x, simParam = simParam)
+    #   return( which(colnames(SS) %in% colnames(Qtl)) )
+    # })
+    out <- cbind(getQtlMap(trait = iTrait), desiredAllele,prov)
+    rownames(out) <- colnames(Qtl) ; colnames(out) <- c("id","chr","ss","pos","a+","freq")
     currentFreqPositive[[iTrait]] <- out
   }
   names(currentFreqPositive) <- simParam$traitNames
