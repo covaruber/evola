@@ -351,7 +351,7 @@ drift <- function(pop, simParam){
     #   SS = pullSegSiteGeno(pop, chr = x, simParam = simParam)
     #   return( which(colnames(SS) %in% colnames(Qtl)) )
     # })
-    out <- cbind(getQtlMap(trait = iTrait), desiredAllele,prov)
+    out <- cbind(getQtlMap(trait = iTrait, simParam=simParam), desiredAllele,prov)
     rownames(out) <- colnames(Qtl) ; colnames(out) <- c("id","chr","ss","pos","a+","freq")
     currentFreqPositive[[iTrait]] <- out
   }

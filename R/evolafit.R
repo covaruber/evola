@@ -164,14 +164,14 @@ evolafit <- function(formula, dt,
     ## use mutation rate in alphas
     if(mutRateAlpha > 0){
       nMutations = ceiling(mutRateAlpha * nrow(dt)) # define the number of mutations
-      nTraits <- simParam$nTraits
+      nTraits <- SP$nTraits
       for(iTrait in 1:nTraits){ # iTrait=1
         # extract the trait to mutate
-        traitToMutate <- simParam$traits[[iTrait]] 
+        traitToMutate <- SP$traits[[iTrait]] 
         # mutate the average allelic effects
         traitToMutate@addEff[sample(1:nrow(dt), nMutations, replace = FALSE)] = rnorm(nMutations)
         # replace the trait back
-        simParam$switchTrait(traitPos=iTrait, lociMap=traitToMutate, varE = NA_real_, force = TRUE)
+        SP$switchTrait(traitPos=iTrait, lociMap=traitToMutate, varE = NA_real_, force = TRUE)
       }
     }
     ## enf of use mutation rate
