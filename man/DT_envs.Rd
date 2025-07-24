@@ -72,8 +72,11 @@ pareto(res)
 svdW <- svd(G, nu = 2, nv = 2)
 PCW <- G \%*\% svdW$v
 rownames(PCW) <- rownames(G)
-plot(PCW[,1], PCW[,2], col = solution+1, 
-    pch=as.character(solution+1),  xlab = "pc1", ylab = "pc2")
+plot(PCW[,1], PCW[,2], col = (solution*2)+2, 
+     pch=(solution*14)+4,  xlab = "pc1", ylab = "pc2")
+labs <- rownames(PCW)
+labs[which(solution==0)]=""
+text(x=PCW[,1], y=PCW[,2], labels=labs, cex=0.5, pos=3)
  
 }
 

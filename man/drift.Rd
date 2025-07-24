@@ -9,13 +9,15 @@ This function takes a population and the simulation parameters from a .Pop class
 calculates the current frequencies of the positive alleles for each trait.
 }
 \usage{
-drift(pop, simParam)
+drift(pop, simParam, solution=NULL, traits=1)
 }
 
 \arguments{
 
 \item{pop}{an object of class \code{"Pop"}}
 \item{simParam}{the simulation parameters stored in the evolaMod object.}
+\item{solution}{an alternative RRBLUP solution so the frequencies of positive alleles are calculated for a given SNP chip. If NULL the frequencies are calculated for the real QTLs. }
+\item{traits}{traits considered.}
 
 }
 \details{
@@ -38,20 +40,27 @@ Giovanny Covarrubias-Pazaran (2024).  evola: a simple evolutionary algorithm for
 
 \examples{
 
+
 #Create founder haplotypes
-founderPop = quickHaplo(nInd=10, nChr=1, segSites=10)
+founderPop = quickHaplo(nInd=10, nChr=1, segSites=30)
 
 #Set simulation parameters
 SP = SimParam$new(founderPop)
+
 SP$addTraitA(10)
+SP$setVarE(h2=0.5)
+SP$addSnpChip(15)
 
 #Create population
 pop = newPop(founderPop, simParam=SP)
 
-#Make 10 crosses
-pop2 = randCross(pop, 10, simParam=SP)
+# drift for QTLs
+drift(pop, simParam = SP ) 
 
-drift(pop=pop, simParam=SP )
+ans = RRBLUP(pop, simParam=SP)
+
+# drift for average allelic effects
+drift(pop, simParam = SP, solution = ans)
 
 }
 \seealso{\code{\link{evolafit}} -- the core function of the package }

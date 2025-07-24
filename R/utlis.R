@@ -326,12 +326,17 @@ importHaploSparse <- function (haplo, genMap, ploidy = 2L, ped = NULL)
   return(founderPop)
 }
 
-drift <- function(pop, simParam){
-  traits <- 1:simParam$nTraits
+drift <- function(pop, simParam, solution=NULL, traits=1){
+  # traits <- 1:simParam$nTraits
   currentFreqPositive <- list()
   for(iTrait in traits){ # iTrait=1
-    alpha = simParam$traits[[iTrait]]@addEff
-    Qtl = pullQtlGeno(pop, simParam = simParam, trait = iTrait)
+    if(is.null(solution)){
+      alpha = simParam$traits[[iTrait]]@addEff
+      Qtl = pullQtlGeno(pop, simParam = simParam, trait = iTrait)
+    }else{ # user provided a solution model
+      alpha = solution@gv[[iTrait]]@addEff
+      Qtl = pullSnpGeno(pop, simParam = simParam)
+    }
     m = matrix(0,nrow=1,ncol=3); colnames(m) <- c(0,1,2)
     freqsG = apply(Qtl,2,function(x){
       tt = table(x)
@@ -346,15 +351,15 @@ drift <- function(pop, simParam){
     rownames(freqsA) <- c(0,2)
     desiredAllele = ifelse( sign(alpha) > 0 , 2, 0 )
     prov <- sapply(1:length(desiredAllele), function(x){freqsA[as.character(desiredAllele[x]) ,x]})
-    # chr <- as.numeric( unlist(lapply( as.list( colnames(Qtl) ), function(x){strsplit(x,"_")[[1]][1]} )) )
-    # ss <- sapply(unique(chr), function(x){
-    #   SS = pullSegSiteGeno(pop, chr = x, simParam = simParam)
-    #   return( which(colnames(SS) %in% colnames(Qtl)) )
-    # })
-    out <- cbind(getQtlMap(trait = iTrait, simParam=simParam), desiredAllele,prov)
+    
+    if(is.null(solution)){
+      out <- cbind(getQtlMap(trait = iTrait, simParam=simParam), desiredAllele,prov)
+    }else{
+      out <- cbind( getSnpMap(snpChip = 1, simParam = simParam), desiredAllele,prov)
+    }
     rownames(out) <- colnames(Qtl) ; colnames(out) <- c("id","chr","ss","pos","a+","freq")
     currentFreqPositive[[iTrait]] <- out
   }
-  names(currentFreqPositive) <- simParam$traitNames
+  names(currentFreqPositive) <- simParam$traitNames[traits]
   return(currentFreqPositive)
 }
