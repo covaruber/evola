@@ -1,5 +1,6 @@
 \name{DT_envs}
 \alias{DT_envs}
+\alias{M}
 \alias{W}
 \docType{data}
 \title{
