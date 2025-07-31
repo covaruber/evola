@@ -56,7 +56,7 @@ with lower value than the lower bound are assigned a +infinite value if the
 argument \code{selectTop=TRUE} and to -infinite when \code{selectTop=FALSE}, 
 which is equivalent to reject/discard a solution based on the fitness function.
 }
-  \item{constraintsW}{
+  \item{constraintW}{
 A numeric vector of length equal to the number of generations to specify the weights 
 to be applied to the lower and upper bound constraint values to relax the constraints
 if needed. If values is NULL a vector of 1s with length equal to the number of

@@ -4,10 +4,11 @@
 \description{\code{summary} method for class \code{"Pop"}.
 }
 \usage{
-\method{summary}{Pop}(pop)
+\method{summary}{Pop}(pop, \dots)
 }
 \arguments{
- \item{object}{an object of class \code{"Pop"}}
+ \item{pop}{an object of class \code{"Pop"}}
+ \item{\dots}{Further arguments to be passed}
 }
 \value{
   an updated model

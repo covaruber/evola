@@ -137,7 +137,7 @@ evolafit <- function(formula, dt,
   while(nonStop) { # for each generation we breed # j=1
     j=j+1
     
-    Q <- pullQtlGeno(pop, simParam = SP, trait = iTrait)/2 #?/2
+    Q <- pullQtlGeno(pop, simParam = SP, trait = 1)/2 #?/2
     Q <- as(as(as( Q,  "dMatrix"), "generalMatrix"), "CsparseMatrix") # as(Q, Class = "dgCMatrix")
     rownames(Q) <- pop@id
     

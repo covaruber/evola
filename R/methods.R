@@ -11,6 +11,7 @@ update.evolaFitMod <- function(object, formula., evaluate = TRUE, ...) {
   if (!missing(formula.)){
     call$formula <- update.formula(formula(object), formula.)
   }
+  # print(call$formula)
   if (length(extras) > 0) {
     existing <- !is.na(match(names(extras), names(call)))
     for (a in names(extras)[existing]) call[[a]] <- extras[[a]]
@@ -48,7 +49,7 @@ update.evolaFitMod <- function(object, formula., evaluate = TRUE, ...) {
   ## eval(call,combf, enclos=pf)
 }
 
-summary.Pop <- function(pop){
+summary.Pop <- function(pop, ...){
   dd=data.frame(id=pop@id, mother=pop@mother, father= pop@father)
   dd$cross <- paste(dd$mother, dd$father, sep="_")
   dd$n <- 1
