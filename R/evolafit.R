@@ -11,7 +11,7 @@ evolafit <- function(formula, dt,
                      includeSet=NULL, excludeSet=NULL,
                      ...){
   
-  my.date <- "2025-08-01"
+  my.date <- "2025-11-01"
   your.date <- Sys.Date()
   ## if your month is greater than my month you are outdated
   if(dateWarning & verbose){
