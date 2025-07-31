@@ -33,13 +33,15 @@ update.evolaFitMod <- function(object, formula., evaluate = TRUE, ...) {
   pf <- parent.frame()
   sf <- sys.frames()[[1]]
   
-  tryCatch(eval(call,  envir = ff),  ## try formula environment
-           error = function(e) {
-             tryCatch(eval(call, envir = sf),  ## try stack frame
-                      error = function(e) {
-                        eval(call, envir=pf) ## try parent frame
-                      })
-           })
+  return( eval(call, envir=pf) )
+  
+  # tryCatch(eval(call,  envir = ff),  ## try formula environment
+  #          error = function(e) {
+  #            tryCatch(eval(call, envir = sf),  ## try stack frame
+  #                     error = function(e) {
+  #                       eval(call, envir=pf) ## try parent frame
+  #                     })
+  #          })
   
   ##
   ## combf <- tryCatch(

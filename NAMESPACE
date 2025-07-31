@@ -23,7 +23,7 @@ export( "evolafit", "pmonitor", "pareto", "varQ", "bestSol", "A.mat",
 #       "summary.Pop"
 #       )
 # S3 METHODS 
-S3method(update, evolaFitMod)
+# S3method(update, evolaFitMod)
 S3method(summary, Pop)
 
 
