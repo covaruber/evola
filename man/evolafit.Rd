@@ -24,7 +24,7 @@ evolafit(formula, dt,
      selectTop=TRUE, tolVarG=1e-6, 
      Ne=50, initPop=NULL, simParam=NULL,
      fixNumQtlPerInd=FALSE, traceDelta=TRUE, topN=10,
-     includeSet=NULL, excludeSet=NULL,
+     includeSet=NULL, excludeSet=NULL, haplo=NULL,
      ...)
 
 }
@@ -238,6 +238,14 @@ of QTLs active in a solution but is slower.
   \item{excludeSet}{
    a numeric vector with 0s and 1s of length equal to the number of QTLs (number of rows in your 
   dataset) to indicate which individuals (1s) should be forced to be deactivated.
+}
+  \item{haplo}{
+   an alternative way to provide the initial solutions (founders) to manage the starting point
+   or activated QTLs. See the vignettes for examples. In general, the user provides a matrix
+   of raw calls (8-bit) with dimensions n rows (founders) and p columns (QTLs) with 0s and 1s 
+   to control the initial founders which will also be considered in the first generation of
+   selection. If NULL (default) the program will randomly activate n QTLs according to the
+   \code{nQtlStart} argument.
 }
 \item{\dots}{Further arguments to be passed to the fitness function if required.}
 
