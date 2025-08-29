@@ -50,7 +50,7 @@ addZeros<- function (x, nr=2) {
   return(newX2)
 }
 
-ocsFun <- function (Y, b, Q, D, a, lambda, scaled=TRUE) {
+ocsFun <- function (Y, b, Q, D, a, lambda, scaled=TRUE, ...) {
   # (q'a)b - l(q'Dq)
   if(scaled){
     Yb <- apply(Y,2,function(x){
@@ -65,7 +65,7 @@ ocsFun <- function (Y, b, Q, D, a, lambda, scaled=TRUE) {
   return( Yb -  lambda*QtDQ )
 }
 
-regFun <- function (Y, b, Q, D, a, lambda, X, y) {
+regFun <- function (Y, b, Q, D, a, lambda, X, y, ...) {
   n <- ncol(X)
   p <- apply(Q, 1, function(z) {
     which(z > 0)
@@ -88,7 +88,7 @@ regFun <- function (Y, b, Q, D, a, lambda, X, y) {
   return(mse)
 }
 
-inbFun <- function (Y, b, Q, D, a, lambda) {
+inbFun <- function (Y, b, Q, D, a, lambda, ...) {
   return( Matrix::diag(Q %*% Matrix::tcrossprod(D, Q))  )
 }
 
