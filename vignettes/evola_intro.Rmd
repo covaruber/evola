@@ -26,6 +26,7 @@ The vignettes aim to provide several examples in how to use the evola package un
 5) How to optimize the number of progeny to produce per cross
 6) Customizing a fitness function (linear regression example)
 7) Travel salesman problem
+8) Forcing initial solutions/founders
 
 Because of CRAN requirements I will only run few generations but please when you run your analysis let it run for many generations.
 
@@ -624,7 +625,50 @@ plotCities(cities, route=Q[best,])
 ```
 
 
-### 8) How to optimize the number of progeny to produce per cross
+### 8) How to force the initial solutions or founders
+
+Using the Gems example we will show how to create the initial haplotypes for the founder solutions. 
+This can be particularly useful if you want to provide initial good solutions (for example, when
+the constraints are too strict) to make the search easier. 
+
+```{r}
+
+set.seed(1)
+# Data
+Gems <- data.frame(
+  Color = c("Red", "Blue", "Purple", "Orange",
+            "Green", "Pink", "White", "Black", 
+            "Yellow"),
+  Weight = round(runif(9,0.5,5),2),
+  Value = round(abs(rnorm(9,0,5))+0.5,2),
+  Times=c(rep(1,8),0)
+)
+
+# create initial haplotypes where all are the same solution so the breeding program won't evolve
+# only when variability exist evolution can happen
+av <- 1:nrow(Gems)
+Ne=5
+haplo = Matrix::Matrix(0, nrow= Ne*2, ncol = nrow(Gems)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )
+for (i in seq(1,nrow(haplo),2)) {
+  haplo[i,c(1,3)] <- 1
+  haplo[(i+1),] <- haplo[i,]
+}
+haplo
+
+# simple specification
+res00<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
+                # constraints on traits: if greater than this ignore
+                constraintsUB = c(10,Inf), nGenerations = 10, 
+                haplo=haplo
+)
+best = bestSol(res00$pop)[,"fitness"]
+Q <- pullQtlGeno(res00$pop, simParam = res00$simParam, trait=1); Q <- Q/2
+qa = Q[best,] %*% as.matrix(Gems[,c("Weight","Value")]); qa
+Q[best,] # only possible solution
+
+```
+
+### 9) How to optimize the number of progeny to produce per cross
 
 The advice here is to upload directly the phased genotypes (haplotypes) to the AlphaSimR machinery and simulate the possible crosses to explore how many individuals are required to sample a given trait (oligogenic or polygenic) with a given probablility. You can also use the inbreeding value of each cross to decide the number of progeny for a given cross since there is a negative relationship between inbreeding of a cross and the expected variance observed in the progeny of such cross. No need to use the evola package. 
 

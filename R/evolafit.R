@@ -8,7 +8,7 @@ evolafit <- function(formula, dt,
                      selectTop=TRUE, tolVarG=1e-6, 
                      Ne=50, initPop=NULL, simParam = NULL, 
                      fixNumQtlPerInd=FALSE, traceDelta=TRUE, topN=10,
-                     includeSet=NULL, excludeSet=NULL,
+                     includeSet=NULL, excludeSet=NULL, haplo=NULL,
                      ...){
   
   my.date <- "2025-11-01"
@@ -62,13 +62,16 @@ evolafit <- function(formula, dt,
   
   
   if(is.null(initPop)){
-    # 1) initialize the population with customized haplotypes to ensure a single QTL per individual
+    # 1) initialize the population with customized haplotypes to ensure n QTLs per individual
     av <- 1:nrow(dt)
-    haplo = Matrix::Matrix(0, nrow= Ne*2, ncol = nrow(dt)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )
-    for (i in seq(1,nrow(haplo),2)) {
-      haplo[i,sample(av,nQtlStart)] <- 1
-      # haplo[i,] <- ifelse(runif(ncol(haplo))< (nQtlStart/ncol(haplo)) ,1,0)
-      haplo[(i+1),] <- haplo[i,]
+    value1 <- as.raw(1)
+    if(is.null(haplo)){
+      haplo = matrix(as.raw(0), nrow= Ne*2, ncol = nrow(dt)) # rbind( diag(nrow(dt)), diag(nrow(dt)) )
+      for (i in seq(1,nrow(haplo),2)) {
+        haplo[i,sample(av,nQtlStart)] <- value1
+        # haplo[i,] <- ifelse(runif(ncol(haplo))< (nQtlStart/ncol(haplo)) ,1,0)
+        haplo[(i+1),] <- haplo[i,]
+      }
     }
     colnames(haplo) = dt[,classifiers]
     
@@ -82,7 +85,7 @@ evolafit <- function(formula, dt,
                         position=position)
     ped = data.frame(id=paste0("I", 1:nrow(dt)),
                      mother=0, father=0)
-    founderPop = importHaploSparse(haplo=haplo, 
+    founderPop = AlphaSimR:::importHaplo(haplo=haplo, 
                                    genMap=genMap,
                                    ploidy=2L)
     # founderPop = quickHaplo(nInd=Ne,nChr=1,segSites=nrow(dt), inbred = TRUE)
@@ -92,11 +95,13 @@ evolafit <- function(formula, dt,
       SP$importTrait(markerNames =unlist(lapply(SP$genMap,names)), addEff = dt[,traits[iTrait]]) # over 2 because QTL data is diplodized or Q/2
     }
     # 3) set the population
-    pop = newPop(founderPop, simParam = SP)
+    pop = popFounders= newPop(founderPop, simParam = SP)
     if(nCrosses > 0){
       pop = randCross(pop, nCrosses = nCrosses, nProgeny = nProgeny, simParam = SP)
       pop = makeDH(pop=pop, simParam = SP)
+      pop = c(pop, popFounders)
     }
+    popFounders = NULL
     variances = diag(varG(pop))
     if(all(SP$varG>0)){
       pop = setPheno(pop,h2=rep(.98,length(which(variances>0))), simParam = SP, traits = which(variances > 0) )

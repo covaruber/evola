@@ -36,10 +36,15 @@
 
       * [r6] Now the drift function to monitor frequencies is available
       * [r6] Now the include and exclude sets allow to force presence or absense of specific QTLs
-      * [r6] Some argument names have changed
+      * [r6] Some argument names have changed (mutRate, fixNumQtlPerInd, nQtlStart)
       * [r6] More examples have been added
       * [r6] The mutations are now also available for the additive effects and not only for the QTLs
       * [r6] The matrix multiplications are not more efficient
 
+2025-12-01 Giovanny Covarrubias Pazaran <cova_ruber@live.com.mx>
+
+      * [r7] Now the user can specify the initial solutions (founders)
+      * [r7] The initial population for breeding includes the founders and not only their recombinants
 
 ## TO DO
+All good for now.
