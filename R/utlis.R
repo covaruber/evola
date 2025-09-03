@@ -329,6 +329,7 @@ importHaploSparse <- function (haplo, genMap, ploidy = 2L, ped = NULL)
 drift <- function(pop, simParam, solution=NULL, traits=1){
   # traits <- 1:simParam$nTraits
   currentFreqPositive <- list()
+  counter=1
   for(iTrait in traits){ # iTrait=1
     if(is.null(solution)){
       alpha = simParam$traits[[iTrait]]@addEff
@@ -358,7 +359,8 @@ drift <- function(pop, simParam, solution=NULL, traits=1){
       out <- cbind( getSnpMap(snpChip = 1, simParam = simParam), desiredAllele,prov)
     }
     rownames(out) <- colnames(Qtl) ; colnames(out) <- c("id","chr","ss","pos","a+","freq")
-    currentFreqPositive[[iTrait]] <- out
+    currentFreqPositive[[counter]] <- out
+    counter <- counter+1
   }
   names(currentFreqPositive) <- simParam$traitNames[traits]
   return(currentFreqPositive)
