@@ -8,7 +8,7 @@ Fitness function from contribution theory
 Simple function for fitness where an index of traits is weighted by the group relationship. 
 }
 \usage{
-ocsFun(Y,b,Q,D,a,lambda,scaled=TRUE)
+ocsFun(Y,b,Q,D,a,lambda,scaled=TRUE,...)
 }
 
 \arguments{
@@ -19,10 +19,10 @@ A matrix of trait values. See details.
 A vector of trait weights. See details.
 }
   \item{Q}{
-A QTL matrix. See details.
+A QTL matrix for solutions. See details.
 }
   \item{D}{
-An LD matrix. See details.
+An LD matrix for solutions. See details.
 }
   \item{a}{
 A named list with vectors of average allelic effects per trait. See details.
@@ -32,6 +32,9 @@ A numeric value to weight the Q'DQ portion of the objective function (to be prov
 }
   \item{scaled}{
 A logical value to indicate if traits should be scaled prior to multiply by the weights.
+}
+  \item{...}{
+additional arguments to pass.
 }
 
 }
@@ -43,13 +46,11 @@ Y\%*\%b - d
 
 Internally, we use this function in the following way:
 
-The Y matrix is the matrix of trait-GEBVs and b is the user-specified trait weights. 
+The Y matrix is the matrix of trait-GEBVs (Y = Q\%*\%alpha) for each solution, and b is the user-specified trait weights. 
 
 d = qtDq * lambda; where qtDq is equal to Matrix::diag(Q\%*\%Matrix::tcrossprod(D,Q)) of dimensions n x n
 
 Notice that Q represents the marker of QTLs (columns) for all solutions (rows) and D the LD between QTLs. The user can modify this function as needed and provide it to the evolafit function along with other arguments.
-
-Notice that a is a list with elements named as the traits specified in your formula.
 
 }
 \value{

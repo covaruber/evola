@@ -65,6 +65,53 @@ ocsFun <- function (Y, b, Q, D, a, lambda, scaled=TRUE, ...) {
   return( Yb -  lambda*QtDQ )
 }
 
+ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
+                     SNP, solution, alphaLog=1, weightsTraitFreq=NULL, ...) {
+  
+  ## classical breeding value
+  
+  if (scaled) {
+    Yb <- apply(Y, 2, function(x) {
+      if (var(x) > 0) {
+        return(scale(x))
+      } else {
+        return(x * 0)
+      }
+    }) %*% b
+  } else {
+    Yb <- Y %*% b
+  }
+  
+  # allele frequency breeding value
+  
+  traitFreqs <- list()
+  for(iTrait in 1:ncol(solution)){ # iTrait=1
+    traitFreqs[[iTrait]] = Q%*%SNP%*%freqPosAllele(SNP, alpha = solution[,iTrait])
+    # traitFreqs[[iTrait]] = apply(Q,1,function(x){
+    #   sum(logspace( freqPosAllele(diag(x)%*%SNP, alpha = solution[,iTrait]), p= alphaLog) )
+    # })
+  }
+  
+  Y2 = do.call(cbind, traitFreqs)
+  if(is.null(weightsTraitFreq)){
+    weightsTraitFreq = rep(1,ncol(Y2))
+  }
+  Yb2 = Y2 %*% weightsTraitFreq # all trait frequencies are equally important
+  
+  ## standardize
+  
+  if (var(Yb) > 0) {
+    Yb <- stan(Yb)
+  }
+  if (var(as.vector(Yb2)) > 0) {
+    Yb2 <- stan(Yb2)
+  }
+  # combine
+  merit = (omega*Yb2) + ((1-omega)*Yb)
+  
+  return(merit)
+}
+
 regFun <- function (Y, b, Q, D, a, lambda, X, y, ...) {
   n <- ncol(X)
   p <- apply(Q, 1, function(z) {
@@ -115,6 +162,19 @@ nQtl <- function(object){
   return(n)
 }
 
+freqPosAllele <- function(M, alpha){
+  # M should not be centered
+  total_alleles <- 2 * colSums(!is.na(M))
+  # Alternate allele count: 2 × homozygous alt (2) + 1 × heterozygous (1)
+  alt_alleles <- colSums(M, na.rm = TRUE)
+  # Frequencies
+  freq_alt <- alt_alleles / total_alleles
+  freq_ref <- 1 - freq_alt
+  # Combine into matrix
+  freqsPos <- ifelse(alpha>0,freq_alt, freq_ref)
+  return(freqsPos)
+}
+
 stan <-function (x, lb=0, ub=1) {
   B=max(x) # current range
   A=min(x) # current range 
@@ -126,20 +186,21 @@ stan <-function (x, lb=0, ub=1) {
   return(x*scale + offset)
 }
 
-logspace <- function (x, p=2) {
-  
-  D=max(x) # new range
-  C=min(x) # new range
-  mysigns <- sign(x)
-  y = abs(x)^(1/p)
-  y <- y*mysigns
-  B=max(y) # current range
-  A=min(y) # current range 
-  
-  scale = (D-C)/(B-A)
-  offset = -A*(D-C)/(B-A) + C
-  return(y*scale + offset)
-  
+logspace <- function (x, p = 2) {
+  if(var(x)>0){
+    D = max(x)
+    C = min(x)
+    mysigns <- sign(x)
+    y = abs(x)^(1/p)
+    y <- y * mysigns
+    B = max(y)
+    A = min(y)
+    scale = (D - C)/(B - A)
+    offset = -A * (D - C)/(B - A) + C
+    return(y * scale + offset)
+  }else{
+    return(x)
+  }
 }
 
 Jc <- function(nc){
