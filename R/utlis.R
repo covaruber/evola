@@ -97,7 +97,8 @@ ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
     weightsTraitFreq = rep(1,ncol(Y2))
   }
   Yb2 = Y2 %*% weightsTraitFreq # all trait frequencies are equally important
-  
+  nans = which(is.nan(Yb2))
+  if(length(nans)>0){Yb2[nans]=mean(Yb2, na.rm=TRUE)}
   ## standardize
   
   if (var(Yb) > 0) {
