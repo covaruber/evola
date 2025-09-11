@@ -14,7 +14,7 @@ importFrom("stats", "na.omit", "quantile", "var", "as.formula","model.matrix",
 
 export( "evolafit", "pmonitor", "pareto", "varQ", "bestSol", "A.mat", 
         "stan", "logspace", "addZeros", "Jc", "Jr",
-        "overlay", "ocsFun", "regFun", "inbFun", "nQtl", "importHaploSparse",
+        "overlay", "ocsFun", "ocsFunC", "regFun", "inbFun", "nQtl", "importHaploSparse",
         "drift"
         )
 
