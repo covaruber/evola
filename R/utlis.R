@@ -103,7 +103,7 @@ ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
   if (var(Yb) > 0) {
     Yb <- stan(Yb)
   }
-  if (var(as.vector(Yb2)) > 0) {
+  if (var(Yb2) > 0) {
     Yb2 <- stan(Yb2)
   }
   # combine
