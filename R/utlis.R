@@ -177,6 +177,7 @@ freqPosAllele <- function(M, alpha){
 }
 
 stan <-function (x, lb=0, ub=1) {
+  if(var(x)>0){
   B=max(x) # current range
   A=min(x) # current range 
   D=ub # new range
@@ -185,6 +186,9 @@ stan <-function (x, lb=0, ub=1) {
   scale = (D-C)/(B-A)
   offset = -A*(D-C)/(B-A) + C
   return(x*scale + offset)
+  }else{
+    return(x)
+  }
 }
 
 logspace <- function (x, p = 2) {
