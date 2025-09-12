@@ -101,10 +101,10 @@ ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
   if(length(nans)>0){Yb2[nans]=mean(Yb2, na.rm=TRUE)}
   ## standardize
   
-  if (var(Yb) > 0) {
+  if (var(Yb[,1]) > 0) {
     Yb <- stan(Yb)
   }
-  if (var(Yb2) > 0) {
+  if (var(Yb2[,1]) > 0) {
     Yb2 <- stan(Yb2)
   }
   # combine
