@@ -69,23 +69,10 @@ ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
                      SNP, solution, alphaLog=1, 
                      weightsTraitFreq=NULL, ...) {
   
-  ## classical breeding value
-  
-  # if (scaled) {
-  #   Yb <- apply(Y, 2, function(x) {
-  #     if (var(x) > 0) {
-  #       return(scale(x))
-  #     } else {
-  #       return(x * 0)
-  #     }
-  #   }) %*% b
-  # } else {
-  #   Yb <- Y %*% b
-  # }
-  print(str(solution))
+
   if(!missing(solution)){
+    if(is.null(solution)){stop("This function cannot have a solution argument as NULL. Please correct.", call. = FALSE)}
     if(inherits(solution,"RRsol")){
-      print("yes")
       solution <- do.call(cbind, lapply(solution@bv,function(x){x@addEff}))
     }
   }
