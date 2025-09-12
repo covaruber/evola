@@ -66,7 +66,8 @@ ocsFun <- function (Y, b, Q, D, a, lambda, scaled=TRUE, ...) {
 }
 
 ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
-                     SNP, solution, alphaLog=1, weightsTraitFreq=NULL, ...) {
+                     SNP, solution, alphaLog=1, 
+                     weightsTraitFreq=NULL, ...) {
   
   ## classical breeding value
   
@@ -83,12 +84,18 @@ ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
   # }
   
   # allele frequency breeding value
-  
+  total_alleles <- 2 * colSums(!is.na(SNP))
+  # Alternate allele count: 2 × homozygous alt (2) + 1 × heterozygous (1)
+  alt_alleles <- colSums(SNP, na.rm = TRUE)
+  # Frequencies
+  freq_alt <- alt_alleles / total_alleles
+  freq_ref <- 1 - freq_alt
+  # Combine into matrix
   traitFreqs <- list()
   for(iTrait in 1:ncol(solution)){ # iTrait=1
-    # traitFreqs[[iTrait]] = Q%*%SNP%*%freqPosAllele(SNP, alpha = solution[,iTrait])
+    freqsPos <- ifelse(solution[,iTrait]>0,freq_alt, freq_ref)
     traitFreqs[[iTrait]] = apply(Q,1,function(x){
-      sum( freqPosAllele(diag(x)%*%SNP, alpha = solution[,iTrait]) ) 
+      sum( freqsPos*x )
     })
   }
   
