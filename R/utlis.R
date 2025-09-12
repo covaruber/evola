@@ -86,10 +86,10 @@ ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
   
   traitFreqs <- list()
   for(iTrait in 1:ncol(solution)){ # iTrait=1
-    # traitFreqs[[iTrait]] = Q%*%SNP%*%freqPosAllele(SNP, alpha = solution[,iTrait])
-    traitFreqs[[iTrait]] = apply(Q,1,function(x){
-      sum(logspace( freqPosAllele(diag(x)%*%SNP, alpha = solution[,iTrait]), p= alphaLog) )
-    })
+    traitFreqs[[iTrait]] = Q%*%SNP%*%freqPosAllele(SNP, alpha = solution[,iTrait])
+    # traitFreqs[[iTrait]] = apply(Q,1,function(x){
+    #   sum(logspace( freqPosAllele(diag(x)%*%SNP, alpha = solution[,iTrait]), p= alphaLog) )
+    # })
   }
   
   Y2 = do.call(cbind, traitFreqs)
