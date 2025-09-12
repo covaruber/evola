@@ -88,9 +88,12 @@ ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
   traitFreqs <- list()
   for(iTrait in 1:ncol(solution)){ # iTrait=1
     freqsPos <- ifelse(solution[,iTrait]>0,freq_alt, freq_ref)
-    traitFreqs[[iTrait]] = apply(Q,1,function(x){
-      sum( freqsPos*x )
-    })
+    
+    traitFreqs[[iTrait]] = Q%*%SNP%*%freqsPos
+    
+    # traitFreqs[[iTrait]] = apply(Q,1,function(x){
+    #   sum( freqsPos*x )
+    # })
   }
   
   Y2 = do.call(cbind, traitFreqs)
