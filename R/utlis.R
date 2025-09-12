@@ -82,9 +82,10 @@ ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
   # } else {
   #   Yb <- Y %*% b
   # }
-  
+  print(str(solution))
   if(!missing(solution)){
     if(inherits(solution,"RRsol")){
+      print("yes")
       solution <- do.call(cbind, lapply(solution@bv,function(x){x@addEff}))
     }
   }
