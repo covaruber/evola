@@ -87,6 +87,8 @@ A <- A[DT$hy,DT$hy]
 mixm = rrBLUP::mixed.solve(y=DT$GY, Z=M)
 solution = matrix(mixm$u[colnames(M)])
 
+sum(freqPosAllele(M,solution[,1])) # starting frequencies
+
 # run the genetic algorithm
 # we assig a weight to x'Dx of (20*pi)/180=0.34
 res<-evolafit(formula = c(GY, occ)~hy,
@@ -104,7 +106,7 @@ res<-evolafit(formula = c(GY, occ)~hy,
               D=A, lambda= (20*pi)/180 , nQtlStart = 90, 
               # selection parameters
               propSelBetween = 0.5, propSelWithin =0.5, 
-              fitnessf = ocsFunC, omega=1,
+              fitnessf = ocsFunC, 
               SNP=M, solution=solution,
               nGenerations = 20) 
 
@@ -113,6 +115,8 @@ res<-evolafit(formula = c(GY, occ)~hy,
   qa = (Q \%*\% DT$GY)[best,]; qa 
   qAq = Q[best,] \%*\% A \%*\% Q[best,]; qAq 
   sum(Q[best,]) # total # of inds selected
+  
+  sum(freqPosAllele(diag(Q[best,])\%*\%M,solution[,1]))
 
 pmonitor(res)
 plot(DT$GY, col=as.factor(Q[best,]), 

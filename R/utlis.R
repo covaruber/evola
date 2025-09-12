@@ -83,6 +83,12 @@ ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
   #   Yb <- Y %*% b
   # }
   
+  if(!missing(solution)){
+    if(inherits(solution,"RRsol")){
+      solution <- do.call(cbind, lapply(solution@bv,function(x){x@addEff}))
+    }
+  }
+  
   # allele frequency breeding value
   total_alleles <- 2 * colSums(!is.na(SNP))
   # Alternate allele count: 2 × homozygous alt (2) + 1 × heterozygous (1)
