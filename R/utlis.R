@@ -70,17 +70,17 @@ ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
   
   ## classical breeding value
   
-  if (scaled) {
-    Yb <- apply(Y, 2, function(x) {
-      if (var(x) > 0) {
-        return(scale(x))
-      } else {
-        return(x * 0)
-      }
-    }) %*% b
-  } else {
-    Yb <- Y %*% b
-  }
+  # if (scaled) {
+  #   Yb <- apply(Y, 2, function(x) {
+  #     if (var(x) > 0) {
+  #       return(scale(x))
+  #     } else {
+  #       return(x * 0)
+  #     }
+  #   }) %*% b
+  # } else {
+  #   Yb <- Y %*% b
+  # }
   
   # allele frequency breeding value
   
@@ -88,7 +88,7 @@ ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
   for(iTrait in 1:ncol(solution)){ # iTrait=1
     # traitFreqs[[iTrait]] = Q%*%SNP%*%freqPosAllele(SNP, alpha = solution[,iTrait])
     traitFreqs[[iTrait]] = apply(Q,1,function(x){
-      sum(logspace( freqPosAllele(diag(x)%*%SNP, alpha = solution[,iTrait]), p= alphaLog) )
+      sum( freqPosAllele(diag(x)%*%SNP, alpha = solution[,iTrait]) ) 
     })
   }
   
@@ -97,20 +97,21 @@ ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
     weightsTraitFreq = rep(1,ncol(Y2))
   }
   Yb2 = Y2 %*% weightsTraitFreq # all trait frequencies are equally important
-  nans = which(is.nan(Yb2))
-  if(length(nans)>0){Yb2[nans]=mean(Yb2, na.rm=TRUE)}
-  ## standardize
   
-  if (var(Yb[,1]) > 0) {
-    Yb <- stan(Yb)
-  }
-  if (var(Yb2[,1]) > 0) {
-    Yb2 <- stan(Yb2)
-  }
-  # combine
-  merit = (omega*Yb2) + ((1-omega)*Yb)
+  # nans = which(is.nan(Yb2))
+  # if(length(nans)>0){Yb2[nans]=mean(Yb2, na.rm=TRUE)}
+  # ## standardize
+  # 
+  # if (var(Yb[,1]) > 0) {
+  #   Yb <- stan(Yb)
+  # }
+  # if (var(Yb2[,1]) > 0) {
+  #   Yb2 <- stan(Yb2)
+  # }
+  # # combine
+  # merit = (omega*Yb2) + ((1-omega)*Yb)
   
-  return(merit)
+  return(Yb2)
 }
 
 regFun <- function (Y, b, Q, D, a, lambda, X, y, ...) {
