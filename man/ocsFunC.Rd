@@ -8,37 +8,21 @@ Fitness function from contribution theory
 Simple function for fitness where an index of traits is weighted by the group relationship. 
 }
 \usage{
-ocsFunC(Y,b,Q,D,a,lambda,scaled=TRUE,
-        SNP, solution, alphaLog=1, 
+ocsFunC(Q,
+        SNP, solution,
         weightsTraitFreq=NULL,...)
 }
 
 \arguments{
-  \item{Y}{
-A matrix of trait values. See details.
-}
-  \item{b}{
-A vector of trait weights. See details.
-}
+
   \item{Q}{
 A QTL matrix for solutions. See details.
-}
-  \item{omega}{
-a numerical value between 0 and 1 to specify the trade-off between frequency-based contribution and
-breeding value contribution when using the \code{\link{ocsFunC}} fitness function.
-}
-  \item{scaled}{
-A logical value to indicate if traits should be scaled prior to multiply by the weights.
 }
   \item{SNP}{
 A SNP marker matrix for the QTLs if the QTLs are individuals.
 }
   \item{solution}{
 an object of RRsol-class.
-}
- \item{alphaLog}{
-an integer value to be applied to function \code{\link{logspace}} when using the \code{\link{ocsFunC}}
-fitness function. Such fitness function is part of the evola package.
 }
   \item{weightsTraitFreq}{
 A vector of trait weights for the solution object. See details.
@@ -52,13 +36,11 @@ additional arguments to pass.
 
 A function of the type:
 
-Y\%*\%b + Y2\%*\%b2
+sum( freq.solution * (1 - freq.base.pop) )
 
-Internally, we use this function in the following way:
-
-The Y matrix is the matrix of trait-GEBVs (Y = Q\%*\%alpha) for each solution, and b is the user-specified trait weights. 
-
-The Y2 matrix is the matrix of positive-allele-trait-frequencies for each solution, and b2 is the user-specified trait-solution weights. 
+the frequency of beneficial alleles is computed for each solution in Q and then
+it is weighted by 1 - freq.base.pop which is the frequency of beneficial alleles
+in the base population.
 
 }
 \value{
@@ -75,23 +57,36 @@ Giovanny Covarrubias-Pazaran (2024).  evola: a simple evolutionary algorithm for
 
 \examples{
 
+# mickey mouse example
 
-data(DT_technow)
-DT <- DT_technow
-DT$occ <- 1; DT$occ[1]=0
-M <- M_technow+1
+Q=matrix(sample(0:1,32,replace = TRUE),nrow=4,ncol=8) # possible solutions
 
-A <- A.mat(M)
-A <- A[DT$hy,DT$hy]
+SNP=matrix(sample(0:2,80,replace = TRUE),nrow=8,ncol=10) # SNPs of 8 individuals with 10 markers
 
-mixm = rrBLUP::mixed.solve(y=DT$GY, Z=M)
-solution = matrix(mixm$u[colnames(M)])
+solution = matrix(rnorm(10)) # marker effects
 
-sum(freqPosAllele(M,solution[,1])) # starting frequencies
+ocsFunC(SNP=SNP,Q=Q, solution=solution) # sum of frequency of positive alleles
 
-# run the genetic algorithm
-# we assig a weight to x'Dx of (20*pi)/180=0.34
-res<-evolafit(formula = c(GY, occ)~hy,
+ \donttest{
+
+  # using the function in an optimal contribution
+
+  data(DT_technow)
+  DT <- DT_technow
+  DT$occ <- 1; DT$occ[1]=0
+  M <- M_technow+1
+
+  A <- A.mat(M)
+  A <- A[DT$hy,DT$hy]
+
+  mixm = rrBLUP::mixed.solve(y=DT$GY, Z=M)
+  solution = matrix(mixm$u[colnames(M)])
+
+  sum(freqPosAllele(M,solution[,1])) # starting frequencies
+
+  # run the genetic algorithm
+  # we assig a weight to x'Dx of (20*pi)/180=0.34
+  res<-evolafit(formula = c(GY, occ)~hy,
               dt= DT, 
               # constraints: if sum is greater than this ignore
               constraintsUB = c(Inf,100), 
@@ -118,11 +113,13 @@ res<-evolafit(formula = c(GY, occ)~hy,
   
   sum(freqPosAllele(diag(Q[best,])\%*\%M,solution[,1]))
 
-pmonitor(res)
-plot(DT$GY, col=as.factor(Q[best,]), 
+  pmonitor(res)
+  plot(DT$GY, col=as.factor(Q[best,]), 
      pch=(Q[best,]*19)+1)
 
-pareto(res)
+  pareto(res)
+
+}
 
 }
 \seealso{\code{\link{evolafit}} -- the core function of the package }

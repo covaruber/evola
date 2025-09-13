@@ -50,7 +50,7 @@ addZeros<- function (x, nr=2) {
   return(newX2)
 }
 
-ocsFun <- function (Y, b, Q, D, a, lambda, scaled=TRUE, ...) {
+ocsFun <- function (Y, b, Q, D, lambda, scaled=TRUE, ...) {
   # (q'a)b - l(q'Dq)
   if(scaled){
     Yb <- apply(Y,2,function(x){
@@ -65,10 +65,10 @@ ocsFun <- function (Y, b, Q, D, a, lambda, scaled=TRUE, ...) {
   return( Yb -  lambda*QtDQ )
 }
 
-ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
-                     SNP, solution, alphaLog=1, 
-                     weightsTraitFreq=NULL, ...) {
-  
+ocsFunC <- function (Q, 
+                     SNP, solution, #alphaLog=1, 
+                     wtf=NULL, ...) {
+  # wtf is weights for trait frequencies ;) 
 
   if(!missing(solution)){
     if(is.null(solution)){stop("This function cannot have a solution argument as NULL. Please correct.", call. = FALSE)}
@@ -95,15 +95,15 @@ ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
     # traitFreqs[[iTrait]] = Q%*%SNP%*%sign(solution[,iTrait])%*%(1-freqsPos)
   }
   Y2 = do.call(cbind, traitFreqs)
-  if(is.null(weightsTraitFreq)){
-    weightsTraitFreq = rep(1,ncol(Y2))
+  if(is.null(wtf)){
+    wtf = rep(1,ncol(Y2))
   }
-  Yb2 = Y2 %*% weightsTraitFreq # all trait frequencies are equally important
+  Yb2 = Y2 %*% wtf # all trait frequencies are equally important
   
   return(Yb2)
 }
 
-regFun <- function (Y, b, Q, D, a, lambda, X, y, ...) {
+regFun <- function ( Q, a, X, y, ...) {
   n <- ncol(X)
   p <- apply(Q, 1, function(z) {
     which(z > 0)
@@ -112,7 +112,7 @@ regFun <- function (Y, b, Q, D, a, lambda, X, y, ...) {
     p <- lapply(seq_len(ncol(p)), function(i) p[, i])
   }
   nq <- unlist(lapply(p, length))
-  v <- 1:nrow(Y)
+  v <- 1:nrow(X)
   mse = vector("numeric", length(v))
   for (j in v) {
     if (nq[j] == n) {
@@ -126,7 +126,7 @@ regFun <- function (Y, b, Q, D, a, lambda, X, y, ...) {
   return(mse)
 }
 
-inbFun <- function (Y, b, Q, D, a, lambda, ...) {
+inbFun <- function (Q, D, ...) {
   return( Matrix::diag(Q %*% Matrix::tcrossprod(D, Q))  )
 }
 

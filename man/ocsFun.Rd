@@ -24,9 +24,6 @@ A QTL matrix for solutions. See details.
   \item{D}{
 An LD matrix for solutions. See details.
 }
-  \item{a}{
-A named list with vectors of average allelic effects per trait. See details.
-}
   \item{lambda}{
 A numeric value to weight the Q'DQ portion of the objective function (to be provided by the user with the lambda argument). See details.
 }

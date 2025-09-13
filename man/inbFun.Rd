@@ -8,27 +8,19 @@ Fitness function from contribution theory using only the group relationship
 Simple function for fitness where we only use the group relationship. 
 }
 \usage{
-inbFun(Y,b,Q,D,a, lambda)
+inbFun(Q,D,...)
 }
 
 \arguments{
-  \item{Y}{
-A matrix of trait values. See details.
-}
-  \item{b}{
-A vector of trait weights. See details.
-}
+
   \item{Q}{
 A QTL matrix. See details.
 }
   \item{D}{
 An LD matrix. See details.
 }
-  \item{a}{
-A named list with vectors of average allelic effects per trait. See details.
-}
-  \item{lambda}{
-A numeric value to weight the Q'DQ portion of the objective function (to be provided by the user with the lambda argument). See details.
+  \item{...}{
+additional arguments to pass.
 }
 
 }
