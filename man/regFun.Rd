@@ -13,7 +13,7 @@ regFun(Q,a,X,y,...)
 
 \arguments{
   \item{Q}{
-A QTL matrix (internal matrix). See details.
+A QTL matrix for the proposed solutions (internal matrix). See details.
 }
   \item{a}{
 A named list with vectors of average allelic effects per trait (internal matrix). See details.
@@ -23,6 +23,9 @@ A matrix of covariates or explanatory variables (to be provided by the user in t
 }
   \item{y}{
 A vector of the response variable (to be provided by the user in the ... arguments). See details.
+}
+  \item{...}{
+additional arguments to pass.
 }
 
 }
