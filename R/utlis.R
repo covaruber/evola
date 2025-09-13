@@ -76,41 +76,29 @@ ocsFunC <- function (Y, b, Q, omega=1, scaled = TRUE,
       solution <- do.call(cbind, lapply(solution@bv,function(x){x@addEff}))
     }
   }
-  
   # allele frequency breeding value
   total_alleles <- 2 * colSums(!is.na(SNP))
   # Alternate allele count: 2 × homozygous alt (2) + 1 × heterozygous (1)
   alt_alleles <- colSums(SNP, na.rm = TRUE)
-  # Frequencies
+  # Frequencies of the base population
   freq_alt <- alt_alleles / total_alleles
+  nans <- which(is.nan(freq_alt))
+  if(length(nans) > 0){freq_alt[nans]=0}
   freq_ref <- 1 - freq_alt
   # Combine into matrix
   traitFreqs <- list()
   for(iTrait in 1:ncol(solution)){ # iTrait=1
     freqsPos <- ifelse(solution[,iTrait]>0,freq_alt, freq_ref)
-    
-    traitFreqs[[iTrait]] = Q%*%SNP%*%sign(solution[,iTrait])%*%(1-freqsPos)
-    
+    traitFreqs[[iTrait]] = apply(Q,1,function(x){
+      sum(freqPosAllele(SNP[which(x>0),,drop=FALSE], alpha = solution[, iTrait]) * (1-freqsPos), na.rm=TRUE )
+    })
+    # traitFreqs[[iTrait]] = Q%*%SNP%*%sign(solution[,iTrait])%*%(1-freqsPos)
   }
-  
   Y2 = do.call(cbind, traitFreqs)
   if(is.null(weightsTraitFreq)){
     weightsTraitFreq = rep(1,ncol(Y2))
   }
   Yb2 = Y2 %*% weightsTraitFreq # all trait frequencies are equally important
-  
-  # nans = which(is.nan(Yb2))
-  # if(length(nans)>0){Yb2[nans]=mean(Yb2, na.rm=TRUE)}
-  # ## standardize
-  # 
-  # if (var(Yb[,1]) > 0) {
-  #   Yb <- stan(Yb)
-  # }
-  # if (var(Yb2[,1]) > 0) {
-  #   Yb2 <- stan(Yb2)
-  # }
-  # # combine
-  # merit = (omega*Yb2) + ((1-omega)*Yb)
   
   return(Yb2)
 }
@@ -172,6 +160,8 @@ freqPosAllele <- function(M, alpha){
   alt_alleles <- colSums(M, na.rm = TRUE)
   # Frequencies
   freq_alt <- alt_alleles / total_alleles
+  nans <- which(is.nan(freq_alt))
+  if(length(nans) > 0){freq_alt[nans]=0}
   freq_ref <- 1 - freq_alt
   # Combine into matrix
   freqsPos <- ifelse(alpha>0,freq_alt, freq_ref)
@@ -179,9 +169,9 @@ freqPosAllele <- function(M, alpha){
 }
 
 stan <-function (x, lb=0, ub=1) {
-  if(var(x)>0){
-  B=max(x) # current range
-  A=min(x) # current range 
+  if(var(x, na.rm=TRUE)>0){
+  B=max(x, na.rm=TRUE) # current range
+  A=min(x, na.rm=TRUE) # current range 
   D=ub # new range
   C=lb # new range
   
@@ -194,14 +184,14 @@ stan <-function (x, lb=0, ub=1) {
 }
 
 logspace <- function (x, p = 2) {
-  if(var(x)>0){
-    D = max(x)
-    C = min(x)
+  if(var(x, na.rm=TRUE)>0){
+    D = max(x, na.rm=TRUE)
+    C = min(x, na.rm=TRUE)
     mysigns <- sign(x)
     y = abs(x)^(1/p)
     y <- y * mysigns
-    B = max(y)
-    A = min(y)
+    B = max(y, na.rm=TRUE)
+    A = min(y, na.rm=TRUE)
     scale = (D - C)/(B - A)
     offset = -A * (D - C)/(B - A) + C
     return(y * scale + offset)
