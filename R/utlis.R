@@ -91,7 +91,7 @@ ocsFunC <- function (Q,
     freqsPos <- ifelse(solution[,iTrait]>0,freq_alt, freq_ref)
     if(useAlphaWeight){ # we use allelic effects as weights for the frequencies
       traitFreqs[[iTrait]] = apply(Q,1,function(x){
-        sum(freqPosAllele(SNP[which(x>0),,drop=FALSE], alpha = solution[, iTrait]) * (solution[, iTrait]), na.rm=TRUE )
+        sum(freqPosAllele(SNP[which(x>0),,drop=FALSE], alpha = solution[, iTrait]) * abs(solution[, iTrait]), na.rm=TRUE )
       })
     }else{ # we use the basic version of 1-freq.base
       traitFreqs[[iTrait]] = apply(Q,1,function(x){
