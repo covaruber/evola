@@ -67,7 +67,7 @@ ocsFun <- function (Y, b, Q, D, lambda, scaled=TRUE, ...) {
 
 ocsFunC <- function (Q, 
                      SNP, solution, #alphaLog=1, 
-                     wtf=NULL, useAlphaWeight=FALSE ...) {
+                     wtf=NULL, useAlphaWeight=FALSE, ...) {
   # wtf is weights for trait frequencies ;) 
 
   if(!missing(solution)){
