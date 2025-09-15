@@ -67,7 +67,7 @@ ocsFun <- function (Y, b, Q, D, lambda, scaled=TRUE, ...) {
 
 ocsFunC <- function (Q, 
                      SNP, solution, #alphaLog=1, 
-                     wtf=NULL, ...) {
+                     wtf=NULL, useAlphaWeight=FALSE ...) {
   # wtf is weights for trait frequencies ;) 
 
   if(!missing(solution)){
@@ -89,9 +89,15 @@ ocsFunC <- function (Q,
   traitFreqs <- list()
   for(iTrait in 1:ncol(solution)){ # iTrait=1
     freqsPos <- ifelse(solution[,iTrait]>0,freq_alt, freq_ref)
-    traitFreqs[[iTrait]] = apply(Q,1,function(x){
-      sum(freqPosAllele(SNP[which(x>0),,drop=FALSE], alpha = solution[, iTrait]) * (1-freqsPos), na.rm=TRUE )
-    })
+    if(useAlphaWeight){ # we use allelic effects as weights for the frequencies
+      traitFreqs[[iTrait]] = apply(Q,1,function(x){
+        sum(freqPosAllele(SNP[which(x>0),,drop=FALSE], alpha = solution[, iTrait]) * (solution[, iTrait]), na.rm=TRUE )
+      })
+    }else{ # we use the basic version of 1-freq.base
+      traitFreqs[[iTrait]] = apply(Q,1,function(x){
+        sum(freqPosAllele(SNP[which(x>0),,drop=FALSE], alpha = solution[, iTrait]) * (1-freqsPos), na.rm=TRUE )
+      })
+    }
     # traitFreqs[[iTrait]] = Q%*%SNP%*%sign(solution[,iTrait])%*%(1-freqsPos)
   }
   Y2 = do.call(cbind, traitFreqs)

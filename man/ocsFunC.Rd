@@ -10,7 +10,9 @@ Simple function for fitness where an index of traits is weighted by the group re
 \usage{
 ocsFunC(Q,
         SNP, solution,
-        weightsTraitFreq=NULL,...)
+        weightsTraitFreq=NULL,
+        useAlphaWeight=FALSE,
+        ...)
 }
 
 \arguments{
@@ -26,6 +28,11 @@ an object of RRsol-class.
 }
   \item{weightsTraitFreq}{
 A vector of trait weights for the solution object. See details.
+}
+  \item{useAlphaWeight}{
+A logical value to indicate if the weights for the beneficial allele frequencies 
+should be the average allelic effects (TRUE) or the proposed 1-benef.freq.base.pop
+as proposed originaly by Covarrubias-Pazaran and Pita (2026).
 }
   \item{...}{
 additional arguments to pass.
