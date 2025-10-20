@@ -99,7 +99,7 @@ ocsFunC <- function (Q,
       })
     }else if(wbaf == 'none'){ # no weights
       traitFreqs[[iTrait]] = apply(Q,1,function(x){
-        sum(freqPosAllele(SNP[which(x>0),,drop=FALSE], alpha = solution[, iTrait]) * (1-freqsPos), na.rm=TRUE )
+        sum(freqPosAllele(SNP[which(x>0),,drop=FALSE], alpha = solution[, iTrait]) , na.rm=TRUE )
       })
     }else{
       stop("Method not available", call. = FALSE)
