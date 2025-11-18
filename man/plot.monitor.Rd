@@ -1,10 +1,10 @@
-\name{pmonitor}
-\alias{pmonitor}
+\name{evolmonitor}
+\alias{evolmonitor}
 \title{plot the change of values across iterations}
 \description{\code{plot} for monitoring.
 }
 \usage{
-pmonitor(object, kind, \dots)
+evolmonitor(object, kind, \dots)
 }
 \arguments{
  \item{object}{model object of class \code{"evolafit"}}

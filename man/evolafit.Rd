@@ -408,7 +408,7 @@ Q[best,]
 # $Result
 # Weight  Value 
 # 8.74  32.10 
-pmonitor(res0)
+evolmonitor(res0)
 pareto(res0)
 
  }

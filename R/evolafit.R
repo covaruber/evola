@@ -11,7 +11,7 @@ evolafit <- function(formula, dt,
                      includeSet=NULL, excludeSet=NULL, haplo=NULL,
                      ...){
   
-  my.date <- "2025-11-01"
+  my.date <- "2026-02-01"
   your.date <- Sys.Date()
   ## if your month is greater than my month you are outdated
   if(dateWarning & verbose){
@@ -85,7 +85,7 @@ evolafit <- function(formula, dt,
                         position=position)
     ped = data.frame(id=paste0("I", 1:nrow(dt)),
                      mother=0, father=0)
-    founderPop = AlphaSimR:::importHaplo(haplo=haplo, 
+    founderPop = importHaplo(haplo=haplo, 
                                    genMap=genMap,
                                    ploidy=2L)
     # founderPop = quickHaplo(nInd=Ne,nChr=1,segSites=nrow(dt), inbred = TRUE)

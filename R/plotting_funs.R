@@ -1,4 +1,4 @@
-pmonitor <- function(object, kind=1, ...){
+evolmonitor <- function(object, kind=1, ...){
   x <- object$pop@score#[,"Best.qa"]
  
   if(kind==1){i=1;j=2}else if(kind==2){i=4;j=6}else{i=5; j=5}

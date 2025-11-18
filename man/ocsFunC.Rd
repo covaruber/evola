@@ -11,7 +11,7 @@ Simple function for fitness where an index of traits is weighted by the group re
 ocsFunC(Q,
         SNP, solution,
         wtf=NULL,
-        wbaf=FALSE,
+        wbaf="base",
         ...)
 }
 
@@ -82,19 +82,25 @@ solution = matrix(rnorm(10)) # marker effects
 
 ocsFunC(SNP=SNP,Q=Q, solution=solution) # sum of frequency of positive alleles
 
- \donttest{
+ \dontrun{
 
   # using the function in an optimal contribution
 
-  data(DT_technow)
+  data(DT_technow, package="enhancer")
   DT <- DT_technow
   DT$occ <- 1; DT$occ[1]=0
-  M <- M_technow+1
+  
+  Md <- apply(Md_technow,2,as.numeric)
+  rownames(Md) <- rownames(Md_technow)
+  Mf <- apply(Mf_technow,2,as.numeric)
+  rownames(Mf) <- rownames(Mf_technow)
+  M <- rbind(Md,Mf)
 
-  A <- A.mat(M)
+  A <- A.matr(M)
   A <- A[DT$hy,DT$hy]
 
-  mixm = rrBLUP::mixed.solve(y=DT$GY, Z=M)
+  library(rrBLUP)
+  mixm = mixed.solve(y=DT$GY, Z=M)
   solution = matrix(mixm$u[colnames(M)])
 
   sum(freqPosAllele(M,solution[,1])) # starting frequencies
@@ -128,7 +134,7 @@ ocsFunC(SNP=SNP,Q=Q, solution=solution) # sum of frequency of positive alleles
   
   sum(freqPosAllele(diag(Q[best,])\%*\%M,solution[,1]))
 
-  pmonitor(res)
+  evolmonitor(res)
   plot(DT$GY, col=as.factor(Q[best,]), 
      pch=(Q[best,]*19)+1)
 

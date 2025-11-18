@@ -57,10 +57,14 @@ pop = newPop(founderPop, simParam=SP)
 # drift for QTLs
 drift(pop, simParam = SP ) 
 
+\donttest{
+
 ans = RRBLUP(pop, simParam=SP)
 
 # drift for average allelic effects
 drift(pop, simParam = SP, solution = ans)
+
+}
 
 }
 \seealso{\code{\link{evolafit}} -- the core function of the package }

@@ -3,6 +3,7 @@ import("AlphaSimR")
 import("Matrix")
 import("crayon")
 import("methods")
+import("enhancer")
 
 importFrom("grDevices", "as.raster", "col2rgb", "colorRampPalette",
              "rgb")
@@ -12,9 +13,9 @@ importFrom("stats", "na.omit", "quantile", "var", "as.formula","model.matrix",
            "median","rnorm", "aggregate","runif","getCall","update.formula",
            "formula")
 
-export( "evolafit", "pmonitor", "pareto", "varQ", "bestSol", "A.mat", 
-        "stan", "logspace", "addZeros", "Jc", "Jr", "freqPosAllele",
-        "overlay", "ocsFun", "ocsFunC", "regFun", "inbFun", "nQtl", "importHaploSparse",
+export( "evolafit", "evolmonitor", "pareto", "varQ", "bestSol", 
+        "addZeros", "Jc", "Jr", "freqPosAllele",
+        "ocsFun", "ocsFunC", "regFun", "inbFun", "nQtl", "importHaploSparse",
         "drift"
         )
 

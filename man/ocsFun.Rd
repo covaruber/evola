@@ -8,7 +8,7 @@ Fitness function from contribution theory
 Simple function for fitness where an index of traits is weighted by the group relationship. 
 }
 \usage{
-ocsFun(Y,b,Q,D,a,lambda,scaled=TRUE,...)
+ocsFun(Y,b,Q,D,lambda,scaled=TRUE,...)
 }
 
 \arguments{

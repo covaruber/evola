@@ -40,11 +40,11 @@ For tutorials on how to perform different analysis with evola please look at the
 \section{Getting started}{
 The package has been equiped with a couple of datasets to learn how to use the evola package: 
 
-* \code{\link{DT_technow}} dataset to perform optimal cross selection. 
+* \code{\link[enhancer]{DT_technow}} dataset to perform optimal cross selection. 
 
-* \code{\link{DT_wheat}} dataset to perform optimal training population selection.
+* \code{\link[enhancer]{DT_wheat}} dataset to perform optimal training population selection.
 
-* \code{\link{DT_cpdata}} dataset to perform optimal individual. 
+* \code{\link[enhancer]{DT_cpdata}} dataset to perform optimal individual. 
 
 }
 
