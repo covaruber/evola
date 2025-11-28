@@ -1,17 +1,16 @@
-\name{pareto}
-\alias{pareto}
-\title{Pareto across iterations}
-\description{\code{plot} for Pareto front.
+\name{abq}
+\alias{abq}
+\title{Alpha by QTL plot}
+\description{\code{plot} for Alpha by QTL.
 }
 \usage{
-pareto(object, scaled=TRUE,trait=~fitness, pch=20, xlim, \dots)
+abq(object, traitAlpha, selectTop=TRUE, n=1, \dots)
 }
 \arguments{
- \item{object}{model object returned by \code{"evolafit"}}
- \item{scaled}{a logical value to specify the scale of the y-axis (gain in merit).}
- \item{trait}{a formula specifying the trait to be plotted. By default is the fitness.}
- \item{pch}{symbol for plotting points as desribed in par}
- \item{xlim}{upper and lower bound in the x-axis}
+ \item{object}{model object returned by \code{evolafit}}
+ \item{traitAlpha}{a character value to specify the trait alpha to be ploted in the y axis.}
+ \item{selectTop}{a logical value to be passed internally to the \code{bestSol} function.}
+ \item{n}{an integer value to be passed internally to the \code{bestSol} function.}
  \item{\dots}{Further arguments to be passed to the plot function.}
 }
 \value{
@@ -37,7 +36,7 @@ res00<-evolafit(formula=cbind(Weight,Value)~Color, dt= Gems,
                 # constraints on traits: if greater than this ignore
                 constraintsUB = c(10,Inf), nGenerations = 10
 )
-pareto(res00)
+abq(res00, traitAlpha = "Value")
 
 
 }

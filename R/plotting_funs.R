@@ -76,3 +76,25 @@ pareto <- function(object, scaled=TRUE, trait=~fitness, pch=20,  xlim, ...){
   rasterImage(legend_image, 0, 0, 1, max(dt$generation) )
   # par(mfrow=c(1,1))
 }
+
+abq <- function(object, traitAlpha, selectTop=TRUE, n=1,...){
+  
+  if(missing(traitAlpha)){stop(paste("Please provide a trait QTL to see the performance of a solution. \nAvailable traits are:",paste(object$pop@traits, collapse = ", ")), call. = FALSE)}
+  dt <- object$pop@qtlData
+  Q <- pullQtlGeno(object$pop, simParam = object$simParam, trait=1)/2
+  dt$response <-  dt[,traitAlpha]
+  best = bestSol(object$pop, selectTop=selectTop, n=n)[,traitAlpha]
+  with(dt, plot(response, xlab=paste("QTL:",object$pop@qtl), ylab=paste("Alpha:", traitAlpha), ...))
+  cols <- enhancer::transp( palette.colors(length(best)) )
+  legend("topright", bty="n", col=cols, pch=20, legend = paste("Solution:",best))
+  counter=1
+  for(iBest in best){ # iBest=best[2]
+    with(dt, points(y=response[which(Q[iBest,]==1)], 
+                    x=which(Q[iBest,]==1),
+                    col=cols[counter],
+                    pch=20)
+    )
+    counter=counter+1
+  }
+  
+}

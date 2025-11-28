@@ -13,7 +13,7 @@ importFrom("stats", "na.omit", "quantile", "var", "as.formula","model.matrix",
            "median","rnorm", "aggregate","runif","getCall","update.formula",
            "formula")
 
-export( "evolafit", "evolmonitor", "pareto", "varQ", "bestSol", 
+export( "evolafit", "evolmonitor", "pareto", "abq", "varQ", "bestSol", 
         "addZeros", "Jc", "Jr", "freqPosAllele",
         "ocsFun", "ocsFunC", "regFun", "inbFun", "nQtl", "importHaploSparse",
         "drift"
