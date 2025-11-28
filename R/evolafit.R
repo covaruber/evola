@@ -392,6 +392,7 @@ evolafit <- function(formula, dt,
   popEvola@constCheckUB <- constCheckUB
   popEvola@constCheckLB <- constCheckLB
   popEvola@traits <- traits
+  popEvola@qtlData <- dt
   
   ###################
   # Although multiple traits are enabled it is assumed that same QTLs are behind all the traits, differing only in their average allelic effects.

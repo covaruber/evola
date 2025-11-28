@@ -20,13 +20,22 @@ evolmonitor <- function(object, kind=1, ...){
   legend("topleft",legend = colnames(x)[c(i,j)], col=c(i,j), bty="n", lty=1)
 }
 
-pareto <- function(object, scaled=TRUE, pch=20, xlim, ...){
+pareto <- function(object, scaled=TRUE, trait=~fitness, pch=20,  xlim, ...){
   transp<-  function (col, alpha = 0.5) {
     res <- apply(col2rgb(col), 2, function(c) rgb(c[1]/255, c[2]/255, 
                                                   c[3]/255, alpha))
     return(res)
   }
-  dt <- object$pop@indivPerformance 
+  if(!inherits(trait,"formula")){
+    stop("Please provide the trait argument as a formula of the form: ~x", call. = FALSE)
+  }
+  
+  originalTraits <- object$pop@gv
+  colnames(originalTraits) <- object$pop@traits
+  
+  dt <- cbind(object$pop@indivPerformance ,originalTraits)
+  dt$response <- eval( trait[[length(trait)]] , dt)
+  
   if(length(which(!is.na(dt$deltaC))) == 0){
     stop("To see build this plot you need to run evolafit with argument traceDelta=TRUE", call. = FALSE)
   }
@@ -34,10 +43,10 @@ pareto <- function(object, scaled=TRUE, pch=20, xlim, ...){
   dt$deltaC <- dt$deltaC * -1
   # prepare performance
   if(scaled){
-    minFitness <- min(dt$fitness)
-    maxFitness <- max(dt$fitness)
-    dt$fitness = (dt$fitness-minFitness)/(maxFitness-minFitness) * 100 # standardized qa
-  }else{dt$fitness <- dt$fitness }
+    minValue <- min(dt[,"response"])
+    maxValue <- max(dt[,"response"])
+    dt$response = (dt[,"response"]-minValue)/(maxValue-minValue) * 100 # standardized qa
+  }else{dt$response <- dt[,"response"] }
   
   colfunc <- colorRampPalette(c("plum1", "plum4"))
   
@@ -46,21 +55,20 @@ pareto <- function(object, scaled=TRUE, pch=20, xlim, ...){
   
   layout(matrix(1:2,ncol=2), widths = c(2,1),heights = c(1,1))
   # left plot
-  if(!scaled){ylabName="Maximum gain (units)"}else{ylabName="Maximum gain (%)"}
+  if(!scaled){ylabName=paste0("Maximum gain (",as.character(trait)[2],")")}else{ylabName="Maximum gain (%)"}
   dt$color <- transp(colfunc(max(dt$generation))[dt$generation], alpha = 0.4)
   
   if(missing(xlim)){
-    # xlim <- quantile(na.omit(dt$deltaC),c(.005,.995))
     xlim=c(min(na.omit(dt$deltaC)),0)
   }
-  with(dt, plot(fitness~ deltaC, col=color, main="Pareto frontier", pch=pch,
+  with(dt, plot(response~ deltaC, col=color, main="Pareto frontier", pch=pch,
                 xlab="Rate of coancestry", ylab=ylabName, xlim=xlim, xaxt="n",  ... ))
   axis(1, at=seq(xlim[1],xlim[2],diff(xlim)/5),labels=round(seq(xlim[1]*-1,xlim[2]*-1, (diff(xlim)/5)*-1 ),3), col.axis="black")
   grid()
   
-  averages <- aggregate(cbind(deltaC,fitness)~generation, FUN=mean, data=dt)
-  lines(averages$deltaC, averages$fitness, col = "blue")
-  points(x=averages$deltaC[nrow(averages)], y=averages$fitness[nrow(averages)], col="red", pch=20)
+  averages <- aggregate(cbind(deltaC,response)~generation, FUN=mean, data=dt)
+  lines(averages$deltaC, averages$response, col = "blue")
+  points(x=averages$deltaC[nrow(averages)], y=averages$response[nrow(averages)], col="red", pch=20)
   # right plot
   legend_image <- as.raster(matrix(colfunc(max(dt$generation)), ncol=1))
   plot(c(0,2),c(0, max(dt$generation) ),type = 'n', axes = F,xlab = '', ylab = '', main = 'Generation')

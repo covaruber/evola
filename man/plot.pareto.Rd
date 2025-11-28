@@ -4,11 +4,12 @@
 \description{\code{plot} for monitoring.
 }
 \usage{
-pareto(object, scaled=TRUE,pch=20, xlim, \dots)
+pareto(object, scaled=TRUE,trait=~fitness, pch=20, xlim, \dots)
 }
 \arguments{
  \item{object}{model object returned by \code{"evolafit"}}
  \item{scaled}{a logical value to specify the scale of the y-axis (gain in merit).}
+ \item{trait}{a formula specifying the trait to be plotted. By default is the fitness.}
  \item{pch}{symbol for plotting points as desribed in par}
  \item{xlim}{upper and lower bound in the x-axis}
  \item{\dots}{Further arguments to be passed to the plot function.}
