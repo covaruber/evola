@@ -392,6 +392,7 @@ evolafit <- function(formula, dt,
   popEvola@constCheckUB <- constCheckUB
   popEvola@constCheckLB <- constCheckLB
   popEvola@traits <- traits
+  popEvola@qtl <- classifiers
   popEvola@qtlData <- dt
   
   ###################
